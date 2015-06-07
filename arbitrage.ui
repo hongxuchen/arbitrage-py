@@ -59,7 +59,7 @@
       <x>410</x>
       <y>40</y>
       <width>521</width>
-      <height>291</height>
+      <height>541</height>
      </rect>
     </property>
     <property name="currentIndex">
@@ -74,7 +74,7 @@
        <rect>
         <x>30</x>
         <y>20</y>
-        <width>441</width>
+        <width>341</width>
         <height>121</height>
        </rect>
       </property>
@@ -108,9 +108,74 @@
         <string>Sum</string>
        </property>
       </column>
+     </widget>
+     <widget class="QTableWidget" name="okc_ask_bid_table">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>160</y>
+        <width>251</width>
+        <height>331</height>
+       </rect>
+      </property>
+      <row>
+       <property name="text">
+        <string>ask5</string>
+       </property>
+      </row>
+      <row>
+       <property name="text">
+        <string>ask4</string>
+       </property>
+      </row>
+      <row>
+       <property name="text">
+        <string>ask3</string>
+       </property>
+      </row>
+      <row>
+       <property name="text">
+        <string>ask2</string>
+       </property>
+      </row>
+      <row>
+       <property name="text">
+        <string>ask1</string>
+       </property>
+      </row>
+      <row>
+       <property name="text">
+        <string>Bid1</string>
+       </property>
+      </row>
+      <row>
+       <property name="text">
+        <string>Bid2</string>
+       </property>
+      </row>
+      <row>
+       <property name="text">
+        <string>Bid3</string>
+       </property>
+      </row>
+      <row>
+       <property name="text">
+        <string>Bid4</string>
+       </property>
+      </row>
+      <row>
+       <property name="text">
+        <string>Bid5</string>
+       </property>
+      </row>
       <column>
        <property name="text">
-        <string>Total</string>
+        <string>Price</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Amount</string>
        </property>
       </column>
      </widget>
@@ -144,7 +209,7 @@
      </property>
     </widget>
    </widget>
-   <widget class="QPushButton" name="TradingButton">
+   <widget class="QPushButton" name="trade_button">
     <property name="geometry">
      <rect>
       <x>130</x>

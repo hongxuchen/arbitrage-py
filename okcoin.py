@@ -18,11 +18,9 @@ class OKCoinAPI(BTC):
     def __init__(self, info):
         super(OKCoinAPI, self).__init__(info)
         self.symbol = info['symbol']
-        self._userinfo = None
-        self._currency_rate = None
 
         self.api_public = ['ticker', 'depth', 'trades', 'kline', 'lend_depth']
-        self.api_private = ['userinfo', 'trade', 'batch_trade', 'cancel_order']
+        self.api_private = ['userinfo', 'trade', 'batch_trade', 'cancel_order', 'orders']
 
     def _real_uri(self, method):
         path = '/' + method + '.do'
@@ -33,7 +31,7 @@ class OKCoinAPI(BTC):
         for key in sorted(params.keys()):
             sign += key + '=' + str(params[key]) + '&'
         data = sign + 'secret_key=' + self.key['secret']
-        print("DATA=",data)
+        # print("DATA=",data)
         sign = hashlib.md5(data.encode("utf8")).hexdigest().upper()
         return sign
 
@@ -47,48 +45,51 @@ class OKCoinAPI(BTC):
             else:
                 print('method [{}] not supported'.format(method))
                 sys.exit(1)
-            print(r.status_code, r.url)
+            # print(r.status_code, r.url)
             return r
         except Exception as e:
             print(e)
             sys.exit(1)
 
     def userinfo(self):
-        if self._userinfo is None:
-            params = {'api_key': self.key['api']}
-            params['sign'] = self._sign(params)
-            print(params)
-            r = self._setup_request('userinfo', None, params)
-            # print(r.content)
-            js = r.json()
-            # print(js)
-            if js['result'] is False:
-                print('api error')
-                sys.exit(1)
-            self._userinfo = js
-        return self._userinfo
+        params = {'api_key': self.key['api']}
+        params['sign'] = self._sign(params)
+        # print(params)
+        r = self._setup_request('userinfo', None, params)
+        # print(r.content)
+        js = r.json()
+        # print(js)
+        if js['result'] is False:
+            print('api error')
+            sys.exit(1)
+        return js
 
     # need to ensure that the rate is only computed once
     # if in future using 'ltc', self._currency_rate should be a tuple
     # TODO make configurable
     def currency_rate(self):
-        if self._currency_rate is None:
-            payload = {
-                'symbol': 'btc_' + self.symbol
-            }
-            r = self._setup_request('ticker', payload)
-            rate_str = float(r.json()['ticker']['last'])
-            self._currency_rate = common.to_decimal(rate_str, config.precision)
-        return self._currency_rate
+        payload = {
+            'symbol': 'btc_' + self.symbol
+        }
+        r = self._setup_request('ticker', payload)
+        rate_str = float(r.json()['ticker']['last'])
+        return common.to_decimal(rate_str, config.precision)
 
-    def depth(self, size=10):
+    def depth(self, size=5, should_merge=0):
         assert (5 <= size <= 200)
         payload = {
             'symbol': 'btc_' + self.symbol,
-            'size': size
+            'size': size,
+            'merge': should_merge
         }
         r = self._setup_request('depth', payload)
-        return r.json()
+        data = r.json()
+        asks = sorted(data['asks'], key=lambda ask: ask[0], reverse=True)
+        bids = sorted(data['bids'], key=lambda bid: bid[0])
+        # print(asks)
+        # print(bids)
+        assert(asks[-1][0] > bids[0][0])
+        return asks + bids
 
     def trades(self, since=None):
         payload = {
@@ -123,13 +124,13 @@ class OKCoinAPI(BTC):
         r = self._setup_request('lend_depth', params=payload)
         return r.json()
 
-    def _get_funds(self):
+    def get_funds(self):
         funds = self.userinfo()['info']['funds']
         return funds
 
     def get_coin(self, currency, status):
         try:
-            raw_str = self._get_funds()[status][currency]
+            raw_str = self.get_funds()[status][currency]
             return common.to_decimal(raw_str, config.precision)
         except:
             print(
@@ -139,6 +140,7 @@ class OKCoinAPI(BTC):
                 file=sys.stderr)
             return 0
 
+
     def dump(self):
         record = {'btc': self.get_coin('btc', 'free') +
                          self.get_coin('btc', 'freezed') +
@@ -147,7 +149,7 @@ class OKCoinAPI(BTC):
                                self.get_coin(self.symbol, 'freezed')}
         record = OrderedDict(record)
 
-        total = common.to_decimal(self._get_funds()['asset']['total'], config.precision)
+        total = common.to_decimal(self.get_funds()['asset']['total'], config.precision)
 
         record['rate'] = self.currency_rate()
         record['total_' + self.symbol] = total
@@ -172,13 +174,13 @@ class OKCoinCOM(OKCoinAPI):
 
 if __name__ == '__main__':
     okcoin_cn = OKCoinCN()
-    info = okcoin_cn.userinfo()
-    print(info)
+    # info = okcoin_cn.userinfo(False)
+    # print(info)
     # print(okcoin_cn.trades())
     # print(okcoin_cn.kline())
     # print(okcoin_cn.lend_depth())
     # okcoin_cn.dump()
-    # print(okcoin_cn.depth(10))
+    print(okcoin_cn.depth(5))
     # okcoin_com = OKCoinCOM()
     # okcoin_com.dump()
     # print('okcoin_com:  btc/usd={:.4f}'.format(okcoin_com.currency_rate()))

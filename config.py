@@ -18,6 +18,3 @@ itbit_info = {
 }
 
 precision = 4
-
-my_sgd = 350
-my_cny = 2400
