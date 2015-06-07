@@ -22,6 +22,7 @@ class BitBays(BTC):
 
     def __init__(self):
         super(BitBays, self).__init__(config.bitbays_info)
+        self.symbol = config.bitbays_info['symbol']
         self.key = common.get_key_from_file('BitBays')
         self._btc_rate = None
         self._user_data = None
@@ -45,7 +46,6 @@ class BitBays(BTC):
         }
         return params
 
-
     def _real_uri(self, method):
         return self.get_url('/' + method + '/')
 
@@ -59,7 +59,7 @@ class BitBays(BTC):
             else:
                 print('method [{}] not supported'.format(method))
                 sys.exit(1)
-            # print(r.url)
+            print(r.url)
             return r
         except Exception as e:
             print(e)
@@ -70,10 +70,19 @@ class BitBays(BTC):
         js = r.json()
         return common.to_decimal(js['result']['last'])
 
-    def depth(self):
-        r = self._setup_request('depth')
-        js = r.json()
-        return js
+    def depth(self, length=5):
+        assert (1 <= length <= 50)
+        payload = {
+            'market': 'btc_' + self.symbol
+        }
+        r = self._setup_request('depth', params=payload)
+        data = r.json()['result']
+        asks = sorted(data['asks'], key=lambda ask: ask[0], reverse=True)[-length:]
+        bids = sorted(data['bids'], key=lambda bid: bid[0], reverse=True)[:length]
+        assert (asks[-1][0] > bids[0][0])
+        print(asks)
+        print(bids)
+        return asks + bids
 
     # global
     def get_ask_bid(self):
@@ -87,7 +96,7 @@ class BitBays(BTC):
     # all my trades
     def trades(self):
         payload = {
-            'market': 'btc_usd'
+            'market': 'btc_' + self.symbol
         }
         r = self._setup_request('trades', params=payload)
         js = r.json()
@@ -96,7 +105,7 @@ class BitBays(BTC):
     # trade operations
     def trade(self, order):
         payload = {
-            'market': 'btc_usd',
+            'market': 'btc_' + self.symbol,
             'order_type': 0,
             'nonce': self._nonce()
         }
@@ -106,7 +115,6 @@ class BitBays(BTC):
         js = r.json()
         return js
 
-
     def cancel(self, id):
         print('canceling order {}...'.format(id))
         payload = {
@@ -114,7 +122,7 @@ class BitBays(BTC):
             'nonce': self._nonce()
         }
         params = self._post_param(payload)
-        r = self._setup_request('cancel', params, payload) #
+        r = self._setup_request('cancel', params, payload)  #
         js = r.json()
         return js
 
@@ -156,7 +164,6 @@ class BitBays(BTC):
             self._orders['sell'] = sell_list
         return self._orders
 
-
     def user_info(self):
         if self._user_data is None:
             payload = {
@@ -169,7 +176,7 @@ class BitBays(BTC):
 
     def orders(self, catalog, status=0):
         payload = {
-            'market': 'btc_usd',
+            'market': 'btc_' + self.symbol,
             'catalog': catalog,
             'status': status,
             'count': 20,
@@ -187,7 +194,7 @@ class BitBays(BTC):
 
     def transactions(self, catalog):
         payload = {
-            'market': 'btc_usd',
+            'market': 'btc_' + self.symbol,
             'catalog': catalog,
             'count': 20,
             'nonce': self._nonce()
@@ -206,19 +213,31 @@ class BitBays(BTC):
         self.print_js(self.transactions(0))
         self.print_js(self.transactions(1))
 
-
-    def asset(self):
-        asset = {}
+    def assets(self):
         info = self.user_info()
         wallet = info['result']['wallet']
-        fund = self.user_info()['result']['fund']['arbitrage']
-        asset['wallet_asset'] = wallet['usd'], wallet['btc']
-        asset['fund_asset'] = fund['usd']['avail'], fund['btc']['avail']
-        return asset
+        print(wallet)
+        return wallet
+
+    def asset_list(self):
+        info = self.user_info()['result']['wallet']
+        l = [
+            [common.to_decimal(info[self.symbol]['lock']), common.to_decimal(info[self.symbol]['avail'])],
+            [common.to_decimal(info['btc']['lock']), common.to_decimal(info['btc']['avail'])]
+        ]
+        return l
+
+    # def assets(self):
+    #     asset = {}
+    #     info = self.user_info()
+    #     wallet = info['result']['wallet']
+    #     fund = self.user_info()['result']['fund']['arbitrage']
+    #     asset['wallet_asset'] = wallet[self.symbol], wallet['btc']
+    #     asset['fund_asset'] = fund[self.symbol]['avail'], fund['btc']['avail']
+    #     return asset
 
     def print_js(self, json_data):
         print(json.dumps(json_data, indent=2))
-
 
     def current_trade(self, op):
         trade_jsdata = self.orders(op)
@@ -244,23 +263,21 @@ class BitBays(BTC):
         # FIXME error
         return (now - date_obj).seconds
 
-
     def dump(self):
         print('btc_rate: {}'.format(bitbays.btc_rate()))
-        asset = self.asset()
-        usd = common.to_decimal(asset['wallet_asset'][0]['avail']), common.to_decimal(
-            asset['wallet_asset'][0]['lock']), common.to_decimal(asset['fund_asset'][0])
-        btc = common.to_decimal(asset['wallet_asset'][1]['avail']), common.to_decimal(
-            asset['wallet_asset'][1]['lock']), common.to_decimal(asset['fund_asset'][1])
-        print('{:5}{:>15}{:>15}{:>15}'.format(' ', 'avail', 'lock', 'fund'))
-        print('{:5}{:>15f}{:>15f}{:>15f}'.format('usd', usd[0], usd[1], usd[2]))
-        print('{:5}{:>15f}{:>15f}{:>15f}'.format('btc', btc[0], btc[1], btc[2]))
-        import operator
-
-        acc = lambda t: reduce(operator.add, t, 0)
-        print('usd->btc {:>15f}'.format(acc(usd) / self.btc_rate()))
-        print('btc----> {:>15f}'.format(acc(btc)))
-
+        # asset = self.assets()
+        # fait = common.to_decimal(asset['wallet_asset'][0]['avail']), common.to_decimal(
+        #     asset['wallet_asset'][0]['lock']), common.to_decimal(asset['fund_asset'][0])
+        # btc = common.to_decimal(asset['wallet_asset'][1]['avail']), common.to_decimal(
+        #     asset['wallet_asset'][1]['lock']), common.to_decimal(asset['fund_asset'][1])
+        # print('{:5}{:>15}{:>15}{:>15}'.format(' ', 'avail', 'lock', 'fund'))
+        # print('{:5}{:>15f}{:>15f}{:>15f}'.format(self.symbol, fait[0], fait[1], fait[2]))
+        # print('{:5}{:>15f}{:>15f}{:>15f}'.format('btc', btc[0], btc[1], btc[2]))
+        # import operator
+        #
+        # acc = lambda t: reduce(operator.add, t, 0)
+        # print(self.symbol + '->btc {:>15f}'.format(acc(fait) / self.btc_rate()))
+        # print('btc----> {:>15f}'.format(acc(btc)))
 
     def my_trade(self, op, price, amount):
         order = {
@@ -270,50 +287,12 @@ class BitBays(BTC):
         }
         return self.trade(order)
 
-    def smart_trade(self, bound):
-        print(self.get_ask_bid())
-        wallet = self.user_info()['result']['wallet']
-        available = {
-            'usd': common.to_decimal(wallet['usd']['avail']),
-            'btc': common.to_decimal(wallet['btc']['avail'])
-        }
-        lock = {
-            'usd': common.to_decimal(wallet['usd']['lock']),
-            'btc': common.to_decimal(wallet['btc']['lock'])
-        }
-        if available['btc'] + lock['btc'] >= 1:
-            assert ( available['usd'] + lock['usd'] < 100)
-            if available['btc'] >= 1:
-                print('selling', bound[1], available['btc'])
-                self.my_trade('sell', bound[1], available['btc'])
-            else:
-                assert (lock['btc'] >= 1)
-                # print('locked [btc]')
-        else:
-            assert (available['btc'] + lock['btc'] < 1)
-            if available['usd'] > 100:
-                print('buying', bound[0], available['usd'])
-                amount = available['usd']/bound[0]
-                trade_info = self.my_trade('buy', bound[0], amount)
-                print(trade_info)
-            else:
-                assert (lock['usd'] > 100)
-                # print('locked [usd]')
-
-    def ask_bid_query(self, duration=10):
-        old = None
-        new = None
-        while True:
-            new = bitbays.get_ask_bid()
-            if new != old:
-                old = new
-                print(new)
-            time.sleep(duration)
-
 
 if __name__ == '__main__':
     init()
     bitbays = BitBays()
-    bitbays.ask_bid_query()
-    # bitbays.smart_trade([234, 235])
+    # print(bitbays.depth())
+    # bitbays.depth()
+    # bitbays.ask_bid_query()
     # print(bitbays.current_trade(0), bitbays.current_trade(1))
+    bitbays.assets()

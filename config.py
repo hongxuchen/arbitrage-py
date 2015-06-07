@@ -9,7 +9,8 @@ okcoin_com_info = {
 }
 
 bitbays_info = {
-    'domain': 'https://bitbays.com/api/v1'
+    'domain': 'https://bitbays.com/api/v1',
+    'symbol': 'cny'
 }
 
 itbit_info = {

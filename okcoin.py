@@ -64,8 +64,6 @@ class OKCoinAPI(BTC):
             sys.exit(1)
         return js
 
-    # need to ensure that the rate is only computed once
-    # if in future using 'ltc', self._currency_rate should be a tuple
     # TODO make configurable
     def currency_rate(self):
         payload = {
@@ -85,10 +83,10 @@ class OKCoinAPI(BTC):
         r = self._setup_request('depth', payload)
         data = r.json()
         asks = sorted(data['asks'], key=lambda ask: ask[0], reverse=True)
-        bids = sorted(data['bids'], key=lambda bid: bid[0])
+        bids = sorted(data['bids'], key=lambda bid: bid[0], reverse=True)
         # print(asks)
         # print(bids)
-        assert(asks[-1][0] > bids[0][0])
+        assert (asks[-1][0] > bids[0][0])
         return asks + bids
 
     def trades(self, since=None):
@@ -124,13 +122,21 @@ class OKCoinAPI(BTC):
         r = self._setup_request('lend_depth', params=payload)
         return r.json()
 
-    def get_funds(self):
+    def assets(self):
         funds = self.userinfo()['info']['funds']
         return funds
 
+    def asset_list(self):
+        funds = self.userinfo()['info']['funds']
+        l = [
+            [common.to_decimal(funds['freezed'][self.symbol]), common.to_decimal(funds['freezed']['btc'])],
+            [common.to_decimal(funds['free'][self.symbol]), common.to_decimal(funds['free']['btc'])]
+        ]
+        return l
+
     def get_coin(self, currency, status):
         try:
-            raw_str = self.get_funds()[status][currency]
+            raw_str = self.assets()[status][currency]
             return common.to_decimal(raw_str, config.precision)
         except:
             print(
@@ -140,7 +146,6 @@ class OKCoinAPI(BTC):
                 file=sys.stderr)
             return 0
 
-
     def dump(self):
         record = {'btc': self.get_coin('btc', 'free') +
                          self.get_coin('btc', 'freezed') +
@@ -149,11 +154,11 @@ class OKCoinAPI(BTC):
                                self.get_coin(self.symbol, 'freezed')}
         record = OrderedDict(record)
 
-        total = common.to_decimal(self.get_funds()['asset']['total'], config.precision)
+        total = common.to_decimal(self.assets()['assets']['total'], config.precision)
 
         record['rate'] = self.currency_rate()
         record['total_' + self.symbol] = total
-        record['total_btc'] = total / self.currency_rate()
+        # record['total_btc'] = total / self.currency_rate()
 
         for k in record:
             print('{:10s} {:10.4f}'.format(k, record[k]))

@@ -10,6 +10,9 @@ class BTC(object):
     def _real_uri(self, method):
         pass
 
+    def asset_list(self):
+        pass
+
     def get_url(self, path):
         url = self.domain + path
         # print(url)

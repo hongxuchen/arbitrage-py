@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1019</width>
-    <height>654</height>
+    <width>1259</width>
+    <height>663</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -53,139 +53,6 @@
      </property>
     </widget>
    </widget>
-   <widget class="QTabWidget" name="details_groupbox">
-    <property name="geometry">
-     <rect>
-      <x>410</x>
-      <y>40</y>
-      <width>521</width>
-      <height>541</height>
-     </rect>
-    </property>
-    <property name="currentIndex">
-     <number>0</number>
-    </property>
-    <widget class="QWidget" name="okc_asset_tab">
-     <attribute name="title">
-      <string>OKC</string>
-     </attribute>
-     <widget class="QTableWidget" name="asset_okc_table">
-      <property name="geometry">
-       <rect>
-        <x>30</x>
-        <y>20</y>
-        <width>341</width>
-        <height>121</height>
-       </rect>
-      </property>
-      <row>
-       <property name="text">
-        <string>CNY</string>
-       </property>
-      </row>
-      <row>
-       <property name="text">
-        <string>BTC</string>
-       </property>
-      </row>
-      <row>
-       <property name="text">
-        <string>LTC</string>
-       </property>
-      </row>
-      <column>
-       <property name="text">
-        <string>Pending</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Available</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Sum</string>
-       </property>
-      </column>
-     </widget>
-     <widget class="QTableWidget" name="okc_ask_bid_table">
-      <property name="geometry">
-       <rect>
-        <x>30</x>
-        <y>160</y>
-        <width>251</width>
-        <height>331</height>
-       </rect>
-      </property>
-      <row>
-       <property name="text">
-        <string>ask5</string>
-       </property>
-      </row>
-      <row>
-       <property name="text">
-        <string>ask4</string>
-       </property>
-      </row>
-      <row>
-       <property name="text">
-        <string>ask3</string>
-       </property>
-      </row>
-      <row>
-       <property name="text">
-        <string>ask2</string>
-       </property>
-      </row>
-      <row>
-       <property name="text">
-        <string>ask1</string>
-       </property>
-      </row>
-      <row>
-       <property name="text">
-        <string>Bid1</string>
-       </property>
-      </row>
-      <row>
-       <property name="text">
-        <string>Bid2</string>
-       </property>
-      </row>
-      <row>
-       <property name="text">
-        <string>Bid3</string>
-       </property>
-      </row>
-      <row>
-       <property name="text">
-        <string>Bid4</string>
-       </property>
-      </row>
-      <row>
-       <property name="text">
-        <string>Bid5</string>
-       </property>
-      </row>
-      <column>
-       <property name="text">
-        <string>Price</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Amount</string>
-       </property>
-      </column>
-     </widget>
-    </widget>
-    <widget class="QWidget" name="bb_asset_tab">
-     <attribute name="title">
-      <string>BitBays</string>
-     </attribute>
-    </widget>
-   </widget>
    <widget class="QGroupBox" name="diff_groupbox">
     <property name="geometry">
      <rect>
@@ -201,10 +68,46 @@
     <widget class="QDoubleSpinBox" name="diff_spinbox">
      <property name="geometry">
       <rect>
-       <x>50</x>
-       <y>50</y>
-       <width>62</width>
-       <height>22</height>
+       <x>140</x>
+       <y>30</y>
+       <width>61</width>
+       <height>21</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label">
+     <property name="geometry">
+      <rect>
+       <x>40</x>
+       <y>30</y>
+       <width>71</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Differences</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_2">
+     <property name="geometry">
+      <rect>
+       <x>40</x>
+       <y>60</y>
+       <width>71</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Min Amount</string>
+     </property>
+    </widget>
+    <widget class="QDoubleSpinBox" name="diff_spinbox_2">
+     <property name="geometry">
+      <rect>
+       <x>140</x>
+       <y>60</y>
+       <width>61</width>
+       <height>21</height>
       </rect>
      </property>
     </widget>
@@ -212,8 +115,8 @@
    <widget class="QPushButton" name="trade_button">
     <property name="geometry">
      <rect>
-      <x>130</x>
-      <y>450</y>
+      <x>80</x>
+      <y>390</y>
       <width>83</width>
       <height>24</height>
      </rect>
@@ -222,13 +125,163 @@
      <string>Start</string>
     </property>
    </widget>
+   <widget class="QTableWidget" name="asset_okc_table">
+    <property name="geometry">
+     <rect>
+      <x>470</x>
+      <y>60</y>
+      <width>341</width>
+      <height>121</height>
+     </rect>
+    </property>
+    <row>
+     <property name="text">
+      <string>CNY</string>
+     </property>
+    </row>
+    <row>
+     <property name="text">
+      <string>BTC</string>
+     </property>
+    </row>
+    <column>
+     <property name="text">
+      <string>Pending</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>Available</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>Sum</string>
+     </property>
+    </column>
+   </widget>
+   <widget class="QTableWidget" name="ask_bid_table">
+    <property name="geometry">
+     <rect>
+      <x>470</x>
+      <y>200</y>
+      <width>451</width>
+      <height>331</height>
+     </rect>
+    </property>
+    <row>
+     <property name="text">
+      <string>ask5</string>
+     </property>
+    </row>
+    <row>
+     <property name="text">
+      <string>ask4</string>
+     </property>
+    </row>
+    <row>
+     <property name="text">
+      <string>ask3</string>
+     </property>
+    </row>
+    <row>
+     <property name="text">
+      <string>ask2</string>
+     </property>
+    </row>
+    <row>
+     <property name="text">
+      <string>ask1</string>
+     </property>
+    </row>
+    <row>
+     <property name="text">
+      <string>Bid1</string>
+     </property>
+    </row>
+    <row>
+     <property name="text">
+      <string>Bid2</string>
+     </property>
+    </row>
+    <row>
+     <property name="text">
+      <string>Bid3</string>
+     </property>
+    </row>
+    <row>
+     <property name="text">
+      <string>Bid4</string>
+     </property>
+    </row>
+    <row>
+     <property name="text">
+      <string>Bid5</string>
+     </property>
+    </row>
+    <column>
+     <property name="text">
+      <string>P1</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>A1</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>P2</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>A2</string>
+     </property>
+    </column>
+   </widget>
+   <widget class="QTableWidget" name="asset_bb_table">
+    <property name="geometry">
+     <rect>
+      <x>810</x>
+      <y>60</y>
+      <width>341</width>
+      <height>121</height>
+     </rect>
+    </property>
+    <row>
+     <property name="text">
+      <string>CNY</string>
+     </property>
+    </row>
+    <row>
+     <property name="text">
+      <string>BTC</string>
+     </property>
+    </row>
+    <column>
+     <property name="text">
+      <string>Pending</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>Available</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>Sum</string>
+     </property>
+    </column>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1019</width>
+     <width>1259</width>
      <height>19</height>
     </rect>
    </property>
