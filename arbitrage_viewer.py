@@ -6,29 +6,68 @@ import sys
 from PySide import QtGui
 
 from bitbays import BitBays
+import common
+from itbit import ItBitAPI
 from okcoin import OKCoinCN
-import ui_arbitrage
+from ui_common import centerized
+import ui_main_win
+import ui_ask_bid_table
+import ui_asset_table
+import ui_selections
+import ui_settings
+
+select_api_dict = {
+    'OKCoinCN': OKCoinCN,
+    'BitBays': BitBays,
+    'ItBit': ItBitAPI
+}
 
 
-def centerized(widget):
-    return QtGui.QDesktopWidget().availableGeometry().center() - widget.frameGeometry().center()
-
-
-class ArbitrageUI(QtGui.QMainWindow, ui_arbitrage.Ui_arbitrage):
+class ArbitrageUI(QtGui.QMainWindow, ui_main_win.Ui_MainWindow):
     def __init__(self, parent=None):
         super(ArbitrageUI, self).__init__(parent)
         self.setupUi(self)
-        self.okc = OKCoinCN()
-        self.bb = BitBays()
+        # self.okc = OKCoinCN()
+        # self.bb = BitBays()
         self.plt = {}
+        self.init_gui()
+        ### actions
         self.setup_actions()
 
-    def _fill_table(self, tbl, row, col, text):
-        item = QtGui.QTableWidgetItem(str(text))
-        item.setTextAlignment(2)
-        tbl.setItem(row, col, item)
+    def init_gui(self):
+        main_layout = QtGui.QHBoxLayout()
+        ### left
+        gp1 = QtGui.QGroupBox()
+        layout1 = QtGui.QVBoxLayout()
+        available_plt = common.get_key_from_file('Available')
+        enabled_plt = common.get_key_from_file('Enabled')
+        self.plt_api_list = [select_api_dict[plt_api]() for plt_api in enabled_plt]
+        self.plt_groupbox = ui_selections.SelectGB(available_plt, enabled_plt)
+        layout1.addWidget(self.plt_groupbox)
+        self.settings_groupbox = ui_settings.SettingGB()
+        layout1.addWidget(self.settings_groupbox)
+        self.trade_button = QtGui.QPushButton('Start')
+        layout1.addWidget(self.trade_button)
+        gp1.setLayout(layout1)
+        ### right
+        gp2 = QtGui.QGroupBox()
+        layout2 = QtGui.QVBoxLayout()
+        self.asset_table_list = []
+        for plt_api in self.plt_api_list:
+            tbl = ui_asset_table.AssetTable(plt_api)
+            self.asset_table_list.append(tbl)
+            layout2.addWidget(tbl)
+        self.ask_bid_table = ui_ask_bid_table.AskBidTable(self.plt_api_list)
+        layout2.addWidget(self.ask_bid_table)
+        gp2.setLayout(layout2)
+        ### all
+        main_layout.addWidget(gp1)
+        main_layout.addWidget(gp2)
+        central = QtGui.QWidget()
+        central.setLayout(main_layout)
+        self.setCentralWidget(central)
 
-    def _set_plt(self):
+    def update_plt(self):
         sender = self.sender()
         assert (isinstance(sender, QtGui.QCheckBox))
         assert (not sender.isTristate())
@@ -51,38 +90,23 @@ class ArbitrageUI(QtGui.QMainWindow, ui_arbitrage.Ui_arbitrage):
 
     def setup_actions(self):
         for checkbox in self.plt_groupbox.findChildren(QtGui.QCheckBox):
-            checkbox.stateChanged.connect(self._set_plt)
+            checkbox.stateChanged.connect(self.update_plt)
         self.trade_button.pressed.connect(self.update_info)
 
     def display_ask_bid(self):
         length = 5
-        okc_depth = self.okc.depth(length)
-        assert (len(okc_depth) == length * 2)
-        for i in range(len(okc_depth)):
-            price = QtGui.QTableWidgetItem(str(okc_depth[i][0]))
-            amount = QtGui.QTableWidgetItem(str(okc_depth[i][1]))
-            self.ask_bid_table.setItem(i, 0, price)
-            self.ask_bid_table.setItem(i, 1, amount)
-        bb_depth = self.bb.depth()
-        assert (len(bb_depth) == length * 2)
-        for i in range(len(bb_depth)):
-            price = QtGui.QTableWidgetItem(str(bb_depth[i][0]))
-            amount = QtGui.QTableWidgetItem(str(bb_depth[i][1]))
-            self.ask_bid_table.setItem(i, 2, price)
-            self.ask_bid_table.setItem(i, 3, amount)
+        api_num = len(self.plt_api_list)
+        for n in range(api_num):
+            trade_depth = self.plt_api_list[n].depth(length)
+            for i in range(length * 2):
+                price = QtGui.QTableWidgetItem(str(trade_depth[i][0]))
+                self.ask_bid_table.setItem(i, 2*n, price)
+                amount = QtGui.QTableWidgetItem(str(trade_depth[i][1]))
+                self.ask_bid_table.setItem(i, 2*n+1, amount)
 
     def display_asset(self):
-        okc_assets = self.okc.asset_list()
-        bb_assets = self.bb.asset_list()
-        tbl_asset_list = [
-            (self.asset_okc_table, okc_assets),
-            (self.asset_bb_table, bb_assets)
-        ]
-        for tbl, asset in tbl_asset_list:
-            for i in range(len(okc_assets)):
-                self._fill_table(tbl, i, 0, asset[i][0])
-                self._fill_table(tbl, i, 1, asset[i][1])
-                self._fill_table(tbl, i, 2, asset[i][0] + asset[i][1])
+        for tbl in self.asset_table_list:
+            tbl.display()
 
 
 if __name__ == '__main__':

@@ -19,3 +19,5 @@ itbit_info = {
 }
 
 precision = 4
+TRADING_LOGGER = 'trading_logger'
+DEBUG_LOGGER = 'debug_logger'

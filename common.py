@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 import decimal
-import hashlib
+
 import requests
 import yaml
+
 import config
 
 
@@ -16,7 +17,7 @@ def get_usd_cny_rate():
 def to_decimal(value_str, precision=config.precision):
     return round(float(value_str), precision)
 
-def get_key_from_file(field, fname = 'Config.yaml'):
+def get_key_from_file(field, fname='Config.yaml'):
     with open(fname) as yfile:
         ydata = yaml.load(yfile)
     try:

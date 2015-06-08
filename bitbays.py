@@ -3,7 +3,6 @@
 from __future__ import print_function
 import hashlib
 import hmac
-import json
 import urllib
 import sys
 from datetime import datetime
@@ -59,7 +58,7 @@ class BitBays(BTC):
             else:
                 print('method [{}] not supported'.format(method))
                 sys.exit(1)
-            print(r.url)
+            self.logger.info(r.url)
             return r
         except Exception as e:
             print(e)
@@ -80,8 +79,8 @@ class BitBays(BTC):
         asks = sorted(data['asks'], key=lambda ask: ask[0], reverse=True)[-length:]
         bids = sorted(data['bids'], key=lambda bid: bid[0], reverse=True)[:length]
         assert (asks[-1][0] > bids[0][0])
-        print(asks)
-        print(bids)
+        self.logger.debug(asks)
+        self.logger.debug(bids)
         return asks + bids
 
     # global
@@ -209,14 +208,10 @@ class BitBays(BTC):
         js = r.json()
         return js
 
-    def dump_buy_sell(self):
-        self.print_js(self.transactions(0))
-        self.print_js(self.transactions(1))
-
     def assets(self):
         info = self.user_info()
         wallet = info['result']['wallet']
-        print(wallet)
+        # my_logger.debug_logger.debug(wallet)
         return wallet
 
     def asset_list(self):
@@ -226,18 +221,6 @@ class BitBays(BTC):
             [common.to_decimal(info['btc']['lock']), common.to_decimal(info['btc']['avail'])]
         ]
         return l
-
-    # def assets(self):
-    #     asset = {}
-    #     info = self.user_info()
-    #     wallet = info['result']['wallet']
-    #     fund = self.user_info()['result']['fund']['arbitrage']
-    #     asset['wallet_asset'] = wallet[self.symbol], wallet['btc']
-    #     asset['fund_asset'] = fund[self.symbol]['avail'], fund['btc']['avail']
-    #     return asset
-
-    def print_js(self, json_data):
-        print(json.dumps(json_data, indent=2))
 
     def current_trade(self, op):
         trade_jsdata = self.orders(op)
@@ -258,26 +241,8 @@ class BitBays(BTC):
     def get_timestamp(time_str, fmt):
         now = datetime.utcnow()
         date_obj = datetime.strptime(time_str, fmt)
-        # print(date_obj)
-        # print(now)
         # FIXME error
         return (now - date_obj).seconds
-
-    def dump(self):
-        print('btc_rate: {}'.format(bitbays.btc_rate()))
-        # asset = self.assets()
-        # fait = common.to_decimal(asset['wallet_asset'][0]['avail']), common.to_decimal(
-        #     asset['wallet_asset'][0]['lock']), common.to_decimal(asset['fund_asset'][0])
-        # btc = common.to_decimal(asset['wallet_asset'][1]['avail']), common.to_decimal(
-        #     asset['wallet_asset'][1]['lock']), common.to_decimal(asset['fund_asset'][1])
-        # print('{:5}{:>15}{:>15}{:>15}'.format(' ', 'avail', 'lock', 'fund'))
-        # print('{:5}{:>15f}{:>15f}{:>15f}'.format(self.symbol, fait[0], fait[1], fait[2]))
-        # print('{:5}{:>15f}{:>15f}{:>15f}'.format('btc', btc[0], btc[1], btc[2]))
-        # import operator
-        #
-        # acc = lambda t: reduce(operator.add, t, 0)
-        # print(self.symbol + '->btc {:>15f}'.format(acc(fait) / self.btc_rate()))
-        # print('btc----> {:>15f}'.format(acc(btc)))
 
     def my_trade(self, op, price, amount):
         order = {
@@ -291,8 +256,5 @@ class BitBays(BTC):
 if __name__ == '__main__':
     init()
     bitbays = BitBays()
-    # print(bitbays.depth())
     # bitbays.depth()
-    # bitbays.ask_bid_query()
-    # print(bitbays.current_trade(0), bitbays.current_trade(1))
     bitbays.assets()

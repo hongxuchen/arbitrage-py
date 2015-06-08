@@ -126,11 +126,12 @@ class OKCoinAPI(BTC):
         funds = self.userinfo()['info']['funds']
         return funds
 
+    # FIXME order error
     def asset_list(self):
         funds = self.userinfo()['info']['funds']
         l = [
-            [common.to_decimal(funds['freezed'][self.symbol]), common.to_decimal(funds['freezed']['btc'])],
-            [common.to_decimal(funds['free'][self.symbol]), common.to_decimal(funds['free']['btc'])]
+            [common.to_decimal(funds['freezed'][self.symbol]), common.to_decimal(funds['free'][self.symbol])],
+            [common.to_decimal(funds['freezed']['btc']), common.to_decimal(funds['free']['btc'])]
         ]
         return l
 
