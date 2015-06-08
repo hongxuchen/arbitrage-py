@@ -24,14 +24,11 @@ select_api_dict = {
 
 
 class ArbitrageUI(QtGui.QMainWindow, ui_main_win.Ui_MainWindow):
-    def __init__(self, parent=None):
+    def __init__(self, length=5, parent=None):
         super(ArbitrageUI, self).__init__(parent)
         self.setupUi(self)
-        # self.okc = OKCoinCN()
-        # self.bb = BitBays()
-        self.plt = {}
+        self.depth_length = length
         self.init_gui()
-        ### actions
         self.setup_actions()
 
     def init_gui(self):
@@ -57,7 +54,7 @@ class ArbitrageUI(QtGui.QMainWindow, ui_main_win.Ui_MainWindow):
             tbl = ui_asset_table.AssetTable(plt_api)
             self.asset_table_list.append(tbl)
             layout2.addWidget(tbl)
-        self.ask_bid_table = ui_ask_bid_table.AskBidTable(self.plt_api_list)
+        self.ask_bid_table = ui_ask_bid_table.AskBidTable(self.plt_api_list, self.depth_length, self)
         layout2.addWidget(self.ask_bid_table)
         gp2.setLayout(layout2)
         ### all
@@ -85,7 +82,7 @@ class ArbitrageUI(QtGui.QMainWindow, ui_main_win.Ui_MainWindow):
         self.report_abitrage()
 
     def update_info(self):
-        self.display_asset()
+        # self.display_asset()
         self.display_ask_bid()
 
     def setup_actions(self):
@@ -93,16 +90,17 @@ class ArbitrageUI(QtGui.QMainWindow, ui_main_win.Ui_MainWindow):
             checkbox.stateChanged.connect(self.update_plt)
         self.trade_button.pressed.connect(self.update_info)
 
+    #TODO distinguish init and update
     def display_ask_bid(self):
-        length = 5
         api_num = len(self.plt_api_list)
-        for n in range(api_num):
-            trade_depth = self.plt_api_list[n].depth(length)
-            for i in range(length * 2):
-                price = QtGui.QTableWidgetItem(str(trade_depth[i][0]))
-                self.ask_bid_table.setItem(i, 2*n, price)
-                amount = QtGui.QTableWidgetItem(str(trade_depth[i][1]))
-                self.ask_bid_table.setItem(i, 2*n+1, amount)
+        for api_index in range(api_num):
+            # rest api
+            trade_depth = self.plt_api_list[api_index].depth(self.depth_length)
+            for ask_bid_index in range(self.depth_length * 2):
+                price = QtGui.QTableWidgetItem(str(trade_depth[ask_bid_index][0]))
+                self.ask_bid_table.setItem(ask_bid_index, 2*api_index, price)
+                amount = QtGui.QTableWidgetItem(str(trade_depth[ask_bid_index][1]))
+                self.ask_bid_table.setItem(ask_bid_index, 2*api_index+1, amount)
 
     def display_asset(self):
         for tbl in self.asset_table_list:
@@ -111,7 +109,7 @@ class ArbitrageUI(QtGui.QMainWindow, ui_main_win.Ui_MainWindow):
 
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
-    widget = ArbitrageUI()
+    widget = ArbitrageUI(3)
     widget.move(centerized(widget))
     widget.show()
     # widget.display_asset()

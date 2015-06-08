@@ -74,7 +74,7 @@ class OKCoinAPI(BTC):
         return common.to_decimal(rate_str, config.precision)
 
     def depth(self, size=5, should_merge=0):
-        assert (5 <= size <= 200)
+        assert (1 <= size <= 200)
         payload = {
             'symbol': 'btc_' + self.symbol,
             'size': size,
