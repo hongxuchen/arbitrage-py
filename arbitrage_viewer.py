@@ -33,7 +33,6 @@ class ArbitrageUI(ui_main_win.Ui_MainWin):
         self.init_gui()
         self.arbitrage_worker = ArbitrageWorker(self.plt_api_list, 'cny')
         self.setup_actions()
-        # self.reset_ask_bid_info()
 
     def apply_trade(self):
         self.arbitrage_worker.start()
@@ -61,27 +60,19 @@ class ArbitrageUI(ui_main_win.Ui_MainWin):
             tbl = ui_asset_table.AssetTable(plt_api)
             self.asset_table_list.append(tbl)
             layout2.addWidget(tbl)
-        self.ask_bid_table = ui_ask_bid_table.AskBidTable(self.plt_api_list, self.depth_length, self)
-        layout2.addWidget(self.ask_bid_table)
-        widget2.setMinimumWidth(config.ui_tbl_col_width * 5)
-        widget2.setLayout(layout2)
-        ### right
+        # self.ask_bid_table = ui_ask_bid_table.AskBidTable(self.plt_api_list, self.depth_length, self)
+        # layout2.addWidget(self.ask_bid_table)
         self.trade_viewer = TradingViewer()
+        layout2.addWidget(self.trade_viewer)
+        # widget2.setMinimumWidth(config.ui_tbl_col_width * 5)
+        widget2.setLayout(layout2)
         ### all
         main_layout.addWidget(widget1)
         main_layout.addWidget(widget2)
-        main_layout.addWidget(self.trade_viewer)
+        # main_layout.addWidget(self.trade_viewer)
         central = QtGui.QWidget()
         central.setLayout(main_layout)
         self.setCentralWidget(central)
-
-    # def get_ask_bid_info(self):
-    #     self.ask_bid_info = []
-    #     for api in self.plt_api_list:
-    #         self.ask_bid_info.append(api.depth())
-    #
-    # def reset_ask_bid_info(self):
-    #     self.ask_bid_info = []
 
     def update_plt(self):
         sender = self.sender()
