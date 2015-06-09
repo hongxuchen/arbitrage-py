@@ -58,7 +58,7 @@ class BitBays(BTC):
             else:
                 print('method [{}] not supported'.format(method))
                 sys.exit(1)
-            self.logger.info(r.url)
+            self.logger.debug(r.url)
             return r
         except Exception as e:
             print(e)
@@ -69,7 +69,7 @@ class BitBays(BTC):
         js = r.json()
         return common.to_decimal(js['result']['last'])
 
-    def depth(self, length=5):
+    def depth(self, length=2):
         assert (1 <= length <= 50)
         payload = {
             'market': 'btc_' + self.symbol

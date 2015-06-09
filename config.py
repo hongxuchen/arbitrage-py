@@ -21,3 +21,6 @@ itbit_info = {
 precision = 4
 TRADING_LOGGER = 'trading_logger'
 DEBUG_LOGGER = 'debug_logger'
+
+ui_tbl_col_width = 100
+ui_tbl_row_height = 25

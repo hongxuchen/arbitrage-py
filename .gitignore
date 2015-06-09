@@ -109,4 +109,4 @@ crashlytics.properties
 crashlytics-build.properties
 
 arbitrage.png
-ui_*.py
+ui_main_win.py

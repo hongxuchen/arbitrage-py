@@ -73,7 +73,7 @@ class OKCoinAPI(BTC):
         rate_str = float(r.json()['ticker']['last'])
         return common.to_decimal(rate_str, config.precision)
 
-    def depth(self, size=5, should_merge=0):
+    def depth(self, size=2, should_merge=0):
         assert (1 <= size <= 200)
         payload = {
             'symbol': 'btc_' + self.symbol,
