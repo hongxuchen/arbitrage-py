@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 import decimal
+import logging
+import logging.config
+import os
+import errno
 
 import requests
 import yaml
@@ -25,3 +29,16 @@ def get_key_from_file(field, fname='Config.yaml'):
     except:
         print('no ydata')
         return None
+
+def setup_logger():
+    log_dir = os.path.join(os.path.dirname(__file__), 'logger')
+    try:
+        os.makedirs(log_dir)
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            raise
+    log_fname = os.path.join(log_dir, 'trading.log')
+    logging.config.fileConfig('logging_config.ini', defaults={
+        'logfilename': log_fname
+    })
+    return logging.getLogger()

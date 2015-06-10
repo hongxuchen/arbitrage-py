@@ -16,6 +16,7 @@ import config
 
 
 class BitBays(BTC):
+    _logger = common.setup_logger()
     fmt = '%Y/%m/%d %H:%M:%S'
 
     def __init__(self):
@@ -54,12 +55,12 @@ class BitBays(BTC):
             elif method in self.api_private:
                 r = requests.post(self._real_uri(method), data=data, headers=params)
             else:
-                self.logger.critical('method [{}] not supported'.format(method))
+                BitBays._logger.critical('method [{}] not supported'.format(method))
                 sys.exit(1)
-            # self.logger.debug(r.url)
+            # BitBays._logger.debug(r.url)
             return r
         except Exception as e:
-            self.logger.critical(e)
+            BitBays._logger.critical(e)
             sys.exit(1)
 
     def ask_bid_list(self, length=2):
@@ -73,7 +74,7 @@ class BitBays(BTC):
         bids = sorted(data['bids'], key=lambda bid: bid[0], reverse=True)[:length]
         assert (asks[-1][0] > bids[0][0])
         asks_bids = asks + bids
-        self.logger.debug(asks_bids)
+        BitBays._logger.debug(asks_bids)
         return asks_bids
 
     # all my trades
@@ -120,20 +121,20 @@ class BitBays(BTC):
         return js
 
     def cancel(self, order_id):
-        self.logger.info('canceling order {}...'.format(order_id))
+        BitBays._logger.info('canceling order {}...'.format(order_id))
         data = self.api_cancel(order_id)
         return data
 
     def cancel_all(self, catalog=2):
         if catalog & 1 == 1:
-            self.logger.info('cancelling buy orders')
-            buy = self.orders(0)['result']
+            BitBays._logger.info('cancelling buy orders')
+            buy = self.api_orders(0)['result']
             if buy is not None:
                 for t in buy:
                     self.api_cancel(t['buy'])
         if (catalog >> 1) & 1 == 1:
-            self.logger.info('cancelling sell orders')
-            sell = self.orders(1)['result']
+            BitBays._logger.info('cancelling sell orders')
+            sell = self.api_orders(1)['result']
             if sell is not None:
                 for t in sell:
                     self.api_cancel(t['id'])
@@ -155,13 +156,13 @@ class BitBays(BTC):
         return create_time, order_id, price, amount
 
     def get_orders_info(self):
-        buy = self.orders(0)['result']
+        buy = self.api_orders(0)['result']
         buy_list = []
         if buy is not None:
             for t in buy:
                 buy_list.append(BitBays._order_info(t))
             self._orders_info['buy'] = buy_list
-        sell = self.orders(1)['result']
+        sell = self.api_orders(1)['result']
         sell_list = []
         if sell is not None:
             for t in sell:
@@ -169,17 +170,15 @@ class BitBays(BTC):
             self._orders_info['sell'] = sell_list
         return self._orders_info
 
-    def _user_info(self):
-        if self._user_data is None:
-            payload = {
-                'nonce': self._nonce()
-            }
-            params = self._post_param(payload)
-            r = self._setup_request('info', params, payload)
-            self._user_data = r.json()
-        return self._user_data
+    def api_user_info(self):
+        payload = {
+            'nonce': self._nonce()
+        }
+        params = self._post_param(payload)
+        r = self._setup_request('info', params, payload)
+        return r.json()
 
-    def orders(self, catalog, status=0):
+    def api_orders(self, catalog, status=0):
         payload = {
             'market': 'btc_' + self.symbol,
             'catalog': catalog,
@@ -197,7 +196,7 @@ class BitBays(BTC):
         js = r.json()
         return js
 
-    def _transactions(self, catalog):
+    def api_transactions(self, catalog):
         payload = {
             'market': 'btc_' + self.symbol,
             'catalog': catalog,
@@ -215,7 +214,7 @@ class BitBays(BTC):
         return js
 
     def assets(self):
-        info = self._user_info()['result']['wallet']
+        info = self.api_user_info()['result']['wallet']
         l = [
             [common.to_decimal(info[self.symbol]['lock']), common.to_decimal(info[self.symbol]['avail'])],
             [common.to_decimal(info['btc']['lock']), common.to_decimal(info['btc']['avail'])]
@@ -223,7 +222,7 @@ class BitBays(BTC):
         return l
 
     def current_trade(self, op):
-        trade_jsdata = self.orders(op)
+        trade_jsdata = self.api_orders(op)
         trade_list = []
         for r in trade_jsdata['result']:
             created_at = r['created_at']

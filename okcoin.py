@@ -14,12 +14,12 @@ import config
 
 
 class OKCoinAPI(BTC):
+    _logger = common.setup_logger()
     def __init__(self, info):
         super(OKCoinAPI, self).__init__(info)
         self.symbol = info['symbol']
         self.api_public = ['ticker', 'depth', 'trades', 'kline', 'lend_depth']
         self.api_private = ['userinfo', 'trade', 'batch_trade', 'cancel_order', 'orders']
-        self.setup_logger()
 
     def _real_uri(self, method):
         path = '/' + method + '.do'
@@ -41,12 +41,12 @@ class OKCoinAPI(BTC):
             elif method in self.api_private:
                 r = requests.request('post', self._real_uri(method), data=data, params=params)
             else:
-                self.logger.critical('method [{}] not supported'.format(method))
+                OKCoinAPI._logger.critical('method [{}] not supported'.format(method))
                 sys.exit(1)
-            # self.logger.debug(r.url)
+            # OKCoinAPI._logger.debug(r.url)
             return r
         except Exception as e:
-            self.logger.critical(e)
+            OKCoinAPI._logger.critical(e)
             sys.exit(1)
 
     ### public api
@@ -74,7 +74,7 @@ class OKCoinAPI(BTC):
         bids = sorted(data['bids'], key=lambda bid: bid[0], reverse=True)
         assert (asks[-1][0] > bids[0][0])
         asks_bids = asks + bids
-        self.logger.debug(asks_bids)
+        OKCoinAPI._logger.debug(asks_bids)
         return asks_bids
 
     def api_trades(self, since=None):
@@ -102,7 +102,7 @@ class OKCoinAPI(BTC):
 
     def api_lend_depth(self, symbol='btc_cny'):
         if symbol not in ['btc_cny', 'cny']:
-            self.logger.critical('illegal symbol')
+            OKCoinAPI._logger.critical('illegal symbol')
             sys.exit(1)
         payload = {
             'symbol': symbol
@@ -125,7 +125,7 @@ class OKCoinAPI(BTC):
         r = self._private_request('userinfo', None)
         data = r.json()
         if data['result'] is False:
-            self.logger.critical('api error')
+            OKCoinAPI._logger.critical('api error')
             sys.exit(1)
         return data
 
@@ -147,7 +147,7 @@ class OKCoinAPI(BTC):
         }
         data = self.api_trade(trade_dict)
         if data['result'] is False:
-            self.logger.critical(data)
+            OKCoinAPI._logger.critical(data)
             sys.exit(1)
         return data
 
