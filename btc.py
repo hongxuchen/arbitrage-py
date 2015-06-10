@@ -33,7 +33,13 @@ class BTC(object):
     def depth(self, length):
         pass
 
-    def asset_list(self):
+    def trade(self, trade_type, price, amount):
+        pass
+
+    def cancel(self, order_id):
+        pass
+
+    def assets(self):
         pass
 
     def get_url(self, path):

@@ -72,12 +72,12 @@ class BitBays(BTC):
         asks = sorted(data['asks'], key=lambda ask: ask[0], reverse=True)[-length:]
         bids = sorted(data['bids'], key=lambda bid: bid[0], reverse=True)[:length]
         assert (asks[-1][0] > bids[0][0])
-        self.logger.debug(asks)
-        self.logger.debug(bids)
+        self.logger.debug('BitBays asks: ', asks)
+        self.logger.debug('BitBays bids: ', bids)
         return asks + bids
 
     # all my trades
-    def _trades(self):
+    def api_trades(self):
         payload = {
             'market': 'btc_' + self.symbol
         }
@@ -86,7 +86,7 @@ class BitBays(BTC):
         return js
 
     # trade operations
-    def _trade(self, order):
+    def api_trade(self, order):
         payload = {
             'market': 'btc_' + self.symbol,
             'order_type': 0,  # limit order
@@ -100,8 +100,16 @@ class BitBays(BTC):
         js = r.json()
         return js
 
-    def _cancel(self, order_id):
-        self.logger.info('canceling order {}...'.format(order_id))
+    def trade(self, trade_type, price, amount):
+        trade_dict = {
+            'op': type,
+            'price': str(price),
+            'amount': str(amount)
+        }
+        data = self.api_trade(trade_dict)
+        return data
+
+    def api_cancel(self, order_id):
         payload = {
             'id': order_id,
             'nonce': self._nonce()
@@ -111,19 +119,24 @@ class BitBays(BTC):
         js = r.json()
         return js
 
+    def cancel(self, order_id):
+        self.logger.info('canceling order {}...'.format(order_id))
+        data = self.api_cancel(order_id)
+        return data
+
     def cancel_all(self, catalog=2):
         if catalog & 1 == 1:
             self.logger.info('cancelling buy orders')
             buy = self.orders(0)['result']
             if buy is not None:
                 for t in buy:
-                    self._cancel(t['buy'])
+                    self.api_cancel(t['buy'])
         if (catalog >> 1) & 1 == 1:
             self.logger.info('cancelling sell orders')
             sell = self.orders(1)['result']
             if sell is not None:
                 for t in sell:
-                    self._cancel(t['id'])
+                    self.api_cancel(t['id'])
 
     @staticmethod
     def _get_timestamp(time_str, fmt):
@@ -201,7 +214,7 @@ class BitBays(BTC):
         js = r.json()
         return js
 
-    def asset_list(self):
+    def assets(self):
         info = self._user_info()['result']['wallet']
         l = [
             [common.to_decimal(info[self.symbol]['lock']), common.to_decimal(info[self.symbol]['avail'])],
@@ -224,13 +237,14 @@ class BitBays(BTC):
             trade_list.append(current)
         return trade_list
 
-    def my_trade(self, op, price, amount):
-        order = {
-            'op': op,
-            'price': str(price),
-            'amount': str(amount)
-        }
-        return self._trade(order)
+
+        # def my_trade(self, op, price, amount):
+        #     order = {
+        #         'op': op,
+        #         'price': str(price),
+        #         'amount': str(amount)
+        #     }
+        #     return self._trade(order)
 
 
 if __name__ == '__main__':

@@ -14,7 +14,7 @@ class TradeInfo(object):
 
     def __repr__(self):
         plt_name = self.plt.__class__.__name__
-        return '{:>10}: {} {} btc at Price {}{}'.format(plt_name, self.type, self.amount, self.price, self.fiat)
+        return '{:>10}: {} {:>10.4f} btc at Price {:<10.2f} {}'.format(plt_name, self.type, self.amount, self.price, self.fiat)
 
     def __str__(self):
         return self.__repr__()

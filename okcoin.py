@@ -17,9 +17,9 @@ class OKCoinAPI(BTC):
     def __init__(self, info):
         super(OKCoinAPI, self).__init__(info)
         self.symbol = info['symbol']
-
         self.api_public = ['ticker', 'depth', 'trades', 'kline', 'lend_depth']
         self.api_private = ['userinfo', 'trade', 'batch_trade', 'cancel_order', 'orders']
+        self.setup_logger()
 
     def _real_uri(self, method):
         path = '/' + method + '.do'
@@ -41,25 +41,24 @@ class OKCoinAPI(BTC):
             elif method in self.api_private:
                 r = requests.request('post', self._real_uri(method), data=data, params=params)
             else:
-                print('method [{}] not supported'.format(method))
+                self.logger.critical('method [{}] not supported'.format(method))
                 sys.exit(1)
-            # print(r.status_code, r.url)
+            self.logger.debug(r.url)
             return r
         except Exception as e:
-            print(e)
+            self.logger.critical(e)
             sys.exit(1)
 
-    def _userinfo(self):
-        params = {'api_key': self.key['api']}
-        params['sign'] = self._sign(params)
-        r = self._setup_request('userinfo', None, params)
-        js = r.json()
-        if js['result'] is False:
-            print('api error')
-            sys.exit(1)
-        return js
+    ### public api
 
-    def depth(self, length=2):
+    def api_ticker(self):
+        payload = {
+            'symbol': 'btc' + self.symbol
+        }
+        r = self._setup_request('ticker', payload)
+        return r.json()
+
+    def api_depth(self, length=2):
         assert (1 <= length <= 200)
         payload = {
             'symbol': 'btc_' + self.symbol,
@@ -67,15 +66,16 @@ class OKCoinAPI(BTC):
             'merge': 0
         }
         r = self._setup_request('depth', payload)
-        data = r.json()
+        return r.json()
+
+    def depth(self, length=2):
+        data = self.api_depth(length)
         asks = sorted(data['asks'], key=lambda ask: ask[0], reverse=True)
         bids = sorted(data['bids'], key=lambda bid: bid[0], reverse=True)
-        # print(asks)
-        # print(bids)
         assert (asks[-1][0] > bids[0][0])
         return asks + bids
 
-    def _trades(self, since=None):
+    def api_trades(self, since=None):
         payload = {
             'symbol': 'btc_' + self.symbol
         }
@@ -84,7 +84,7 @@ class OKCoinAPI(BTC):
         r = self._setup_request('trades', payload)
         return r.json()
 
-    def _kline(self, ktype='15min', size=10, since=None):
+    def api_kline(self, ktype='15min', size=10, since=None):
         payload = {
             'symbol': 'btc_' + self.symbol,
             'size': size,
@@ -98,9 +98,9 @@ class OKCoinAPI(BTC):
         r = self._setup_request('kline', payload)
         return r.json()
 
-    def _lend_depth(self, symbol='btc_cny'):
+    def api_lend_depth(self, symbol='btc_cny'):
         if symbol not in ['btc_cny', 'cny']:
-            print('illegal symbol')
+            self.logger.critical('illegal symbol')
             sys.exit(1)
         payload = {
             'symbol': symbol
@@ -108,8 +108,76 @@ class OKCoinAPI(BTC):
         r = self._setup_request('lend_depth', params=payload)
         return r.json()
 
-    def asset_list(self):
-        funds = self._userinfo()['info']['funds']
+    ### private api
+
+    def _private_request(self, api_type, param_dict):
+        params = {'api_key': self.key['api']}
+        if param_dict is not None:
+            params.update(param_dict)
+        params['sign'] = self._sign(params)
+        # print(params)
+        r = self._setup_request(api_type, None, params)
+        return r
+
+    def api_userinfo(self):
+        r = self._private_request('userinfo', None)
+        data = r.json()
+        if data['result'] is False:
+            self.logger.critical('api error')
+            sys.exit(1)
+        return data
+
+    def api_trade(self, trade_dict):
+        params = {
+            'symbol': 'btc_' + self.symbol
+        }
+        params.update(trade_dict)
+        assert (0 < common.to_decimal(params['price']) <= 1000000)
+        r = self._private_request('trade', params)
+        data = r.json()
+        return data
+
+    def trade(self, trade_type, price, amount):
+        trade_dict = {
+            'type': trade_type,
+            'price': str(price),
+            'amount': str(amount)
+        }
+        data = self.api_trade(trade_dict)
+        if data['result'] is False:
+            self.logger.critical(data)
+            sys.exit(1)
+        return data
+
+    def api_batch_trade(self, trade_dict):
+        pass
+
+    def api_cancel_order(self, order_id):
+        params = {
+            'symbol': 'btc_' + self.symbol
+        }
+        params.update(order_id)
+        r = self._private_request('cancel_order', params)
+        return r.json()
+
+    def cancel(self, order_id):
+        data = self.api_cancel_order(order_id)
+        return data
+
+    def api_order_history(self):
+        pass
+
+    def api_withdraw(self):
+        pass
+
+    def api_cancel_withdraw(self):
+        pass
+
+    def api_order_fee(self):
+        pass
+
+    def assets(self):
+        funds = self.api_userinfo()['info']['funds']
         l = [
             [common.to_decimal(funds['freezed'][self.symbol]), common.to_decimal(funds['free'][self.symbol])],
             [common.to_decimal(funds['freezed']['btc']), common.to_decimal(funds['free']['btc'])]
@@ -131,4 +199,16 @@ class OKCoinCOM(OKCoinAPI):
 
 if __name__ == '__main__':
     okcoin_cn = OKCoinCN()
-    print(okcoin_cn.depth(5))
+    print(okcoin_cn.assets())
+    trade_dict = {
+        'type': 'buy',
+        'price': '1',
+        'amount': '0.01'
+    }
+    trade_dict = {
+        'type': 'sell',
+        'price': '10000',
+        'amount': '0.1'
+    }
+    res = okcoin_cn.api_trade(trade_dict)
+    print(res)

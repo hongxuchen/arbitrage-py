@@ -35,7 +35,7 @@ class AssetTable(QtGui.QTableWidget):
         self.plt = plt
 
     def display(self):
-        asset = self.plt.asset_list()
+        asset = self.plt.assets()
         for i in range(len(asset)):
             fill_table(self, i, 0, asset[i][0])
             fill_table(self, i, 1, asset[i][1])
