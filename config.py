@@ -18,13 +18,15 @@ itbit_info = {
     'symbol': 'XBTUSD'
 }
 
+ui_tbl_col_width = 100
+ui_tbl_row_height = 25
+
 precision = 4
 TRADING_LOGGER = 'trading_logger'
 DEBUG_LOGGER = 'debug_logger'
 
-upper_bound = 0.012
-lower_bound = 0.010
 minor_diff = 10 ** (-precision)
 
-ui_tbl_col_width = 100
-ui_tbl_row_height = 25
+upper_bound = 0.012
+lower_bound = 0.010
+arbitrage_diff = 0.00

@@ -14,6 +14,7 @@ class SelectGB(QtGui.QGroupBox):
             plt = QtGui.QCheckBox(e)
             if e in enabled_plt:
                 plt.setChecked(True)
+            plt.setDisabled(1)
             layout.addWidget(plt)
         self.setLayout(layout)
         self.setTitle('platforms')

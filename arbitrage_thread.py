@@ -56,7 +56,7 @@ class ArbitrageWorker(QtCore.QThread):
     # ask_a, bid_b are of [price, amount]
     @staticmethod
     def can_arbitrage(ask_a, bid_b):
-        return ask_a[0] < bid_b[0]
+        return ask_a[0] + config.arbitrage_diff < bid_b[0]
 
     # ask_a, bid_b are of [price, amount]
     @staticmethod
