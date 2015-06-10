@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
-from collections import OrderedDict
 import hashlib
 import sys
 import datetime
@@ -31,7 +30,6 @@ class OKCoinAPI(BTC):
         for key in sorted(params.keys()):
             sign += key + '=' + str(params[key]) + '&'
         data = sign + 'secret_key=' + self.key['secret']
-        # print("DATA=",data)
         sign = hashlib.md5(data.encode("utf8")).hexdigest().upper()
         return sign
 
@@ -51,34 +49,22 @@ class OKCoinAPI(BTC):
             print(e)
             sys.exit(1)
 
-    def userinfo(self):
+    def _userinfo(self):
         params = {'api_key': self.key['api']}
         params['sign'] = self._sign(params)
-        # print(params)
         r = self._setup_request('userinfo', None, params)
-        # print(r.content)
         js = r.json()
-        # print(js)
         if js['result'] is False:
             print('api error')
             sys.exit(1)
         return js
 
-    # TODO make configurable
-    def currency_rate(self):
-        payload = {
-            'symbol': 'btc_' + self.symbol
-        }
-        r = self._setup_request('ticker', payload)
-        rate_str = float(r.json()['ticker']['last'])
-        return common.to_decimal(rate_str, config.precision)
-
-    def depth(self, size=2, should_merge=0):
-        assert (1 <= size <= 200)
+    def depth(self, length=2):
+        assert (1 <= length <= 200)
         payload = {
             'symbol': 'btc_' + self.symbol,
-            'size': size,
-            'merge': should_merge
+            'size': length,
+            'merge': 0
         }
         r = self._setup_request('depth', payload)
         data = r.json()
@@ -89,7 +75,7 @@ class OKCoinAPI(BTC):
         assert (asks[-1][0] > bids[0][0])
         return asks + bids
 
-    def trades(self, since=None):
+    def _trades(self, since=None):
         payload = {
             'symbol': 'btc_' + self.symbol
         }
@@ -98,7 +84,7 @@ class OKCoinAPI(BTC):
         r = self._setup_request('trades', payload)
         return r.json()
 
-    def kline(self, ktype='15min', size=10, since=None):
+    def _kline(self, ktype='15min', size=10, since=None):
         payload = {
             'symbol': 'btc_' + self.symbol,
             'size': size,
@@ -112,7 +98,7 @@ class OKCoinAPI(BTC):
         r = self._setup_request('kline', payload)
         return r.json()
 
-    def lend_depth(self, symbol='btc_cny'):
+    def _lend_depth(self, symbol='btc_cny'):
         if symbol not in ['btc_cny', 'cny']:
             print('illegal symbol')
             sys.exit(1)
@@ -122,48 +108,13 @@ class OKCoinAPI(BTC):
         r = self._setup_request('lend_depth', params=payload)
         return r.json()
 
-    def assets(self):
-        funds = self.userinfo()['info']['funds']
-        return funds
-
-    # FIXME order error
     def asset_list(self):
-        funds = self.userinfo()['info']['funds']
+        funds = self._userinfo()['info']['funds']
         l = [
             [common.to_decimal(funds['freezed'][self.symbol]), common.to_decimal(funds['free'][self.symbol])],
             [common.to_decimal(funds['freezed']['btc']), common.to_decimal(funds['free']['btc'])]
         ]
         return l
-
-    def get_coin(self, currency, status):
-        try:
-            raw_str = self.assets()[status][currency]
-            return common.to_decimal(raw_str, config.precision)
-        except:
-            print(
-                'funds[{}][{}] not exists'.format(
-                    status,
-                    currency),
-                file=sys.stderr)
-            return 0
-
-    def dump(self):
-        record = {'btc': self.get_coin('btc', 'free') +
-                         self.get_coin('btc', 'freezed') +
-                         self.get_coin('btc', 'union_fund'),
-                  self.symbol: self.get_coin(self.symbol, 'free') +
-                               self.get_coin(self.symbol, 'freezed')}
-        record = OrderedDict(record)
-
-        total = common.to_decimal(self.assets()['assets']['total'], config.precision)
-
-        record['rate'] = self.currency_rate()
-        record['total_' + self.symbol] = total
-        # record['total_btc'] = total / self.currency_rate()
-
-        for k in record:
-            print('{:10s} {:10.4f}'.format(k, record[k]))
-        print()
 
 
 class OKCoinCN(OKCoinAPI):
@@ -180,16 +131,4 @@ class OKCoinCOM(OKCoinAPI):
 
 if __name__ == '__main__':
     okcoin_cn = OKCoinCN()
-    # info = okcoin_cn.userinfo(False)
-    # print(info)
-    # print(okcoin_cn.trades())
-    # print(okcoin_cn.kline())
-    # print(okcoin_cn.lend_depth())
-    # okcoin_cn.dump()
     print(okcoin_cn.depth(5))
-    # okcoin_com = OKCoinCOM()
-    # okcoin_com.dump()
-    # print('okcoin_com:  btc/usd={:.4f}'.format(okcoin_com.currency_rate()))
-    # print('okcoin_cn:   btc/cny={:.4f}'.format(okcoin_cn.currency_rate()))
-    # print('yahoo:       usd/cny={:.4f}'.format(common.get_usd_cny_rate()))
-    # print('okcoin:      usd/cny={:.4f}'.format(okcoin_cn.currency_rate() / okcoin_com.currency_rate()))

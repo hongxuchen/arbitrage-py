@@ -2,11 +2,12 @@
 
 from PySide import QtCore
 
-from tradinginfo import TradingInfo
+from trade_info import TradeInfo
 
 
 class ArbitrageWorker(QtCore.QThread):
     notify = QtCore.Signal(list)
+
     def __init__(self, api_list, symbol):
         super(ArbitrageWorker, self).__init__()
         self.api_list = api_list
@@ -24,6 +25,9 @@ class ArbitrageWorker(QtCore.QThread):
         if info is not None:
             self.notify.emit(info)
             print(info)
+
+    def do_trade(self, trading_info):
+        pass
 
     # keep doing
     def run(self, *args, **kwargs):
@@ -65,12 +69,12 @@ class ArbitrageWorker(QtCore.QThread):
             ask_a = ask_list[i]  # a
             bid_b = bid_list[1 - i]  # the oposite, b
             if self.should_arbitrage(ask_a, bid_b):
-                plt_a_name = self.api_list[i].__class__.__name__
-                plt_b_name = self.api_list[1 - i].__class__.__name__
                 ask_a_price = ask_a[0]
                 bid_b_price = bid_b[0]
+                plt_a = self.api_list[i]
+                plt_b = self.api_list[1 - i]
                 amount = self.amount_refine(ask_a, bid_b)
-                buy_trade = TradingInfo(plt_a_name, 'buy', ask_a_price, amount)
-                sell_trade = TradingInfo(plt_b_name, 'sell', bid_b_price, amount)
+                buy_trade = TradeInfo(plt_a, 'buy', ask_a_price, amount)
+                sell_trade = TradeInfo(plt_b, 'sell', bid_b_price, amount)
                 return buy_trade, sell_trade
         return None

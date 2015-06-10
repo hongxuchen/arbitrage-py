@@ -30,6 +30,9 @@ class BTC(object):
     def _real_uri(self, method):
         pass
 
+    def depth(self, length):
+        pass
+
     def asset_list(self):
         pass
 

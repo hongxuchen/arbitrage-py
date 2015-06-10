@@ -58,8 +58,6 @@ class ArbitrageUI(ui_main_win.Ui_MainWin):
             tbl = ui_asset_table.AssetTable(plt_api)
             self.asset_table_list.append(tbl)
             layout2.addWidget(tbl)
-        # self.ask_bid_table = ui_ask_bid_table.AskBidTable(self.plt_api_list, self.depth_length, self)
-        # layout2.addWidget(self.ask_bid_table)
         self.trade_viewer = TradingViewer()
         layout2.addWidget(self.trade_viewer)
         # widget2.setMinimumWidth(config.ui_tbl_col_width * 5)
@@ -104,18 +102,6 @@ class ArbitrageUI(ui_main_win.Ui_MainWin):
         for trade in trading_list:
             self.trade_viewer.append(str(trade))
         self.trade_viewer.append('\n')
-
-    # TODO distinguish init and update
-    def display_ask_bid(self, tbl):
-        api_num = len(self.plt_api_list)
-        for api_index in range(api_num):
-            # rest api
-            trade_depth = self.plt_api_list[api_index].depth(self.depth_length)
-            for ask_bid_index in range(self.depth_length * 2):
-                price = QtGui.QTableWidgetItem(str(trade_depth[ask_bid_index][0]))
-                tbl.setItem(ask_bid_index, 2 * api_index, price)
-                amount = QtGui.QTableWidgetItem(str(trade_depth[ask_bid_index][1]))
-                tbl.setItem(ask_bid_index, 2 * api_index + 1, amount)
 
     def display_asset(self):
         for tbl in self.asset_table_list:
