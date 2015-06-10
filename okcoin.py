@@ -15,6 +15,7 @@ import config
 
 class OKCoinAPI(BTC):
     _logger = common.setup_logger()
+
     def __init__(self, info):
         super(OKCoinAPI, self).__init__(info)
         self.symbol = info['symbol']
@@ -45,7 +46,10 @@ class OKCoinAPI(BTC):
                 sys.exit(1)
             # OKCoinAPI._logger.debug(r.url)
             return r
-        except Exception as e:
+        except requests.ConnectionError as e:
+            OKCoinAPI._logger.critical(e)
+            sys.exit(1)
+        except requests.HTTPError as e:
             OKCoinAPI._logger.critical(e)
             sys.exit(1)
 

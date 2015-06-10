@@ -5,7 +5,6 @@ import logging
 from PySide import QtCore
 
 from asset_info import AssetInfo
-import common
 import config
 from trade_info import TradeInfo
 

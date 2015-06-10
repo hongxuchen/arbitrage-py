@@ -24,7 +24,7 @@ DEBUG_LOGGER = 'debug_logger'
 
 upper_bound = 0.012
 lower_bound = 0.010
-minor_diff = 10 ** (-4)
+minor_diff = 10 ** (-precision)
 
 ui_tbl_col_width = 100
 ui_tbl_row_height = 25
