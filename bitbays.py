@@ -8,8 +8,8 @@ from datetime import datetime
 import time
 
 import requests
-from colorama import *
 
+import asset_info
 from btc import BTC
 import common
 import config
@@ -56,13 +56,13 @@ class BitBays(BTC):
             else:
                 self.logger.critical('method [{}] not supported'.format(method))
                 sys.exit(1)
-            self.logger.debug(r.url)
+            # self.logger.debug(r.url)
             return r
         except Exception as e:
             self.logger.critical(e)
             sys.exit(1)
 
-    def depth(self, length=2):
+    def ask_bid_list(self, length=2):
         assert (1 <= length <= 50)
         payload = {
             'market': 'btc_' + self.symbol
@@ -72,9 +72,9 @@ class BitBays(BTC):
         asks = sorted(data['asks'], key=lambda ask: ask[0], reverse=True)[-length:]
         bids = sorted(data['bids'], key=lambda bid: bid[0], reverse=True)[:length]
         assert (asks[-1][0] > bids[0][0])
-        self.logger.debug('BitBays asks: ', asks)
-        self.logger.debug('BitBays bids: ', bids)
-        return asks + bids
+        asks_bids = asks + bids
+        self.logger.debug(asks_bids)
+        return asks_bids
 
     # all my trades
     def api_trades(self):
@@ -102,7 +102,7 @@ class BitBays(BTC):
 
     def trade(self, trade_type, price, amount):
         trade_dict = {
-            'op': type,
+            'op': trade_type,
             'price': str(price),
             'amount': str(amount)
         }
@@ -238,16 +238,11 @@ class BitBays(BTC):
         return trade_list
 
 
-        # def my_trade(self, op, price, amount):
-        #     order = {
-        #         'op': op,
-        #         'price': str(price),
-        #         'amount': str(amount)
-        #     }
-        #     return self._trade(order)
-
-
 if __name__ == '__main__':
-    init()
     bitbays = BitBays()
-    bitbays.depth()
+    depth = bitbays.ask_bid_list(5)
+    print(depth)
+    assets = bitbays.assets()
+    print(assets)
+    asset_info = asset_info.AssetInfo(bitbays)
+    print(asset_info)

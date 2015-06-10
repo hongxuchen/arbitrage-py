@@ -30,7 +30,7 @@ class BTC(object):
     def _real_uri(self, method):
         pass
 
-    def depth(self, length):
+    def ask_bid_list(self, length):
         pass
 
     def trade(self, trade_type, price, amount):

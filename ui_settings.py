@@ -14,7 +14,7 @@ class SettingGB(QtGui.QGroupBox):
         diff_button = QtGui.QDoubleSpinBox(self)
         diff_button.setSingleStep(step / 2)
         diff_button.setMinimum(step)
-        diff_button.setValue(2 * step)
+        diff_button.setValue(0)
         min_amount_label = QtGui.QLabel('Min Amount')
         min_amount_button = QtGui.QDoubleSpinBox(self)
         min_amount_button.setSingleStep(min_amount)

@@ -29,11 +29,19 @@ class ArbitrageUI(ui_main_win.Ui_MainWin):
         super(ArbitrageUI, self).__init__()
         self.depth_length = length
         self.init_gui()
+        self.setWindowTitle('Arbitrage')
         self.arbitrage_worker = ArbitrageWorker(self.plt_api_list, 'cny')
         self.setup_actions()
 
     def apply_trade(self):
-        self.arbitrage_worker.start()
+        if self.arbitrage_worker.running is False:
+            self.arbitrage_worker.running = True
+            self.arbitrage_worker.start()
+            self.trade_button.setText('stop')
+        else:
+            self.arbitrage_worker.running = False
+            self.arbitrage_worker.quit()
+            self.trade_button.setText('Trade')
 
     def init_gui(self):
         main_layout = QtGui.QHBoxLayout()
@@ -47,15 +55,15 @@ class ArbitrageUI(ui_main_win.Ui_MainWin):
         layout1.addWidget(self.plt_groupbox)
         self.settings_groupbox = ui_settings.SettingGB()
         layout1.addWidget(self.settings_groupbox)
-        self.trade_button = QtGui.QPushButton('trade')
+        self.trade_button = QtGui.QPushButton('Trade')
         layout1.addWidget(self.trade_button)
         widget1.setLayout(layout1)
-        ### middle
+        ### right
         widget2 = QtGui.QWidget()
         layout2 = QtGui.QVBoxLayout()
         self.asset_table_list = []
-        for plt_api in self.plt_api_list:
-            tbl = ui_asset_table.AssetTable(plt_api)
+        for i in range(len(self.plt_api_list) + 1):
+            tbl = ui_asset_table.AssetTable()
             self.asset_table_list.append(tbl)
             layout2.addWidget(tbl)
         self.trade_viewer = TradingViewer()
@@ -89,23 +97,33 @@ class ArbitrageUI(ui_main_win.Ui_MainWin):
 
     def update_info(self):
         pass
-        # self.display_asset()
-        # self.display_ask_bid()
 
     def setup_actions(self):
         for checkbox in self.plt_groupbox.findChildren(QtGui.QCheckBox):
             checkbox.stateChanged.connect(self.update_plt)
         self.trade_button.pressed.connect(self.apply_trade)
-        self.arbitrage_worker.notify.connect(self.display_trade)
+        self.arbitrage_worker.notify_trade.connect(self.display_trade)
+        self.arbitrage_worker.notify_asset.connect(self.display_asset)
 
     def display_trade(self, trading_list):
         for trade in trading_list:
             self.trade_viewer.append(str(trade))
         self.trade_viewer.append('\n')
 
-    def display_asset(self):
-        for tbl in self.asset_table_list:
-            tbl.display()
+    def display_asset(self, asset_info_list):
+        asset_raw_list_list = []
+        for tbl, asset_info in zip(self.asset_table_list, asset_info_list):
+            asset_raw = asset_info.asset_raw_list
+            tbl.display_asset(asset_raw)
+            asset_raw_list_list.append(asset_raw)
+        sum_asset_tbl = self.asset_table_list[2]
+        sum_asset_raw = []
+        for i in range(len(asset_raw_list_list[0])):
+            sum_asset_instance = []
+            for j in range(len(asset_raw_list_list[0][0])):
+                sum_asset_instance.append(asset_raw_list_list[0][i][j] + asset_raw_list_list[1][i][j])
+            sum_asset_raw.append(sum_asset_instance)
+        sum_asset_tbl.display_asset(sum_asset_raw)
 
 
 if __name__ == '__main__':

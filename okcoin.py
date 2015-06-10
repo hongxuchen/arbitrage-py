@@ -43,7 +43,7 @@ class OKCoinAPI(BTC):
             else:
                 self.logger.critical('method [{}] not supported'.format(method))
                 sys.exit(1)
-            self.logger.debug(r.url)
+            # self.logger.debug(r.url)
             return r
         except Exception as e:
             self.logger.critical(e)
@@ -68,12 +68,14 @@ class OKCoinAPI(BTC):
         r = self._setup_request('depth', payload)
         return r.json()
 
-    def depth(self, length=2):
+    def ask_bid_list(self, length=2):
         data = self.api_depth(length)
         asks = sorted(data['asks'], key=lambda ask: ask[0], reverse=True)
         bids = sorted(data['bids'], key=lambda bid: bid[0], reverse=True)
         assert (asks[-1][0] > bids[0][0])
-        return asks + bids
+        asks_bids = asks + bids
+        self.logger.debug(asks_bids)
+        return asks_bids
 
     def api_trades(self, since=None):
         payload = {
