@@ -5,7 +5,7 @@ import sys
 
 from PySide import QtGui
 
-from arbitrage_thread import ArbitrageWorker
+from arbitrage_worker import ArbitrageWorker, ArbitrageThread
 from bitbays import BitBays
 import common
 from itbit import ItBitAPI
@@ -23,7 +23,6 @@ select_api_dict = {
     'ItBit': ItBitAPI
 }
 
-
 class ArbitrageUI(ui_main_win.Ui_MainWin):
     def __init__(self, length=5):
         super(ArbitrageUI, self).__init__()
@@ -31,16 +30,28 @@ class ArbitrageUI(ui_main_win.Ui_MainWin):
         self.init_gui()
         self.setWindowTitle('Arbitrage')
         self.arbitrage_worker = ArbitrageWorker(self.plt_api_list, 'cny')
+        self.arbitrage_thread = ArbitrageThread(self.arbitrage_worker)
         self.setup_actions()
+
+    def closeEvent(self, event):
+        reply = QtGui.QMessageBox.question(self, 'message', 'are you sure to quit?',
+                                           QtGui.QMessageBox.Yes | QtGui.QMessageBox.No, QtGui.QMessageBox.No)
+        if reply == QtGui.QMessageBox.Yes:
+            event.accept()
+        else:
+            event.ignore()
+        self.arbitrage_worker.running = False
+        self.arbitrage_thread.quit()
+        self.arbitrage_thread.wait()
 
     def apply_trade(self):
         if self.arbitrage_worker.running is False:
             self.arbitrage_worker.running = True
-            self.arbitrage_worker.start()
+            self.arbitrage_thread.start()
             self.trade_button.setText('stop')
         else:
             self.arbitrage_worker.running = False
-            self.arbitrage_worker.quit()
+            self.arbitrage_thread.quit()
             self.trade_button.setText('Trade')
 
     def init_gui(self):

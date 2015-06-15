@@ -6,17 +6,23 @@ import urllib
 import sys
 from datetime import datetime
 import time
+import calendar
 
 import requests
 
 from btc import BTC
 import common
 import config
+from order_info import OrderInfo
 
 
 class BitBays(BTC):
     _logger = common.setup_logger()
     fmt = '%Y/%m/%d %H:%M:%S'
+    catalog_dict = {
+        0: 'buy',
+        1: 'sell'
+    }
 
     def __init__(self):
         super(BitBays, self).__init__(config.bitbays_info)
@@ -26,7 +32,7 @@ class BitBays(BTC):
         self._user_data = None
         self._counter = int(time.time() * 1000)
         self.api_public = ['ticker', 'trades', 'depth']
-        self.api_private = ['info', 'orders', 'transactions', 'trade', 'cancel']
+        self.api_private = ['info', 'orders', 'transactions', 'trade', 'cancel', 'order']
         self._orders_info = {}
 
     def _nonce(self):
@@ -62,6 +68,20 @@ class BitBays(BTC):
             BitBays._logger.critical(e)
             sys.exit(1)
 
+    def api_ticker(self):
+        payload = {
+            'market': 'btc_' + self.symbol
+        }
+        r = self._setup_request('ticker', params=payload)
+        data = r.json()
+        return data
+
+    def ask1(self):
+        ticker = self.api_ticker()
+        sell = ticker['result']['sell']
+        sell = common.to_decimal(sell)
+        return sell
+
     def ask_bid_list(self, length=2):
         assert (1 <= length <= 50)
         payload = {
@@ -82,8 +102,8 @@ class BitBays(BTC):
             'market': 'btc_' + self.symbol
         }
         r = self._setup_request('trades', params=payload)
-        js = r.json()
-        return js
+        data = r.json()
+        return data
 
     # trade operations
     def api_trade(self, order):
@@ -93,14 +113,12 @@ class BitBays(BTC):
             'nonce': self._nonce()
         }
         payload.update(order)
-        print(payload)
         assert (payload['order_type'] in [0, 1])
-        # print(payload['op'], file=sys.stderr)
         assert (payload['op'] in ['buy', 'sell'])
         params = self._post_param(payload)
         r = self._setup_request('trade', params, payload)
-        js = r.json()
-        return js
+        data = r.json()
+        return data
 
     def trade(self, op_type, price, amount):
         trade_dict = {
@@ -109,7 +127,11 @@ class BitBays(BTC):
             'amount': str(amount)
         }
         data = self.api_trade(trade_dict)
-        return data
+        if str(data['status']).startswith('4'):
+            BitBays._logger.critical("ERROR: {}".format(data['message']))
+            sys.exit(1)
+        order_id = data['result']['id']
+        return order_id
 
     def _market_trade(self, op_type, mo_amount):
         trade_dict = {
@@ -121,9 +143,11 @@ class BitBays(BTC):
         return data
 
     def buy_market(self, mo_amount):
+        BitBays._logger.debug('BitBays.buy_market with amount {}'.format(mo_amount))
         return self._market_trade('buy', mo_amount)
 
     def sell_market(self, mo_amount):
+        BitBays._logger.debug('BitBays.sell_market with amount {}'.format(mo_amount))
         return self._market_trade('sell', mo_amount)
 
     def api_cancel(self, order_id):
@@ -133,8 +157,18 @@ class BitBays(BTC):
         }
         params = self._post_param(payload)
         r = self._setup_request('cancel', params, payload)  #
-        js = r.json()
-        return js
+        data = r.json()
+        return data
+
+    def api_order_info(self, order_id):
+        payload = {
+            'id': order_id,
+            'nonce': self._nonce()
+        }
+        params = self._post_param(payload)
+        r = self._setup_request('order', params, payload)
+        data = r.json()
+        return data
 
     def cancel(self, order_id):
         BitBays._logger.info('canceling order {}...'.format(order_id))
@@ -157,34 +191,25 @@ class BitBays(BTC):
 
     @staticmethod
     def _get_timestamp(time_str, fmt):
-        now = datetime.utcnow()
-        date_obj = datetime.strptime(time_str, fmt)
-        # FIXME error
-        return (now - date_obj).seconds
+        date_obj = datetime.strptime(time_str, fmt).timetuple()
+        timestamp = calendar.timegm(date_obj)
+        ts2 = time.mktime(date_obj)
+        now = time.time()
+        return timestamp
 
-    @staticmethod
-    def _order_info(order):
-        create_time = BitBays._get_timestamp(order['created_at'], BitBays.fmt)
-        # update_time = BitBaysAPI._get_timestamp(order['updated_at'], BitBaysAPI.fmt)
-        order_id = order['id']
-        price = common.to_decimal(order['price'])
-        amount = common.to_decimal(order['amount_total'])
-        return create_time, order_id, price, amount
-
-    def get_orders_info(self):
-        buy = self.api_orders(0)['result']
-        buy_list = []
-        if buy is not None:
-            for t in buy:
-                buy_list.append(BitBays._order_info(t))
-            self._orders_info['buy'] = buy_list
-        sell = self.api_orders(1)['result']
-        sell_list = []
-        if sell is not None:
-            for t in sell:
-                sell_list.append(BitBays._order_info(t))
-            self._orders_info['sell'] = sell_list
-        return self._orders_info
+    def order_info(self, order_id):
+        info = self.api_order_info(order_id)['result']
+        create_time = BitBays._get_timestamp(info['created_at'], BitBays.fmt)
+        now = time.time()
+        amount = 0.0
+        # print(info)
+        if 'amount_total' in info:
+            amount = info['amount_total']
+        elif 'mo_amount' in info:
+            amount = info['mo_amount']
+        remaining_amount = common.to_decimal(amount) - common.to_decimal(info['amount_done'])
+        catalog = BitBays.catalog_dict[info['catalog']]
+        return OrderInfo(catalog, remaining_amount, create_time)
 
     def api_user_info(self):
         payload = {
@@ -237,31 +262,20 @@ class BitBays(BTC):
         ]
         return l
 
-    def current_trade(self, op):
-        trade_jsdata = self.api_orders(op)
-        trade_list = []
-        for r in trade_jsdata['result']:
-            created_at = r['created_at']
-            updated_at = r['updated_at']
-            sell_id = r['id']
-            amount = common.to_decimal(r['amount_total'])
-            price = common.to_decimal(r['price'])
-            created_duration = BitBays._get_timestamp(created_at, BitBays.fmt)
-            # current = (sell_id, created_duration, prince, amount)
-            current = (price, amount)
-            trade_list.append(current)
-        return trade_list
-
 
 if __name__ == '__main__':
     bitbays = BitBays()
-    # depth = bitbays.ask_bid_list(5)
-    # print(depth)
-    # assets = bitbays.assets()
-    # print(assets)
-    # asset_info = asset_info.AssetInfo(bitbays)
-    # print(asset_info)
-    res = bitbays.buy_market(0.01)
-    print(res)
+    # order_id = bitbays.trade('sell', 10000, 0.001)
+    # limit order id
+    # res = bitbays.order_info(order_id)
+    # print(res)
+    order_id = bitbays.trade('buy', 10, 0.001)
+    print(order_id)
+    order_info = bitbays.order_info(order_id)
+    print(order_info)
+    # res = bitbays.buy_market(0.01)
+    # print(res)
+    # order_id = 44036603
+    # res = bitbays.order_info(order_id)
     # res = bitbays.sell_market(0.001)
     # print(res)

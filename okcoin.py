@@ -11,6 +11,7 @@ import requests
 from btc import BTC
 import common
 import config
+from order_info import OrderInfo
 
 
 class OKCoinAPI(BTC):
@@ -61,6 +62,12 @@ class OKCoinAPI(BTC):
         }
         r = self._setup_request('ticker', payload)
         return r.json()
+
+    def ask1(self):
+        ticker = self.api_ticker()
+        sell = ticker['ticker']['sell']
+        sell = common.to_decimal(sell)
+        return sell
 
     def api_depth(self, length=2):
         assert (1 <= length <= 200)
@@ -159,13 +166,15 @@ class OKCoinAPI(BTC):
         if data['result'] is False:
             OKCoinAPI._logger.critical(data)
             sys.exit(1)
-        return data
+        return data['order_id']
 
     def buy_market(self, mo_amount):
+        OKCoinAPI._logger.debug('OKCoinAPI.buy_market with {}'.format(mo_amount))
         return self.trade('buy_market', mo_amount, None)
 
     def sell_market(self, mo_amount):
         assert (mo_amount >= config.lower_bound)
+        OKCoinAPI._logger.debug('OKCoinAPI.sell_market with amount {}'.format(mo_amount))
         return self.trade('sell_market', None, mo_amount)
 
     def api_batch_trade(self, trade_dict):
@@ -192,7 +201,12 @@ class OKCoinAPI(BTC):
         return r.json()
 
     def order_info(self, order_id):
-        return self.api_order_info(order_id)
+        info = self.api_order_info(order_id)['orders'][0]
+        catalog = info['type']
+        remaining_amount = info['amount'] - info['deal_amount']
+        create_time = info['create_date'] / 1000.0
+        order_info = OrderInfo(catalog, remaining_amount, create_time)
+        return order_info
 
     def api_order_history(self):
         pass
@@ -226,6 +240,7 @@ class OKCoinCOM(OKCoinAPI):
         super(OKCoinCOM, self).__init__(config.okcoin_com_info)
         self.key = common.get_key_from_file('OKCoinCOM')
 
+
 status_dict = {
     -1: 'cancelled',
     0: 'unfilled',
@@ -248,17 +263,18 @@ if __name__ == '__main__':
         'amount': '0.1'
     }
     # res = okcoin_cn.api_trade(trade_dict)
-    # order_id = res['order_id']
-    order_id = 748493013
+    order_id = okcoin_cn.trade('sell', 100000, 0.01)
     res = okcoin_cn.order_info(order_id)
-    order_res = res['orders'][0]
-    status = order_res['status']
-    if status not in [-1, 2]:
-        print(status_dict[status])
-        remaining_amount = order_res['amount'] - order_res['deal_amount']
-        if remaining_amount < config.lower_bound:
-            print('remaining amount less than lower bound')
-        print(remaining_amount)
+    print(res)
+    # order_res = res['orders'][0]
+    # status = order_res['status']
+    # print(order_res)
+    # if status not in [-1, 2]:
+    #     print(status_dict[status])
+    #     remaining_amount = order_res['amount'] - order_res['deal_amount']
+    #     if remaining_amount < config.lower_bound:
+    #         print('remaining amount less than lower bound')
+    #     print(remaining_amount)
 
     # res = okcoin_cn.sell_market(0.01)
     # print(res)

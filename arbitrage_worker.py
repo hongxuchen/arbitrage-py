@@ -3,23 +3,30 @@
 import logging
 
 from PySide import QtCore
+from arbitrage_monitor import ArbitrageMonitor
 
 from asset_info import AssetInfo
 import config
 from trade_info import TradeInfo
 
+class ArbitrageThread(QtCore.QThread):
+    def __init__(self, worker):
+        super(ArbitrageThread, self).__init__()
+        worker.moveToThread(self)
+        self.started.connect(worker.run)
 
-class ArbitrageWorker(QtCore.QThread):
+class ArbitrageWorker(QtCore.QObject):
     notify_trade = QtCore.Signal(list)
     notify_asset = QtCore.Signal(list)
     _logger = logging.getLogger()
 
     ### stateless
-    def __init__(self, plt_list, symbol):
-        super(ArbitrageWorker, self).__init__()
+    def __init__(self, plt_list, symbol, parent=None):
+        super(ArbitrageWorker, self).__init__(parent)
         self.plt_list = plt_list
         self.symbol = symbol
         self.running = False
+        self.monitor_list = []
 
     # used each time we run; producer
     def update_ask_bid_info(self):
@@ -37,7 +44,12 @@ class ArbitrageWorker(QtCore.QThread):
         for to_trade in trade_list:
             ArbitrageWorker._logger.info(to_trade)
             plt = to_trade.plt
-            plt.trade(to_trade.type, to_trade.price, to_trade.amount)
+            order_id = plt.trade(to_trade.type, to_trade.price, to_trade.amount)
+            ######
+            monitor = ArbitrageMonitor(plt, order_id)
+            thread = ArbitrageThread(monitor)
+            self.monitor_list.append(thread)
+            thread.start()
 
     # do arbitrage
     def arbitrage_trade(self):
@@ -62,9 +74,9 @@ class ArbitrageWorker(QtCore.QThread):
     @staticmethod
     def amount_refine(ask_a, bid_b, asset_info_a, asset_info_b):
         plt_a_buy_amount = asset_info_a.afford_buy_amount(ask_a[0])
-        ArbitrageWorker._logger.debug('CAN_BUY  {:.4f}'.format(plt_a_buy_amount))
+        # ArbitrageWorker._logger.debug('CAN_BUY  {:.4f}'.format(plt_a_buy_amount))
         plt_b_sell_amount = asset_info_b.afford_sell_amount()
-        ArbitrageWorker._logger.debug('CAN_SELL {:.4f}'.format(plt_b_sell_amount))
+        # ArbitrageWorker._logger.debug('CAN_SELL {:.4f}'.format(plt_b_sell_amount))
         amount = min(config.upper_bound, ask_a[1], bid_b[1], plt_a_buy_amount, plt_b_sell_amount)
         amount = float('{:.4f}'.format(amount))
         amount = max(config.lower_bound, amount)
@@ -94,7 +106,7 @@ class ArbitrageWorker(QtCore.QThread):
             ask_a = ask_list[i]  # a
             bid_b = bid_list[1 - i]  # the oposite, b
             if self.can_arbitrage(ask_a, bid_b):
-                ArbitrageWorker._logger.debug('i={}, [{:.2f}, {:.2f}]'.format(i, ask_a[0], bid_b[0]))
+                # ArbitrageWorker._logger.debug('i={}, [{:.2f}, {:.2f}]'.format(i, ask_a[0], bid_b[0]))
                 ask_a_price = ask_a[0]
                 bid_b_price = bid_b[0]
                 plt_a = self.plt_list[i]

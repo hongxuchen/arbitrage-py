@@ -5,3 +5,8 @@ known issues
 * ConnectionError: ('Connection aborted.', BadStatusLine(""''''"))
 * 'EOF occurred in violation of protocol (_ssl.c:581)'
 * 'Connection aborted.', error(110, 'Connection timed out'
+
+
+TODO
+
+- keep track of each order, when larger than 5s, use market price
