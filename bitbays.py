@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+from __future__ import print_function
 import hashlib
 import hmac
 import urllib
@@ -9,7 +9,6 @@ import time
 
 import requests
 
-import asset_info
 from btc import BTC
 import common
 import config
@@ -94,21 +93,38 @@ class BitBays(BTC):
             'nonce': self._nonce()
         }
         payload.update(order)
+        print(payload)
         assert (payload['order_type'] in [0, 1])
+        # print(payload['op'], file=sys.stderr)
         assert (payload['op'] in ['buy', 'sell'])
         params = self._post_param(payload)
         r = self._setup_request('trade', params, payload)
         js = r.json()
         return js
 
-    def trade(self, trade_type, price, amount):
+    def trade(self, op_type, price, amount):
         trade_dict = {
-            'op': trade_type,
+            'op': op_type,
             'price': str(price),
             'amount': str(amount)
         }
         data = self.api_trade(trade_dict)
         return data
+
+    def _market_trade(self, op_type, mo_amount):
+        trade_dict = {
+            'order_type': 1,
+            'op': op_type,
+            'mo_amount': mo_amount
+        }
+        data = self.api_trade(trade_dict)
+        return data
+
+    def buy_market(self, mo_amount):
+        return self._market_trade('buy', mo_amount)
+
+    def sell_market(self, mo_amount):
+        return self._market_trade('sell', mo_amount)
 
     def api_cancel(self, order_id):
         payload = {
@@ -239,9 +255,13 @@ class BitBays(BTC):
 
 if __name__ == '__main__':
     bitbays = BitBays()
-    depth = bitbays.ask_bid_list(5)
-    print(depth)
-    assets = bitbays.assets()
-    print(assets)
-    asset_info = asset_info.AssetInfo(bitbays)
-    print(asset_info)
+    # depth = bitbays.ask_bid_list(5)
+    # print(depth)
+    # assets = bitbays.assets()
+    # print(assets)
+    # asset_info = asset_info.AssetInfo(bitbays)
+    # print(asset_info)
+    res = bitbays.buy_market(0.01)
+    print(res)
+    # res = bitbays.sell_market(0.001)
+    # print(res)

@@ -30,6 +30,14 @@ class BTC(object):
     def assets(self):
         pass
 
+    # buy amount is the CNY unit
+    def buy_market(self, mo_amount):
+        pass
+
+    # sell amount is the BTC unit
+    def sell_market(self, mo_amount):
+        pass
+
     def get_url(self, path):
         url = self.domain + path
         # print(url)

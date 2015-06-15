@@ -20,7 +20,7 @@ class OKCoinAPI(BTC):
         super(OKCoinAPI, self).__init__(info)
         self.symbol = info['symbol']
         self.api_public = ['ticker', 'depth', 'trades', 'kline', 'lend_depth']
-        self.api_private = ['userinfo', 'trade', 'batch_trade', 'cancel_order', 'orders']
+        self.api_private = ['userinfo', 'trade', 'batch_trade', 'cancel_order', 'orders', 'order_info']
 
     def _real_uri(self, method):
         path = '/' + method + '.do'
@@ -138,37 +138,61 @@ class OKCoinAPI(BTC):
             'symbol': 'btc_' + self.symbol
         }
         params.update(trade_dict)
-        assert (0 < common.to_decimal(params['price']) <= 1000000)
+        if 'price' in params:
+            # if params['price'] is not None:
+            assert (0 < common.to_decimal(params['price']) <= 1000000)
         r = self._private_request('trade', params)
         data = r.json()
         return data
 
     def trade(self, trade_type, price, amount):
+        assert (trade_type in ['buy', 'sell', 'buy_market', 'sell_market'])
         trade_dict = {
-            'type': trade_type,
-            'price': str(price),
-            'amount': str(amount)
+            'type': trade_type
         }
+        if price:
+            trade_dict['price'] = str(price)
+        if amount:
+            trade_dict['amount'] = str(amount)
+
         data = self.api_trade(trade_dict)
         if data['result'] is False:
             OKCoinAPI._logger.critical(data)
             sys.exit(1)
         return data
 
+    def buy_market(self, mo_amount):
+        return self.trade('buy_market', mo_amount, None)
+
+    def sell_market(self, mo_amount):
+        assert (mo_amount >= config.lower_bound)
+        return self.trade('sell_market', None, mo_amount)
+
     def api_batch_trade(self, trade_dict):
         pass
 
     def api_cancel_order(self, order_id):
         params = {
-            'symbol': 'btc_' + self.symbol
+            'symbol': 'btc_' + self.symbol,
+            'order_id': order_id
         }
-        params.update(order_id)
         r = self._private_request('cancel_order', params)
         return r.json()
 
     def cancel(self, order_id):
         data = self.api_cancel_order(order_id)
         return data
+
+    def api_order_info(self, order_id):
+        params = {
+            'symbol': 'btc_' + self.symbol,
+            'order_id': order_id
+        }
+        r = self._private_request('order_info', params)
+        return r.json()
+
+    def order_info(self, order_id):
+        return self.api_order_info(order_id)
 
     def api_order_history(self):
         pass
@@ -202,6 +226,13 @@ class OKCoinCOM(OKCoinAPI):
         super(OKCoinCOM, self).__init__(config.okcoin_com_info)
         self.key = common.get_key_from_file('OKCoinCOM')
 
+status_dict = {
+    -1: 'cancelled',
+    0: 'unfilled',
+    1: 'partially filled',
+    2: 'fully filled',
+    4: 'cancel request in process'
+}
 
 if __name__ == '__main__':
     okcoin_cn = OKCoinCN()
@@ -216,5 +247,23 @@ if __name__ == '__main__':
         'price': '10000',
         'amount': '0.1'
     }
-    res = okcoin_cn.api_trade(trade_dict)
-    print(res)
+    # res = okcoin_cn.api_trade(trade_dict)
+    # order_id = res['order_id']
+    order_id = 748493013
+    res = okcoin_cn.order_info(order_id)
+    order_res = res['orders'][0]
+    status = order_res['status']
+    if status not in [-1, 2]:
+        print(status_dict[status])
+        remaining_amount = order_res['amount'] - order_res['deal_amount']
+        if remaining_amount < config.lower_bound:
+            print('remaining amount less than lower bound')
+        print(remaining_amount)
+
+    # res = okcoin_cn.sell_market(0.01)
+    # print(res)
+    # res = okcoin_cn.market_trade('buy_market', 17)
+    # res = okcoin_cn.buy_market(17)
+    # print(res)
+    # order_id = 748381048
+    # print(okcoin_cn.order_info(order_id))
