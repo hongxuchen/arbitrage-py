@@ -1,3 +1,9 @@
+thread allocation:
+
+1. Thread1 for arbitrage detection
+2. Thread2 for arbitrage and monitoring
+
+
 # 监控未成交交易
 
 ## 前置条件
