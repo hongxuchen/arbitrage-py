@@ -16,6 +16,7 @@ from order_info import OrderInfo
 
 class OKCoinAPI(BTC):
     _logger = common.setup_logger()
+    lower_bound = 0.01
 
     def __init__(self, info):
         super(OKCoinAPI, self).__init__(info)

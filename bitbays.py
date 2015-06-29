@@ -23,6 +23,7 @@ class BitBays(BTC):
         0: 'buy',
         1: 'sell'
     }
+    lower_bound = 0.001
 
     def __init__(self):
         super(BitBays, self).__init__(config.bitbays_info)
