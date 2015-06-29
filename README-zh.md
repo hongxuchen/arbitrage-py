@@ -1,7 +1,7 @@
 thread allocation:
 
-1. Thread1 for arbitrage detection
-2. Thread2 for arbitrage and monitoring
+1. Thread1 for arbitrage detection: producer
+2. Thread2 for arbitrage and monitoring: consumer
 
 
 # 监控未成交交易
