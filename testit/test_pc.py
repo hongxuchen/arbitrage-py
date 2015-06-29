@@ -93,9 +93,10 @@ class Widg(QWidget):
         self.consumer.running = False
 
     def closeEvent(self, event):
-        self.stopThread()
-        self.producer.wait()
-        self.consumer.wait()
+        if self.threadRunning:
+            self.stopThread()
+            self.producer.wait()
+            self.consumer.wait()
 
 
     def startStopThread(self):

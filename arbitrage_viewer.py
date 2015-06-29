@@ -4,8 +4,9 @@ from __future__ import print_function
 import sys
 
 from PySide import QtGui
+import arbitrage_consumer
+import arbitrage_producer
 
-from arbitrage_worker import ArbitrageWorker, ArbitrageThread
 from bitbays import BitBays
 import common
 from itbit import ItBitAPI
@@ -23,38 +24,32 @@ select_api_dict = {
     'ItBit': ItBitAPI
 }
 
+
 class ArbitrageUI(ui_main_win.Ui_MainWin):
     def __init__(self, length=5):
         super(ArbitrageUI, self).__init__()
         self.depth_length = length
         self.init_gui()
-        self.setWindowTitle('Arbitrage')
-        self.arbitrage_worker = ArbitrageWorker(self.plt_api_list, 'cny')
-        self.arbitrage_thread = ArbitrageThread(self.arbitrage_worker)
         self.setup_actions()
+        self.worklist = []
+        self.producer = arbitrage_producer.ArbitrageProducer(self.worklist)
+        self.consumer = arbitrage_consumer.ArbitrageConsumer(self.worklist)
 
     def closeEvent(self, event):
         reply = QtGui.QMessageBox.question(self, 'message', 'are you sure to quit?',
                                            QtGui.QMessageBox.Yes | QtGui.QMessageBox.No, QtGui.QMessageBox.No)
         if reply == QtGui.QMessageBox.Yes:
             event.accept()
+            if self.running:
+                self.stop_trade()
+                self.producer.wait()
+                self.consumer.wait()
         else:
             event.ignore()
-        self.arbitrage_worker.running = False
-        self.arbitrage_thread.quit()
-        self.arbitrage_thread.wait()
 
-    def apply_trade(self):
-        if self.arbitrage_worker.running is False:
-            self.arbitrage_worker.running = True
-            self.arbitrage_thread.start()
-            self.trade_button.setText('stop')
-        else:
-            self.arbitrage_worker.running = False
-            self.arbitrage_thread.quit()
-            self.trade_button.setText('Trade')
 
     def init_gui(self):
+        self.setWindowTitle('Arbitrage')
         main_layout = QtGui.QHBoxLayout()
         ### left
         widget1 = QtGui.QWidget()
@@ -89,22 +84,37 @@ class ArbitrageUI(ui_main_win.Ui_MainWin):
         central.setLayout(main_layout)
         self.setCentralWidget(central)
 
+    def report_trade(self):
+        pass
+
+    def stop_trade(self):
+        self.running = False
+        self.producer.running = False
+        self.consumer.running = False
+
+    def start_trade(self):
+        self.running = True
+        self.producer.running = True
+        self.consumer.running = True
+        self.producer.start()
+        self.consumer.start()
+
+    def apply_trade(self):
+        if not self.running:
+            self.start_trade()
+        else:
+            self.stop_trade()
+            self.report_trade()
+
+
     def update_plt(self):
         sender = self.sender()
         assert (isinstance(sender, QtGui.QCheckBox))
         assert (not sender.isTristate())
-        # self.plt[sender.text()] = sender.isChecked()
+        self.plt[sender.text()] = sender.isChecked()
         # true_list = [k for (k, v) in self.plt.iteritems() if v is True]
         # print(true_list)
 
-    def report_abitrage(self):
-        pass
-
-    def start_abitrage(self):
-        pass
-
-    def stop_abitrage(self):
-        self.report_abitrage()
 
     def update_info(self):
         pass
@@ -113,8 +123,6 @@ class ArbitrageUI(ui_main_win.Ui_MainWin):
         for checkbox in self.plt_groupbox.findChildren(QtGui.QCheckBox):
             checkbox.stateChanged.connect(self.update_plt)
         self.trade_button.pressed.connect(self.apply_trade)
-        self.arbitrage_worker.notify_trade.connect(self.display_trade)
-        self.arbitrage_worker.notify_asset.connect(self.display_asset)
 
     def display_trade(self, trading_list):
         for trade in trading_list:
