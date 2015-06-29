@@ -15,6 +15,10 @@ ItBit:
     secret: R3PGdMoUf+PIR9Glu7Bokp0BU926HsBfyKnexiMy0w4
     uid:    511D55F2-0DEF-47AE-BB3F-8E1D70F80A18
 
+BTC38:
+    api:    38584E0A009DBBACFA32DEDEBE68DCE5
+    secret: 9AB2E17DE79E62C3844684F83DC16222
+
 Available: [OKCoinCN, BitBays, ItBit]
 
 Enabled: [OKCoinCN, BitBays]
