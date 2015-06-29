@@ -57,7 +57,7 @@ class ArbitrageMonitor(QtCore.QObject):
     def run(self):
         while self.pending:
             self.adjust_price()
-        ArbitrageMonitor._logger.debug('finished inside')
+        ArbitrageMonitor._logger.debug('Monitor finished')
 
 
 if __name__ == '__main__':
