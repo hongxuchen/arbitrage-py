@@ -3,11 +3,11 @@
 import logging
 
 from PySide import QtCore
-from arbitrage_monitor import ArbitrageMonitor
+import time
 
 from asset_info import AssetInfo
 import config
-from trade_info import TradeInfo
+from arbitrage_info import TradeInfo, ArbitrageInfo
 
 
 class ArbitrageProducer(QtCore.QThread):
@@ -16,9 +16,8 @@ class ArbitrageProducer(QtCore.QThread):
     _logger = logging.getLogger()
 
     ### stateless
-    def __init__(self, arbitrage_list, plt_list, symbol, parent=None):
+    def __init__(self, arbitrage_list, symbol, parent=None):
         super(ArbitrageProducer, self).__init__(parent)
-        self.plt_list = plt_list
         self.symbol = symbol
         self.running = False
         self.queue = arbitrage_list
@@ -36,19 +35,19 @@ class ArbitrageProducer(QtCore.QThread):
             self._asset_info_list.append(asset_info)
 
     def arbitrage_trade_impl(self, trade_pair):
-        for to_trade in trade_pair:
-            ArbitrageProducer._logger.info(to_trade)
-            plt = to_trade.plt
-            order_id = plt.trade(to_trade.type, to_trade.price, to_trade.amount)
-            self.queue.append(trade_pair)
+        now = time.time()
+        arbitrage_info = ArbitrageInfo(trade_pair, now)
+        arbitrage_info.process_trade()
+        self.queue.append(arbitrage_info)
+
 
     # do arbitrage
     def arbitrage_trade(self):
-        trade_pair = self.arbitrage_info()
+        arbitrage_info = self.get_arbitrage_info()
         self.notify_asset.emit(self._asset_info_list)
-        if trade_pair is not None:
-            self.notify_trade.emit(trade_pair)
-            self.arbitrage_trade_impl(trade_pair)
+        if arbitrage_info is not None:
+            self.notify_trade.emit(arbitrage_info)
+            self.arbitrage_trade_impl(arbitrage_info)
 
     # keep doing
     def run(self):
@@ -74,7 +73,7 @@ class ArbitrageProducer(QtCore.QThread):
         return amount
 
     # the consumer that "uses" the info
-    def arbitrage_info(self):
+    def get_arbitrage_info(self):
         self.update_ask_bid_info()
         self.update_asset_info_list()
         assert (len(self._info_list) == 2)

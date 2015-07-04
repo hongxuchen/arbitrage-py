@@ -3,7 +3,7 @@
 from __future__ import print_function
 import time
 
-
+# this class is used to help deal with the remaining pending order
 class OrderInfo(object):
     def __init__(self, catalog, remaining_amount, create_time):
         assert(catalog in ['buy', 'sell'])

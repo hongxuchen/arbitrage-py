@@ -37,7 +37,7 @@ def setup_logger():
     except OSError as e:
         if e.errno != errno.EEXIST:
             raise
-    log_fname = os.path.join(log_dir, 'trading.log')
+    log_fname = os.path.join(log_dir, 'arbitrage.log')
     logging.config.fileConfig('logging_config.ini', defaults={
         'logfilename': log_fname
     })

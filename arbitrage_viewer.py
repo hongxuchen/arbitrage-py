@@ -18,7 +18,7 @@ import ui_selections
 import ui_settings
 from ui_trading_viewer import TradingViewer
 
-select_api_dict = {
+select_plt_dict = {
     'OKCoinCN': OKCoinCN,
     'BitBays': BitBays,
     'ItBit': ItBitAPI
@@ -32,8 +32,9 @@ class ArbitrageUI(ui_main_win.Ui_MainWin):
         self.init_gui()
         self.setup_actions()
         self.worklist = []
-        self.producer = arbitrage_producer.ArbitrageProducer(self.worklist)
+        self.producer = arbitrage_producer.ArbitrageProducer(self.worklist, 'cny')
         self.consumer = arbitrage_consumer.ArbitrageConsumer(self.worklist)
+        self.running = False
 
     def closeEvent(self, event):
         reply = QtGui.QMessageBox.question(self, 'message', 'are you sure to quit?',
@@ -56,7 +57,7 @@ class ArbitrageUI(ui_main_win.Ui_MainWin):
         layout1 = QtGui.QVBoxLayout()
         available_plt = common.get_key_from_file('Available')
         enabled_plt = common.get_key_from_file('Enabled')
-        self.plt_api_list = [select_api_dict[plt_api]() for plt_api in enabled_plt]
+        self.plt_list = [select_plt_dict[plt]() for plt in enabled_plt]
         self.plt_groupbox = ui_selections.SelectGB(available_plt, enabled_plt)
         layout1.addWidget(self.plt_groupbox)
         self.settings_groupbox = ui_settings.SettingGB()
@@ -68,7 +69,7 @@ class ArbitrageUI(ui_main_win.Ui_MainWin):
         widget2 = QtGui.QWidget()
         layout2 = QtGui.QVBoxLayout()
         self.asset_table_list = []
-        for i in range(len(self.plt_api_list) + 1):
+        for i in range(len(self.plt_list) + 1):
             tbl = ui_asset_table.AssetTable()
             self.asset_table_list.append(tbl)
             layout2.addWidget(tbl)
@@ -114,10 +115,6 @@ class ArbitrageUI(ui_main_win.Ui_MainWin):
         self.plt[sender.text()] = sender.isChecked()
         # true_list = [k for (k, v) in self.plt.iteritems() if v is True]
         # print(true_list)
-
-
-    def update_info(self):
-        pass
 
     def setup_actions(self):
         for checkbox in self.plt_groupbox.findChildren(QtGui.QCheckBox):
