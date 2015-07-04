@@ -20,7 +20,7 @@ class ArbitrageProducer(QtCore.QThread):
         super(ArbitrageProducer, self).__init__(parent)
         self.symbol = symbol
         self.running = False
-        self.queue = arbitrage_list
+        self.arbitrage_queue = arbitrage_list
 
     # used each time we run; producer
     def update_ask_bid_info(self):
@@ -38,7 +38,7 @@ class ArbitrageProducer(QtCore.QThread):
         now = time.time()
         arbitrage_info = ArbitrageInfo(trade_pair, now)
         arbitrage_info.process_trade()
-        self.queue.append(arbitrage_info)
+        self.arbitrage_queue.append(arbitrage_info)
 
 
     # do arbitrage

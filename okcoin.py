@@ -189,6 +189,7 @@ class OKCoinAPI(BTC):
         return r.json()
 
     def cancel(self, order_id):
+        OKCoinAPI._logger.info('canceling order {}...'.format(order_id))
         data = self.api_cancel_order(order_id)
         return data
 
@@ -197,10 +198,13 @@ class OKCoinAPI(BTC):
             'symbol': 'btc_' + self.symbol,
             'order_id': order_id
         }
+        print(params)
         r = self._private_request('order_info', params)
         return r.json()
 
     def order_info(self, order_id):
+        # orders = self.api_order_info(order_id)
+        # print(orders)
         info = self.api_order_info(order_id)['orders'][0]
         catalog = info['type']
         remaining_amount = info['amount'] - info['deal_amount']
@@ -252,35 +256,8 @@ status_dict = {
 
 if __name__ == '__main__':
     okcoin_cn = OKCoinCN()
-    print(okcoin_cn.assets())
-    trade_dict = {
-        'type': 'buy',
-        'price': '1',
-        'amount': '0.01'
-    }
-    trade_dict = {
-        'type': 'sell',
-        'price': '10000',
-        'amount': '0.1'
-    }
+    # print(okcoin_cn.assets())
     # res = okcoin_cn.api_trade(trade_dict)
-    order_id = okcoin_cn.trade('sell', 100000, 0.01)
+    order_id = okcoin_cn.trade('buy', 10, 0.01)
     res = okcoin_cn.order_info(order_id)
     print(res)
-    # order_res = res['orders'][0]
-    # status = order_res['status']
-    # print(order_res)
-    # if status not in [-1, 2]:
-    #     print(status_dict[status])
-    #     remaining_amount = order_res['amount'] - order_res['deal_amount']
-    #     if remaining_amount < config.lower_bound:
-    #         print('remaining amount less than lower bound')
-    #     print(remaining_amount)
-
-    # res = okcoin_cn.sell_market(0.01)
-    # print(res)
-    # res = okcoin_cn.market_trade('buy_market', 17)
-    # res = okcoin_cn.buy_market(17)
-    # print(res)
-    # order_id = 748381048
-    # print(okcoin_cn.order_info(order_id))

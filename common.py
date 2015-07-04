@@ -21,6 +21,7 @@ def get_usd_cny_rate():
 def to_decimal(value_str, precision=config.precision):
     return round(float(value_str), precision)
 
+
 def get_key_from_file(field, fname='Config.yaml'):
     with open(fname) as yfile:
         ydata = yaml.load(yfile)
@@ -29,6 +30,23 @@ def get_key_from_file(field, fname='Config.yaml'):
     except:
         print('no ydata')
         return None
+
+
+def reverse_catelog(original_catelog):
+    assert (original_catelog in ['buy', 'sell'])
+    if original_catelog == 'buy':
+        return 'sell'
+    else:  # sell
+        return 'buy'
+
+
+def adjust_price(trade_catelog, price):
+    assert (trade_catelog in ['buy', 'sell'])
+    if trade_catelog == 'buy':
+        return price * (1 + config.adjust_percentage)
+    else:  # sell
+        return price * (1 - config.adjust_percentage)
+
 
 def setup_logger():
     log_dir = os.path.join(os.path.dirname(__file__), 'logger')

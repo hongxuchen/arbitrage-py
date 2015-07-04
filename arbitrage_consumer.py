@@ -4,7 +4,6 @@ from PySide import QtCore
 
 from bitbays import BitBays
 import common
-import config
 from okcoin import OKCoinCN
 
 
@@ -14,31 +13,30 @@ class ArbitrageConsumer(QtCore.QThread):
     def __init__(self, arbitrage_list):
         super(ArbitrageConsumer, self).__init__()
         self.running = False
-        self.queue = arbitrage_list
+        self.arbitrage_queue = arbitrage_list
 
-    def _get_order_info(self, order_id):
-        order_info = self.plt_list.order_info(order_id)
-        ArbitrageConsumer._logger.debug('ORDER_INFO:{}'.format(order_info))
-        return order_info
+    @staticmethod
+    def need_adjust(arbitrage_info):
+        return arbitrage_info.has_pending()
+
+    def adjust(self, arbitrage):
+        arbitrage.adjust()
 
     ### only remove self.arbitrage_list item
     def consume(self):
-        for q in self.queue:
-            # TODO
-            pass
-
-    def AdjustTrade(self):
-        pass
-
+        for arbitrage in self.arbitrage_queue:
+            if ArbitrageConsumer.need_adjust(arbitrage):
+                self.adjust(arbitrage)
+            # must be done
+            assert arbitrage.done
+            self.arbitrage_queue.remove(arbitrage)
 
     def run(self):
-        while self.running:
+        while self.running or self.arbitrage_queue:
             self.consume()
 
 
 if __name__ == '__main__':
-    plt = BitBays()
-    # plt = OKCoinCN()
-    # config.lower_bound = 0.003
-    amount = 0.001
-    order_id = plt.trade('sell', 10000, amount)
+    p1 = BitBays()
+    p2 = OKCoinCN()
+    amount = 0.01
