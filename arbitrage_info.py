@@ -15,13 +15,13 @@ class TradeInfo(object):
     _logger = common.setup_logger()
 
     def __init__(self, plt, catelog, price, amount, fiat='cny'):
-        '''
+        """
         :param plt: platform, don't change
         :param catelog: sell/buy, don't change
         :param price: trade price, don't change
         :param amount: trade amount, don't change
         :param fiat: fiat, don't change
-        '''
+        """
         self.plt = plt
         assert (catelog in ['sell', 'buy'])
         self.catelog = catelog
@@ -35,17 +35,17 @@ class TradeInfo(object):
         self.order_id = order_id
 
     def regular_trade(self):
-        '''
+        """
         regular trade, may cause pending
         :return: order_id
-        '''
+        """
         return self.plt.trade(self.catelog, self.price, self.amount)
 
     def _get_price_and_afford(self):
-        '''
+        """
         calculate the trade price and the asset afford amount
         :return: pair
-        '''
+        """
         asset_info = AssetInfo(self.plt)
         trade_price = common.adjust_price(self.catelog, self.price)
         if self.catelog == 'buy':
@@ -54,8 +54,9 @@ class TradeInfo(object):
             asset_amount = asset_info.afford_sell_amount()
         return trade_price, asset_amount
 
+    # noinspection PyPep8Naming
     def adjust_trade(self):
-        '''
+        """
         this trade ensures that there will be no pending afterwards:
           1. meet the lower_bound limit for each platform
              if amount >= M, regular trade; if amount < M, a bidirectional trade is provided
@@ -64,7 +65,7 @@ class TradeInfo(object):
           3. the price is higher for buy or lower for sell
              adjust_price with a certain percentage
         :return: None
-        '''
+        """
         M = self.plt.__class__.lower_bound
         # no trading amount
         if self.amount < config.minor_diff:
@@ -124,10 +125,10 @@ class ArbitrageInfo(object):
             trade.set_order_id(order_id)
 
     def normalize_trade_pair(self):
-        '''
+        """
         only 2 platforms; first is trade whose lower_bound is smaller
         :return: trade pair
-        '''
+        """
         ta = self.trade_pair[0]
         tb = self.trade_pair[1]
         ma = ta.plt.__class__.lower_bound
@@ -145,9 +146,9 @@ class ArbitrageInfo(object):
             trade.cancel()
 
     def _init_order_dict(self):
-        ''' self._order_dict is initialized/changed for each adjust
+        """ self._order_dict is initialized/changed for each adjust
         :return: order dict
-        '''
+        """
         self._order_dict = {}
         for trade in self.trade_pair:
             order_info = trade.get_order_info()
@@ -155,11 +156,11 @@ class ArbitrageInfo(object):
         return self._order_dict
 
     def has_pending(self):
-        '''
+        """
         has pending when at least one platform has pending
         need to get order dict for current arbitrage pair
         :return:
-        '''
+        """
         self._init_order_dict()
         for order in self._order_dict.values():
             if order.has_pending():
@@ -168,10 +169,11 @@ class ArbitrageInfo(object):
         self.done = True
         return False
 
+    # noinspection PyPep8Naming
     def adjust_pending(self):
-        '''adjust after finding has_pending; self._order_dict has been initialized
+        """adjust after finding has_pending; self._order_dict has been initialized
         :return: None
-        '''
+        """
         self._cancel_orders()
         t1, t2 = self.normalize_trade_pair()
         p1, p2 = t1.plt, t2.plt
@@ -188,6 +190,7 @@ class ArbitrageInfo(object):
             new_t1 = TradeInfo(p1, trade_catelog, t1.price, A)
             new_t1.adjust_trade()
         else:  # A2 >= M2:
+            # FIXME this may introduce bug since one of new_t1, new_t2 may be canceled
             new_t1 = TradeInfo(p1, t1.catelog, t1.price, A1)
             new_t1.adjust_trade()
             new_t2 = TradeInfo(p2, t2.catelog, t2.price, A2)

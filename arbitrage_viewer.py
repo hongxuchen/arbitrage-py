@@ -30,11 +30,11 @@ class ArbitrageUI(ui_main_win.Ui_MainWin):
         super(ArbitrageUI, self).__init__()
         self.depth_length = length
         self.init_gui()
-        self.setup_actions()
         self.worklist = []
         self.producer = arbitrage_producer.ArbitrageProducer(self.plt_list, self.worklist, 'cny')
         self.consumer = arbitrage_consumer.ArbitrageConsumer(self.worklist)
         self.running = False
+        self.setup_actions()
 
     def closeEvent(self, event):
         reply = QtGui.QMessageBox.question(self, 'message', 'are you sure to quit?',
@@ -121,11 +121,11 @@ class ArbitrageUI(ui_main_win.Ui_MainWin):
         for checkbox in self.plt_groupbox.findChildren(QtGui.QCheckBox):
             checkbox.stateChanged.connect(self.update_plt)
         self.trade_button.pressed.connect(self.apply_trade)
+        self.producer.notify_asset.connect(self.display_asset_summary)
+        self.producer.notify_trade.connect(self.display_arbitrage)
 
-    def display_trade(self, trading_list):
-        for trade in trading_list:
-            self.trade_viewer.append(str(trade))
-        self.trade_viewer.append('\n')
+    def display_arbitrage(self, arbitrage_info):
+        self.trade_viewer.append(str(arbitrage_info))
 
     def display_asset_summary(self, asset_info_list):
         asset_raw_list_list = []
