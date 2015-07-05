@@ -115,7 +115,6 @@ class ArbitrageInfo(object):
     def __init__(self, trade_pair, time):
         self.trade_pair = trade_pair
         self.time = time
-        self._order_dict = []
         self.done = False
 
     ### initial trading
@@ -141,7 +140,7 @@ class ArbitrageInfo(object):
     def seconds_since_trade(self):
         return time.time() - self.time
 
-    def cancel_orders(self):
+    def _cancel_orders(self):
         for trade in self.trade_pair:
             trade.cancel()
 
@@ -149,19 +148,20 @@ class ArbitrageInfo(object):
         ''' self._order_dict is initialized/changed for each adjust
         :return: order list
         '''
-        self._order_dict = []
+        self._order_dict = {}
         for trade in self.trade_pair:
             order_info = trade.get_order_info()
-            self._order_dict.append(order_info)
+            self._order_dict[trade.plt] = order_info
         return self._order_dict
 
     def has_pending(self):
         '''
         has pending when at least one platform has pending
+        need to get order list for current arbitrage pair
         :return:
         '''
         self._init_order_dict()
-        for order in self._order_dict:
+        for order in self._order_dict.values():
             if order.has_pending():
                 return True
         # no remaining amount, done
@@ -172,7 +172,7 @@ class ArbitrageInfo(object):
         '''adjust after finding has_pending; self._order_dict has been initialized
         :return: None
         '''
-        self.cancel_orders()
+        self._cancel_orders()
         t1, t2 = self.normalize_trade_pair()
         p1, p2 = t1.plt, t2.plt
         O1, O2 = self._order_dict[p1], self._order_dict[p2]
@@ -206,14 +206,14 @@ class ArbitrageInfo(object):
 if __name__ == '__main__':
     okcoin = OKCoinCN()
     bitbays = BitBays()
-    amount = 0.01
-    ok_trade = TradeInfo(okcoin, 'buy', 1000, amount)
-    bb_trade = TradeInfo(bitbays, 'sell', 3000, amount)
+    ok_trade = TradeInfo(okcoin, 'buy', 1615, 0.01)
+    bb_trade = TradeInfo(bitbays, 'sell', 1635, 0.008)
     trade_pair = ok_trade, bb_trade
     now = time.time()
     arbitrage = ArbitrageInfo(trade_pair, now)
     print(arbitrage)
     arbitrage.process_trade()
-    print(arbitrage._init_order_dict())
+    if arbitrage.has_pending():
+        arbitrage.adjust_pending()
+    assert arbitrage.done
     print(arbitrage)
-    arbitrage.cancel_orders()
