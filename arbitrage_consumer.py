@@ -23,7 +23,6 @@ class ArbitrageConsumer(QtCore.QThread):
         return arbitrage_info.has_pending()
 
     def adjust(self, arbitrage):
-        seconds = time.time() - arbitrage.time
         arbitrage.adjust_pending()
 
     ### only remove self.arbitrage_list item
@@ -32,9 +31,9 @@ class ArbitrageConsumer(QtCore.QThread):
             seconds = time.time() - arbitrage.time
             if seconds > config.PENDING_SECONDS and ArbitrageConsumer.need_adjust(arbitrage):
                 self.adjust(arbitrage)
-            # must be done
-            assert arbitrage.done
-            self.arbitrage_queue.remove(arbitrage)
+            # FIXME make sure only done
+            if arbitrage.done:
+                self.arbitrage_queue.remove(arbitrage)
 
     def run(self):
         while self.running or self.arbitrage_queue:

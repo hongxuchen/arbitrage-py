@@ -34,12 +34,14 @@ class TradeInfo(object):
     def set_order_id(self, order_id):
         self.order_id = order_id
 
-    def regular_trade(self):
+    @staticmethod
+    def regular_trade(plt, catelog, price, amount):
         """
         regular trade, may cause pending
         :return: order_id
         """
-        return self.plt.trade(self.catelog, self.price, self.amount)
+        TradeInfo._logger.debug('{}: {} {} btc at price {} cny'.format(plt.__class__.__name__, catelog, amount, price))
+        return plt.trade(catelog, price, amount)
 
     def _get_price_and_afford(self):
         """
@@ -77,12 +79,12 @@ class TradeInfo(object):
             if asset_amount > self.amount + M:
                 TradeInfo._logger.debug('bi-directional adjust_trade, waited {:d} times'.format(wait_for_asset_times))
                 # trade1, must succeed
-                self.plt.trade(self.catelog, trade_price, self.amount + M)
+                TradeInfo.regular_trade(self.plt, self.catelog, trade_price, self.amount + M)
                 # trade2, must succeed
                 # FIXME: it has data race problem with arbitrage thread
                 reverse_catelog = common.reverse_catelog(self.catelog)
                 reverse_price = common.adjust_price(reverse_catelog, self.price)
-                self.plt.trade(reverse_catelog, reverse_price, M)
+                TradeInfo.regular_trade(self.plt, reverse_catelog, reverse_price, M)
                 return
             else:
                 wait_for_asset_times += 1
@@ -121,7 +123,7 @@ class ArbitrageInfo(object):
     ### initial trading
     def process_trade(self):
         for trade in self.trade_pair:
-            order_id = trade.regular_trade()
+            order_id = TradeInfo.regular_trade(trade.plt, trade.catelog, trade.price, trade.amount)
             trade.set_order_id(order_id)
 
     def normalize_trade_pair(self):
@@ -161,11 +163,12 @@ class ArbitrageInfo(object):
         need to get order dict for current arbitrage pair
         :return:
         """
+        self.done = False
         self._init_order_dict()
         for order in self._order_dict.values():
             if order.has_pending():
                 return True
-        # no remaining amount, done
+        # no remaining amount, no need to adjust_pending, done
         self.done = True
         return False
 
@@ -176,6 +179,7 @@ class ArbitrageInfo(object):
         """
         self._cancel_orders()
         t1, t2 = self.normalize_trade_pair()
+        print(t1, t2)
         p1, p2 = t1.plt, t2.plt
         O1, O2 = self._order_dict[p1], self._order_dict[p2]
         A1, A2 = O1.remaining_amount, O2.remaining_amount
@@ -216,7 +220,7 @@ if __name__ == '__main__':
     arbitrage = ArbitrageInfo(trade_pair, now)
     print(arbitrage)
     arbitrage.process_trade()
-    if arbitrage.has_pending():
-        arbitrage.adjust_pending()
-    assert arbitrage.done
+    # if arbitrage.has_pending():
+    #     arbitrage.adjust_pending()
+    # assert arbitrage.done
     print(arbitrage)
