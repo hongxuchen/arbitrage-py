@@ -35,20 +35,36 @@ class TradeInfo(object):
         self.order_id = order_id
 
     def regular_trade(self):
+        '''
+        regular trade, may cause pending
+        :return: order_id
+        '''
         return self.plt.trade(self.catelog, self.price, self.amount)
 
-    def get_price_and_afford(self):
+    def _get_price_and_afford(self):
+        '''
+        calculate the trade price and the asset afford amount
+        :return: pair
+        '''
         asset_info = AssetInfo(self.plt)
+        trade_price = common.adjust_price(self.catelog, self.price)
         if self.catelog == 'buy':
-            trade_price = self.price * (1 + config.adjust_percentage)
             asset_amount = asset_info.afford_buy_amount(trade_price)
         else:  # self.catelog == 'sell'
-            trade_price = self.price * (1 - config.adjust_percentage)
             asset_amount = asset_info.afford_sell_amount()
         return trade_price, asset_amount
 
-    # it is ensured that this trade MUST succeed
     def adjust_trade(self):
+        '''
+        this trade ensures that there will be no pending afterwards:
+          1. meet the lower_bound limit for each platform
+             if amount >= M, regular trade; if amount < M, a bidirectional trade is provided
+          2. there will be enough asset for sell(BTC) or buy(fiat/CNY)
+             calculate for current asset
+          3. the price is higher for buy or lower for sell
+             adjust_price with a certain percentage
+        :return: None
+        '''
         M = self.plt.__class__.lower_bound
         # no trading amount
         if self.amount < config.minor_diff:
@@ -56,7 +72,7 @@ class TradeInfo(object):
         wait_for_asset_times = 0
         # conflicts with self.amount >= M, do not change
         while self.amount < M:
-            trade_price, asset_amount = self.get_price_and_afford()
+            trade_price, asset_amount = self._get_price_and_afford()
             if asset_amount > self.amount + M:
                 TradeInfo._logger.debug('bi-directional adjust_trade, waited {:d} times'.format(wait_for_asset_times))
                 # trade1, must succeed
@@ -66,14 +82,16 @@ class TradeInfo(object):
                 reverse_catelog = common.reverse_catelog(self.catelog)
                 reverse_price = common.adjust_price(reverse_catelog, self.price)
                 self.plt.trade(reverse_catelog, reverse_price, M)
+                return
             else:
                 wait_for_asset_times += 1
                 if wait_for_asset_times > config.ASSET_WAIT_MAX:
                     return
-        if self.amount >= M:
+        else:
             TradeInfo._logger.debug('single adjust_trade')
-            trade_price, asset_amount = self.get_price_and_afford()
+            trade_price, asset_amount = self._get_price_and_afford()
             self.plt.trade(self.catelog, trade_price, asset_amount)
+            return
 
     def cancel(self):
         if self.order_id != -1:
@@ -97,8 +115,6 @@ class ArbitrageInfo(object):
     def __init__(self, trade_pair, time):
         self.trade_pair = trade_pair
         self.time = time
-        self.pending = False
-        self.min_plt = None
         self._order_dict = []
         self.done = False
 
@@ -109,6 +125,10 @@ class ArbitrageInfo(object):
             trade.set_order_id(order_id)
 
     def normalize_trade_pair(self):
+        '''
+        only 2 platforms; first is trade whose lower_bound is smaller
+        :return: trade pair
+        '''
         ta = self.trade_pair[0]
         tb = self.trade_pair[1]
         ma = ta.plt.__class__.lower_bound
@@ -125,7 +145,10 @@ class ArbitrageInfo(object):
         for trade in self.trade_pair:
             trade.cancel()
 
-    def init_order_dict(self):
+    def _init_order_dict(self):
+        ''' self._order_dict is initialized/changed for each adjust
+        :return: order list
+        '''
         self._order_dict = []
         for trade in self.trade_pair:
             order_info = trade.get_order_info()
@@ -133,7 +156,11 @@ class ArbitrageInfo(object):
         return self._order_dict
 
     def has_pending(self):
-        self.init_order_dict()
+        '''
+        has pending when at least one platform has pending
+        :return:
+        '''
+        self._init_order_dict()
         for order in self._order_dict:
             if order.has_pending():
                 return True
@@ -141,9 +168,10 @@ class ArbitrageInfo(object):
         self.done = True
         return False
 
-    # adjust after finding has_pending
-    # self._order_dict has been initialized
-    def adjust(self):
+    def adjust_pending(self):
+        '''adjust after finding has_pending; self._order_dict has been initialized
+        :return: None
+        '''
         self.cancel_orders()
         t1, t2 = self.normalize_trade_pair()
         p1, p2 = t1.plt, t2.plt
@@ -155,21 +183,17 @@ class ArbitrageInfo(object):
             A = A1 - A2
             if A < 0:
                 trade_catelog = common.reverse_catelog(t1.catelog)
-            else:
+            else:  # A >= 0
                 trade_catelog = t1.catelog
             new_t1 = TradeInfo(p1, trade_catelog, t1.price, A)
             new_t1.adjust_trade()
         else:  # A2 >= M2:
-            new_t1 = TradeInfo(p1, t1.type, t1.price, A1)
+            new_t1 = TradeInfo(p1, t1.catelog, t1.price, A1)
             new_t1.adjust_trade()
-            new_t2 = TradeInfo(p2, t2.type, t2.price, A2)
+            new_t2 = TradeInfo(p2, t2.catelog, t2.price, A2)
             new_t2.adjust_trade()
         ### post-condition
         self.done = True
-
-    @staticmethod
-    def adjust_trade(self):
-        pass
 
     def __repr__(self):
         trade_info = ''
@@ -190,6 +214,6 @@ if __name__ == '__main__':
     arbitrage = ArbitrageInfo(trade_pair, now)
     print(arbitrage)
     arbitrage.process_trade()
-    print(arbitrage.init_order_dict())
+    print(arbitrage._init_order_dict())
     print(arbitrage)
     arbitrage.cancel_orders()

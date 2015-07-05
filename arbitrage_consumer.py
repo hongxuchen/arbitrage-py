@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 
+import time
+
 from PySide import QtCore
 
 from bitbays import BitBays
 import common
+import config
 from okcoin import OKCoinCN
 
 
@@ -20,12 +23,14 @@ class ArbitrageConsumer(QtCore.QThread):
         return arbitrage_info.has_pending()
 
     def adjust(self, arbitrage):
-        arbitrage.adjust()
+        seconds = time.time() - arbitrage.time
+        arbitrage.adjust_pending()
 
     ### only remove self.arbitrage_list item
     def consume(self):
         for arbitrage in self.arbitrage_queue:
-            if ArbitrageConsumer.need_adjust(arbitrage):
+            seconds = time.time() - arbitrage.time
+            if seconds > config.PENDING_SECONDS and ArbitrageConsumer.need_adjust(arbitrage):
                 self.adjust(arbitrage)
             # must be done
             assert arbitrage.done
