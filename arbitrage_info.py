@@ -146,7 +146,7 @@ class ArbitrageInfo(object):
 
     def _init_order_dict(self):
         ''' self._order_dict is initialized/changed for each adjust
-        :return: order list
+        :return: order dict
         '''
         self._order_dict = {}
         for trade in self.trade_pair:
@@ -157,7 +157,7 @@ class ArbitrageInfo(object):
     def has_pending(self):
         '''
         has pending when at least one platform has pending
-        need to get order list for current arbitrage pair
+        need to get order dict for current arbitrage pair
         :return:
         '''
         self._init_order_dict()

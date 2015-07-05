@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 import logging
+import time
 
 from PySide import QtCore
-import time
 
 from asset_info import AssetInfo
 import config
@@ -16,11 +16,12 @@ class ArbitrageProducer(QtCore.QThread):
     _logger = logging.getLogger()
 
     ### stateless
-    def __init__(self, arbitrage_list, symbol, parent=None):
+    def __init__(self, plt_list, arbitrage_list, symbol, parent=None):
         super(ArbitrageProducer, self).__init__(parent)
+        self.plt_list = plt_list
+        self.arbitrage_queue = arbitrage_list
         self.symbol = symbol
         self.running = False
-        self.arbitrage_queue = arbitrage_list
 
     # used each time we run; producer
     def update_ask_bid_info(self):
@@ -39,7 +40,6 @@ class ArbitrageProducer(QtCore.QThread):
         arbitrage_info = ArbitrageInfo(trade_pair, now)
         arbitrage_info.process_trade()
         self.arbitrage_queue.append(arbitrage_info)
-
 
     # do arbitrage
     def arbitrage_trade(self):

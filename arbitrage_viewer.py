@@ -4,9 +4,9 @@ from __future__ import print_function
 import sys
 
 from PySide import QtGui
+
 import arbitrage_consumer
 import arbitrage_producer
-
 from bitbays import BitBays
 import common
 from itbit import ItBitAPI
@@ -32,7 +32,7 @@ class ArbitrageUI(ui_main_win.Ui_MainWin):
         self.init_gui()
         self.setup_actions()
         self.worklist = []
-        self.producer = arbitrage_producer.ArbitrageProducer(self.worklist, 'cny')
+        self.producer = arbitrage_producer.ArbitrageProducer(self.plt_list, self.worklist, 'cny')
         self.consumer = arbitrage_consumer.ArbitrageConsumer(self.worklist)
         self.running = False
 
@@ -48,7 +48,6 @@ class ArbitrageUI(ui_main_win.Ui_MainWin):
         else:
             event.ignore()
 
-
     def init_gui(self):
         self.setWindowTitle('Arbitrage')
         main_layout = QtGui.QHBoxLayout()
@@ -58,11 +57,12 @@ class ArbitrageUI(ui_main_win.Ui_MainWin):
         available_plt = common.get_key_from_file('Available')
         enabled_plt = common.get_key_from_file('Enabled')
         self.plt_list = [select_plt_dict[plt]() for plt in enabled_plt]
+        assert (len(self.plt_list) == 2)
         self.plt_groupbox = ui_selections.SelectGB(available_plt, enabled_plt)
         layout1.addWidget(self.plt_groupbox)
         self.settings_groupbox = ui_settings.SettingGB()
         layout1.addWidget(self.settings_groupbox)
-        self.trade_button = QtGui.QPushButton('Trade')
+        self.trade_button = QtGui.QPushButton('Arbitrage')
         layout1.addWidget(self.trade_button)
         widget1.setLayout(layout1)
         ### right
@@ -92,6 +92,7 @@ class ArbitrageUI(ui_main_win.Ui_MainWin):
         self.running = False
         self.producer.running = False
         self.consumer.running = False
+        self.trade_button.setText('Arbitrage')
 
     def start_trade(self):
         self.running = True
@@ -99,6 +100,7 @@ class ArbitrageUI(ui_main_win.Ui_MainWin):
         self.consumer.running = True
         self.producer.start()
         self.consumer.start()
+        self.trade_button.setText('Stop')
 
     def apply_trade(self):
         if not self.running:
@@ -106,7 +108,6 @@ class ArbitrageUI(ui_main_win.Ui_MainWin):
         else:
             self.stop_trade()
             self.report_trade()
-
 
     def update_plt(self):
         sender = self.sender()
@@ -126,7 +127,7 @@ class ArbitrageUI(ui_main_win.Ui_MainWin):
             self.trade_viewer.append(str(trade))
         self.trade_viewer.append('\n')
 
-    def display_asset(self, asset_info_list):
+    def display_asset_summary(self, asset_info_list):
         asset_raw_list_list = []
         for tbl, asset_info in zip(self.asset_table_list, asset_info_list):
             asset_raw = asset_info.asset_raw_list
