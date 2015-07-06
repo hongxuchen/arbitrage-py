@@ -40,11 +40,11 @@ class ArbitrageUI(ui_main_win.Ui_MainWin):
         reply = QtGui.QMessageBox.question(self, 'message', 'are you sure to quit?',
                                            QtGui.QMessageBox.Yes | QtGui.QMessageBox.No, QtGui.QMessageBox.No)
         if reply == QtGui.QMessageBox.Yes:
-            event.accept()
             if self.running:
                 self.stop_trade()
                 self.producer.wait()
                 self.consumer.wait()
+            event.accept()
         else:
             event.ignore()
 

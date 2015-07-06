@@ -139,6 +139,7 @@ class ArbitrageInfo(object):
 
     ### initial trading
     def process_trade(self):
+        ArbitrageInfo._logger.debug('Arbitrage Start')
         for trade in self.trade_pair:
             order_id = TradeInfo.regular_trade(trade.plt, trade.catelog, trade.price, trade.amount)
             trade.set_order_id(order_id)
@@ -196,7 +197,7 @@ class ArbitrageInfo(object):
         """
         self._cancel_orders()
         t1, t2 = self.normalize_trade_pair()
-        ArbitrageInfo._logger.debug('Arbitrage Pair: {} {}'.format(t1, t2))
+        # ArbitrageInfo._logger.debug('Adjust Pair: {} {}'.format(t1, t2))
         p1, p2 = t1.plt, t2.plt
         O1, O2 = self._order_dict[p1], self._order_dict[p2]
         A1, A2 = O1.remaining_amount, O2.remaining_amount
