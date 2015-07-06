@@ -22,6 +22,7 @@ class TradeInfo(object):
         :param fiat: fiat, don't change
         """
         self.plt = plt
+        self.plt_name = self.plt.__class__.__name__
         assert (catelog in ['sell', 'buy'])
         self.catelog = catelog
         self.amount = amount
@@ -33,16 +34,18 @@ class TradeInfo(object):
     def set_order_id(self, order_id):
         self.order_id = order_id
 
-    @staticmethod
-    def regular_trade(plt, catelog, price, amount):
+    def regular_trade(self, catelog, price, amount):
         """
         regular trade, may cause pending
         :return: order_id
         """
-        order_id = plt.trade(catelog, price, amount)
         TradeInfo._logger.debug(
-            'regular_trade {}: {} {} btc at price {} cny, order_id={:d}'.format(plt.__class__.__name__, catelog, amount,
-                                                                                price, order_id))
+            'BEFORE, {}: {} {} btc at price {} cny'.format(self.plt_name, catelog, amount,
+                                                           price))
+        order_id = self.plt.trade(catelog, price, amount)
+        TradeInfo._logger.debug(
+            'AFTER,  {}: {} {} btc at price {} cny, order_id={:d}'.format(self.plt_name, catelog, amount,
+                                                                          price, order_id))
         return order_id
 
     def _asset_afford_trade(self, trade_amount, trade_price):
@@ -84,10 +87,11 @@ class TradeInfo(object):
         M = self.plt.__class__.lower_bound
         # no trading amount
         if self.amount < config.minor_diff:
+            TradeInfo._logger.debug('trading amount = 0, exit adjust_trade')
             return
         # config.minor_diff <= self.amount
         wait_for_asset_times = 0
-        # conflicts with self.amount >= M, do not change
+        # self.amount does not change inside
         if self.amount < M:
             trade_amount = self.amount + M
             trade_catelog = self.catelog
@@ -95,21 +99,22 @@ class TradeInfo(object):
             if self._asset_afford_trade(trade_amount, trade_price):
                 TradeInfo._logger.debug('bi-directional adjust_trade, waited {:d} times'.format(wait_for_asset_times))
                 # trade1, must succeed
-                TradeInfo.regular_trade(self.plt, trade_catelog, trade_price, trade_amount)
+                self.regular_trade(trade_catelog, trade_price, trade_amount)
                 # trade2, must succeed
                 # FIXME: it has data race problem with arbitrage thread
                 reverse_amount = M
                 reverse_catelog = common.reverse_catelog(trade_catelog)
                 reverse_price = common.adjust_price(reverse_catelog, self.price)
-                TradeInfo.regular_trade(self.plt, reverse_catelog, reverse_price, reverse_amount)
+                self.regular_trade(reverse_catelog, reverse_price, reverse_amount)
         else:  # self.amount >= M
             trade_price = common.adjust_price(self.catelog, self.price)
             trade_catelog = self.catelog
             trade_amount = self.amount
             if self._asset_afford_trade(trade_amount, trade_price):
                 # trade must succeed
-                TradeInfo._logger.debug('single adjust_trade, waited {:d} times'.format(wait_for_asset_times))
-                TradeInfo.regular_trade(self.plt, trade_catelog, trade_price, trade_amount)
+                TradeInfo._logger.debug(
+                    '{} single adjust_trade, waited {:d} times'.format(self.plt_name, wait_for_asset_times))
+                self.regular_trade(trade_catelog, trade_price, trade_amount)
 
     def cancel(self):
         if self.order_id != -1:
@@ -119,9 +124,8 @@ class TradeInfo(object):
         return self.plt.order_info(self.order_id)
 
     def __repr__(self):
-        plt_name = self.plt.__class__.__name__
         trade_info = '{:>10}: {} {:>10.4f} btc, Price {:>10.2f} {}' \
-            .format(plt_name, self.catelog, self.amount, self.price, self.fiat)
+            .format(self.plt_name, self.catelog, self.amount, self.price, self.fiat)
         if self.order_id != -1:
             order_info = '{:<d}'.format(self.order_id)
             trade_info += ',\torder_id=' + order_info
@@ -141,7 +145,7 @@ class ArbitrageInfo(object):
     def process_trade(self):
         ArbitrageInfo._logger.debug('Arbitrage Start')
         for trade in self.trade_pair:
-            order_id = TradeInfo.regular_trade(trade.plt, trade.catelog, trade.price, trade.amount)
+            order_id = trade.regular_trade(trade.catelog, trade.price, trade.amount)
             trade.set_order_id(order_id)
 
     def normalize_trade_pair(self):
@@ -204,6 +208,7 @@ class ArbitrageInfo(object):
         M1 = p1.__class__.lower_bound
         M2 = p2.__class__.lower_bound
         if A2 < M2:
+            ArbitrageInfo._logger.debug('A2<M2')
             A = A1 - A2
             if A < 0:
                 trade_catelog = common.reverse_catelog(t1.catelog)
@@ -212,6 +217,7 @@ class ArbitrageInfo(object):
             new_t1 = TradeInfo(p1, trade_catelog, t1.price, A)
             new_t1.adjust_trade()
         else:  # A2 >= M2:
+            ArbitrageInfo._logger.debug('A2>=M2')
             # FIXME this may introduce bug since one of new_t1, new_t2 may be canceled
             new_t1 = TradeInfo(p1, t1.catelog, t1.price, A1)
             new_t1.adjust_trade()

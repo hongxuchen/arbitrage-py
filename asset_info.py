@@ -20,9 +20,11 @@ class AssetInfo(object):
     def has_pending_btc(self):
         return self.btc_pending > config.minor_diff
 
+    ### FIXME sub-optimal
     def afford_buy_amount(self, price):
         return self.fiat_avail / price
 
+    ### FIXME sub-optimal
     def afford_sell_amount(self):
         return self.btc_avail
 
@@ -41,10 +43,10 @@ class AssetInfo(object):
 
 if __name__ == '__main__':
     okc = OKCoinCN()
-    asset_info = AssetInfo(okc)
-    print(asset_info)
+    info1 = AssetInfo(okc)
+    print(info1)
     bb = BitBays()
-    asset_info = AssetInfo(bb)
-    print(asset_info)
-    print(asset_info.has_pending_btc())
-    print(asset_info.has_pending_fiat())
+    info2 = AssetInfo(bb)
+    print(info2)
+    print(info1.total_btc() + info2.total_btc())
+    print(info1.total_fiat() + info2.total_fiat())

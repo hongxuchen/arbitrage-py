@@ -45,6 +45,7 @@ class ArbitrageProducer(QtCore.QThread):
     def arbitrage_trade(self):
         arbitrage_info = self.get_arbitrage_info()
         self.notify_asset.emit(self._asset_info_list)
+        # ArbitrageProducer._logger.debug(self._asset_info_list)
         if arbitrage_info is not None:
             self.notify_trade.emit(arbitrage_info)
             self.arbitrage_trade_impl(arbitrage_info)
@@ -63,9 +64,9 @@ class ArbitrageProducer(QtCore.QThread):
     # ask_a, bid_b are of [price, amount]
     @staticmethod
     def amount_refine(ask_a, bid_b, asset_info_a, asset_info_b):
-        plt_a_buy_amount = asset_info_a.afford_buy_amount(ask_a[0])
+        plt_a_buy_amount = asset_info_a.afford_buy_amount(ask_a[0]) - config.ASSET_FOR_TRAID_DIFF
         # ArbitrageWorker._logger.debug('CAN_BUY  {:.4f}'.format(plt_a_buy_amount))
-        plt_b_sell_amount = asset_info_b.afford_sell_amount()
+        plt_b_sell_amount = asset_info_b.afford_sell_amount() - config.ASSET_FOR_TRAID_DIFF
         # ArbitrageWorker._logger.debug('CAN_SELL {:.4f}'.format(plt_b_sell_amount))
         amount = min(config.upper_bound, ask_a[1], bid_b[1], plt_a_buy_amount, plt_b_sell_amount)
         amount = float('{:.4f}'.format(amount))
@@ -106,6 +107,8 @@ class ArbitrageProducer(QtCore.QThread):
                 amount = self.amount_refine(ask_a, bid_b, asset_info_a, asset_info_b)
                 if amount - config.lower_bound < config.minor_diff:
                     return None
+                ArbitrageProducer._logger.debug(asset_info_a)
+                ArbitrageProducer._logger.debug(asset_info_b)
                 buy_trade = TradeInfo(plt_a, 'buy', ask_a_price, amount)  # buy at plt_a
                 sell_trade = TradeInfo(plt_b, 'sell', bid_b_price, amount)  # sell at plt_b
                 return buy_trade, sell_trade
