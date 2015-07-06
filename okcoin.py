@@ -52,6 +52,9 @@ class OKCoinAPI(BTC):
                 OKCoinAPI._logger.critical('method [{}] not supported'.format(method))
                 sys.exit(1)
             # OKCoinAPI._logger.debug(r.url)
+            if r is None:
+                OKCoinAPI._logger.critical('ERROR: return None for params={}')
+                sys.exit(1)
             return r
         except requests.ConnectionError as e:
             OKCoinAPI._logger.critical(e)
@@ -87,6 +90,7 @@ class OKCoinAPI(BTC):
 
     def ask_bid_list(self, length=2):
         data = self.api_depth(length)
+        OKCoinAPI._logger.debug(data)
         asks = sorted(data['asks'], key=lambda ask: ask[0], reverse=True)
         bids = sorted(data['bids'], key=lambda bid: bid[0], reverse=True)
         assert (asks[-1][0] > bids[0][0])
@@ -136,6 +140,7 @@ class OKCoinAPI(BTC):
         params['sign'] = self._sign(params)
         # print(params)
         r = self._setup_request(api_type, None, params)
+        assert (r is not None)
         return r
 
     def api_userinfo(self):
@@ -240,6 +245,7 @@ class OKCoinAPI(BTC):
 
 class OKCoinCN(OKCoinAPI):
     lower_bound = 0.01
+
     def __init__(self):
         super(OKCoinCN, self).__init__(config.okcoin_cn_info)
         self.key = common.get_key_from_file('OKCoinCN')
@@ -263,6 +269,7 @@ if __name__ == '__main__':
     okcoin_cn = OKCoinCN()
     # print(okcoin_cn.assets())
     # res = okcoin_cn.api_trade(trade_dict)
-    order_id = okcoin_cn.trade('buy', 10, 0.01)
-    res = okcoin_cn.order_info(order_id)
-    print(res)
+    # order_id = okcoin_cn.trade('buy', 10, 0.01)
+    # res = okcoin_cn.order_info(order_id)
+    # print(res)
+    print(okcoin_cn.ask_bid_list(2))

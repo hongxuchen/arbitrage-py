@@ -38,7 +38,7 @@ class AssetInfo(object):
         plt_name = self.plt.__class__.__name__
         fiat_str = 'fiat : pending={:<10} avail={:<10}'.format(self.fiat_pending, self.fiat_avail)
         btc_str = 'btc  : pending={:<10} avail={:<10}'.format(self.btc_pending, self.btc_avail)
-        return plt_name + '\n' + fiat_str + '\n' + btc_str
+        return plt_name + '\n\t' + fiat_str + '\n\t' + btc_str
 
 
 if __name__ == '__main__':

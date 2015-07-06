@@ -109,6 +109,10 @@ class ArbitrageProducer(QtCore.QThread):
                     return None
                 ArbitrageProducer._logger.debug(asset_info_a)
                 ArbitrageProducer._logger.debug(asset_info_b)
+                ArbitrageProducer._logger.debug(
+                    'BTC: {:10.4f}, {}: {:10.4}'.format(asset_info_a.total_btc() + asset_info_b.total_btc(),
+                                                        self.symbol,
+                                                        asset_info_a.total_fiat() + asset_info_b.total_fiat()))
                 buy_trade = TradeInfo(plt_a, 'buy', ask_a_price, amount)  # buy at plt_a
                 sell_trade = TradeInfo(plt_b, 'sell', bid_b_price, amount)  # sell at plt_b
                 return buy_trade, sell_trade

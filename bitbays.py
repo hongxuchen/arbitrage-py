@@ -64,6 +64,9 @@ class BitBays(BTC):
                 BitBays._logger.critical('method [{}] not supported'.format(method))
                 sys.exit(1)
             # BitBays._logger.debug(r.url)
+            if r is None:
+                BitBays._logger.critical('ERROR: return None when params={}'.format(params))
+                sys.exit(1)
             return r
         except Exception as e:
             BitBays._logger.critical(e)

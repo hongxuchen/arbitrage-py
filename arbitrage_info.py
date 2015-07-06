@@ -40,12 +40,12 @@ class TradeInfo(object):
         :return: order_id
         """
         TradeInfo._logger.debug(
-            'BEFORE, {}: {} {} btc at price {} cny'.format(self.plt_name, catelog, amount,
-                                                           price))
+            'BEFORE, {:10s}: {} {} btc at price {} cny'.format(self.plt_name, catelog, amount,
+                                                               price))
         order_id = self.plt.trade(catelog, price, amount)
         TradeInfo._logger.debug(
-            'AFTER,  {}: {} {} btc at price {} cny, order_id={:d}'.format(self.plt_name, catelog, amount,
-                                                                          price, order_id))
+            'AFTER,  {:10s}: {} {} btc at price {} cny, order_id={:d}'.format(self.plt_name, catelog, amount,
+                                                                              price, order_id))
         return order_id
 
     def _asset_afford_trade(self, trade_amount, trade_price):
@@ -98,10 +98,10 @@ class TradeInfo(object):
             trade_price = common.adjust_price(trade_catelog, self.price)
             if self._asset_afford_trade(trade_amount, trade_price):
                 TradeInfo._logger.debug('bi-directional adjust_trade, waited {:d} times'.format(wait_for_asset_times))
+                # FIXME: it has data race problem with arbitrage thread, but no error within itself if single thread
                 # trade1, must succeed
                 self.regular_trade(trade_catelog, trade_price, trade_amount)
                 # trade2, must succeed
-                # FIXME: it has data race problem with arbitrage thread
                 reverse_amount = M
                 reverse_catelog = common.reverse_catelog(trade_catelog)
                 reverse_price = common.adjust_price(reverse_catelog, self.price)
@@ -208,8 +208,8 @@ class ArbitrageInfo(object):
         M1 = p1.__class__.lower_bound
         M2 = p2.__class__.lower_bound
         if A2 < M2:
-            ArbitrageInfo._logger.debug('A2<M2')
             A = A1 - A2
+            ArbitrageInfo._logger.debug('A2<M2, A1={:<10.4f}, A2={:<10.4f}, A={:<10.2f}'.format(A1, A2, A))
             if A < 0:
                 trade_catelog = common.reverse_catelog(t1.catelog)
             else:  # A >= 0
@@ -217,7 +217,7 @@ class ArbitrageInfo(object):
             new_t1 = TradeInfo(p1, trade_catelog, t1.price, A)
             new_t1.adjust_trade()
         else:  # A2 >= M2:
-            ArbitrageInfo._logger.debug('A2>=M2')
+            ArbitrageInfo._logger.debug('A2>=M2, A1={:<10.4f}, A2={:<10.4f}'.format(A1, A2))
             # FIXME this may introduce bug since one of new_t1, new_t2 may be canceled
             new_t1 = TradeInfo(p1, t1.catelog, t1.price, A1)
             new_t1.adjust_trade()
