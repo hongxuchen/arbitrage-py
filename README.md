@@ -9,3 +9,10 @@
 
 ## bitbays.py:132
 * account too low
+
+## other
+* display asset issue
+* when stop and exit, QThread may be unexpected terminated
+
+## cases:
+* OKCoin buys more than expected

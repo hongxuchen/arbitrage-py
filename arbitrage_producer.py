@@ -7,7 +7,8 @@ from PySide import QtCore
 
 from asset_info import AssetInfo
 import config
-from arbitrage_info import TradeInfo, ArbitrageInfo
+from arbitrage_info import ArbitrageInfo
+from trade_info import TradeInfo
 
 
 class ArbitrageProducer(QtCore.QThread):
@@ -110,7 +111,7 @@ class ArbitrageProducer(QtCore.QThread):
                 ArbitrageProducer._logger.debug(asset_info_a)
                 ArbitrageProducer._logger.debug(asset_info_b)
                 ArbitrageProducer._logger.debug(
-                    'BTC: {:10.4f}, {}: {:10.4}'.format(asset_info_a.total_btc() + asset_info_b.total_btc(),
+                    'BTC: {:10.4f}, {}: {:10.4f}'.format(asset_info_a.total_btc() + asset_info_b.total_btc(),
                                                         self.symbol,
                                                         asset_info_a.total_fiat() + asset_info_b.total_fiat()))
                 buy_trade = TradeInfo(plt_a, 'buy', ask_a_price, amount)  # buy at plt_a
