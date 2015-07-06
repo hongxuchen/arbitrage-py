@@ -36,6 +36,12 @@ class OKCoinAPI(BTC):
         return sign
 
     def _setup_request(self, method, params, data=None):
+        """  the basic request function, also called by _private_request
+        :param method:
+        :param params:
+        :param data:
+        :return:
+        """
         try:
             r = None
             if method in self.api_public:
@@ -85,7 +91,7 @@ class OKCoinAPI(BTC):
         bids = sorted(data['bids'], key=lambda bid: bid[0], reverse=True)
         assert (asks[-1][0] > bids[0][0])
         asks_bids = asks + bids
-        OKCoinAPI._logger.debug(asks_bids)
+        # OKCoinAPI._logger.debug(asks_bids)
         return asks_bids
 
     def api_trades(self, since=None):
@@ -198,7 +204,6 @@ class OKCoinAPI(BTC):
             'symbol': 'btc_' + self.symbol,
             'order_id': order_id
         }
-        print(params)
         r = self._private_request('order_info', params)
         return r.json()
 

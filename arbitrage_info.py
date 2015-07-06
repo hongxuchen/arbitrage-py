@@ -3,7 +3,6 @@ from __future__ import print_function
 import time
 
 from asset_info import AssetInfo
-
 from bitbays import BitBays
 import common
 import config
@@ -40,21 +39,35 @@ class TradeInfo(object):
         regular trade, may cause pending
         :return: order_id
         """
-        TradeInfo._logger.debug('{}: {} {} btc at price {} cny'.format(plt.__class__.__name__, catelog, amount, price))
-        return plt.trade(catelog, price, amount)
+        order_id = plt.trade(catelog, price, amount)
+        TradeInfo._logger.debug(
+            'regular_trade {}: {} {} btc at price {} cny, order_id={:d}'.format(plt.__class__.__name__, catelog, amount,
+                                                                                price, order_id))
+        return order_id
 
-    def _get_price_and_afford(self):
+    def _asset_afford_trade(self, trade_amount, trade_price):
         """
-        calculate the trade price and the asset afford amount
-        :return: pair
+        test whether there is enough asset to afford trade, catelog is self.catelog
+        :param trade_amount:
+        :return:
         """
-        asset_info = AssetInfo(self.plt)
-        trade_price = common.adjust_price(self.catelog, self.price)
-        if self.catelog == 'buy':
-            asset_amount = asset_info.afford_buy_amount(trade_price)
-        else:  # self.catelog == 'sell'
-            asset_amount = asset_info.afford_sell_amount()
-        return trade_price, asset_amount
+        # trade_price = common.adjust_price(self.catelog, self.price)
+        waited_asset_times = 0
+        while True:
+            ### request here
+            asset_info = AssetInfo(self.plt)
+            if self.catelog == 'buy':
+                asset_amount = asset_info.afford_buy_amount(trade_price)
+            else:  # sell
+                asset_amount = asset_info.afford_sell_amount()
+            if asset_amount >= trade_amount:
+                return True
+            else:
+                waited_asset_times += 1
+                if waited_asset_times >= config.ASSET_WAIT_MAX:
+                    TradeInfo._logger.debug(
+                        'asset cannot afford trading after waiting {} times'.format(config.ASSET_WAIT_MAX))
+                    return False
 
     # noinspection PyPep8Naming
     def adjust_trade(self):
@@ -72,29 +85,31 @@ class TradeInfo(object):
         # no trading amount
         if self.amount < config.minor_diff:
             return
+        # config.minor_diff <= self.amount
         wait_for_asset_times = 0
         # conflicts with self.amount >= M, do not change
-        while self.amount < M:
-            trade_price, asset_amount = self._get_price_and_afford()
-            if asset_amount > self.amount + M:
+        if self.amount < M:
+            trade_amount = self.amount + M
+            trade_catelog = self.catelog
+            trade_price = common.adjust_price(trade_catelog, self.price)
+            if self._asset_afford_trade(trade_amount, trade_price):
                 TradeInfo._logger.debug('bi-directional adjust_trade, waited {:d} times'.format(wait_for_asset_times))
                 # trade1, must succeed
-                TradeInfo.regular_trade(self.plt, self.catelog, trade_price, self.amount + M)
+                TradeInfo.regular_trade(self.plt, trade_catelog, trade_price, trade_amount)
                 # trade2, must succeed
                 # FIXME: it has data race problem with arbitrage thread
-                reverse_catelog = common.reverse_catelog(self.catelog)
+                reverse_amount = M
+                reverse_catelog = common.reverse_catelog(trade_catelog)
                 reverse_price = common.adjust_price(reverse_catelog, self.price)
-                TradeInfo.regular_trade(self.plt, reverse_catelog, reverse_price, M)
-                return
-            else:
-                wait_for_asset_times += 1
-                if wait_for_asset_times > config.ASSET_WAIT_MAX:
-                    return
-        else:
-            TradeInfo._logger.debug('single adjust_trade')
-            trade_price, asset_amount = self._get_price_and_afford()
-            self.plt.trade(self.catelog, trade_price, asset_amount)
-            return
+                TradeInfo.regular_trade(self.plt, reverse_catelog, reverse_price, reverse_amount)
+        else:  # self.amount >= M
+            trade_price = common.adjust_price(self.catelog, self.price)
+            trade_catelog = self.catelog
+            trade_amount = self.amount
+            if self._asset_afford_trade(trade_amount, trade_price):
+                # trade must succeed
+                TradeInfo._logger.debug('single adjust_trade, waited {:d} times'.format(wait_for_asset_times))
+                TradeInfo.regular_trade(self.plt, trade_catelog, trade_price, trade_amount)
 
     def cancel(self):
         if self.order_id != -1:
@@ -115,6 +130,8 @@ class TradeInfo(object):
 
 
 class ArbitrageInfo(object):
+    _logger = common.setup_logger()
+
     def __init__(self, trade_pair, time):
         self.trade_pair = trade_pair
         self.time = time
@@ -179,7 +196,7 @@ class ArbitrageInfo(object):
         """
         self._cancel_orders()
         t1, t2 = self.normalize_trade_pair()
-        print(t1, t2)
+        ArbitrageInfo._logger.debug('Arbitrage Pair: {} {}'.format(t1, t2))
         p1, p2 = t1.plt, t2.plt
         O1, O2 = self._order_dict[p1], self._order_dict[p2]
         A1, A2 = O1.remaining_amount, O2.remaining_amount

@@ -33,4 +33,4 @@ lower_rate = 0.5
 arbitrage_diff = 0.00
 PENDING_SECONDS = 2
 adjust_percentage = 0.2
-ASSET_WAIT_MAX = 2
+ASSET_WAIT_MAX = 3

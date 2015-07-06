@@ -94,7 +94,7 @@ class BitBays(BTC):
         bids = sorted(data['bids'], key=lambda bid: bid[0], reverse=True)[:length]
         assert (asks[-1][0] > bids[0][0])
         asks_bids = asks + bids
-        BitBays._logger.debug(asks_bids)
+        # BitBays._logger.debug(asks_bids)
         return asks_bids
 
     # all my trades
@@ -203,7 +203,6 @@ class BitBays(BTC):
         create_time = BitBays._get_timestamp(info['created_at'], BitBays.fmt)
         now = time.time()
         amount = 0.0
-        # print(info)
         if 'amount_total' in info:
             amount = info['amount_total']
         elif 'mo_amount' in info:
