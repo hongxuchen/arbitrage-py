@@ -40,11 +40,11 @@ class TradeInfo(object):
         :return: order_id
         """
         TradeInfo._logger.debug(
-            'BEFORE, {:10s}: {} {} btc at price {} cny'.format(self.plt_name, catelog, amount,
+            'BEFORE, {:10s}: {} {:10.4f} btc at price {:10.4f} cny'.format(self.plt_name, catelog, amount,
                                                                price))
         order_id = self.plt.trade(catelog, price, amount)
         TradeInfo._logger.debug(
-            'AFTER,  {:10s}: {} {} btc at price {} cny, order_id={:d}'.format(self.plt_name, catelog, amount,
+            'AFTER,  {:10s}: {} {:10.4f} btc at price {:10.4f} cny, order_id={:d}'.format(self.plt_name, catelog, amount,
                                                                               price, order_id))
         return order_id
 
@@ -209,7 +209,7 @@ class ArbitrageInfo(object):
         M2 = p2.__class__.lower_bound
         if A2 < M2:
             A = A1 - A2
-            ArbitrageInfo._logger.debug('A2<M2, A1={:<10.4f}, A2={:<10.4f}, A={:<10.2f}'.format(A1, A2, A))
+            ArbitrageInfo._logger.debug('A2<M2, A1={:<10.4f}, A2={:<10.4f}, A={:<10.4f}'.format(A1, A2, A))
             if A < 0:
                 trade_catelog = common.reverse_catelog(t1.catelog)
             else:  # A >= 0

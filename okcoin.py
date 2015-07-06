@@ -90,7 +90,7 @@ class OKCoinAPI(BTC):
 
     def ask_bid_list(self, length=2):
         data = self.api_depth(length)
-        OKCoinAPI._logger.debug(data)
+        # OKCoinAPI._logger.debug(data)
         asks = sorted(data['asks'], key=lambda ask: ask[0], reverse=True)
         bids = sorted(data['bids'], key=lambda bid: bid[0], reverse=True)
         assert (asks[-1][0] > bids[0][0])
