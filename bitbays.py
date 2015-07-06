@@ -203,8 +203,8 @@ class BitBays(BTC):
 
     def order_info(self, order_id):
         info = self.api_order_info(order_id)['result']
-        create_time = BitBays._get_timestamp(info['created_at'], BitBays.fmt)
-        now = time.time()
+        # create_time = BitBays._get_timestamp(info['created_at'], BitBays.fmt)
+        # now = time.time()
         amount = 0.0
         if 'amount_total' in info:
             amount = info['amount_total']
@@ -212,7 +212,9 @@ class BitBays(BTC):
             amount = info['mo_amount']
         remaining_amount = common.to_decimal(amount) - common.to_decimal(info['amount_done'])
         catalog = BitBays.catalog_dict[info['catalog']]
-        return OrderInfo(catalog, remaining_amount, create_time)
+        # order_info = OrderInfo(catalog, remaining_amount, create_time)
+        order_info = OrderInfo(catalog, remaining_amount)
+        return order_info
 
     def api_user_info(self):
         payload = {

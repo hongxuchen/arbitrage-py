@@ -17,3 +17,7 @@
 
 ## cases:
 * OKCoin buys more than expected
+* xxx
+File "bitbays.py", line 206, in order_info
+    create_time = BitBays._get_timestamp(info['created_at'], BitBays.fmt)
+TypeError: 'NoneType' object has no attribute '__getitem__'

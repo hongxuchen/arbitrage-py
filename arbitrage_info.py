@@ -88,26 +88,29 @@ class ArbitrageInfo(object):
         A1, A2 = O1.remaining_amount, O2.remaining_amount
         M1 = p1.__class__.lower_bound
         M2 = p2.__class__.lower_bound
-        if A2 < M2:
-            A = A1 - A2
-            ArbitrageInfo._logger.debug('A2<M2, A1={:<10.4f}, A2={:<10.4f}, A={:<10.4f}'.format(A1, A2, A))
-            if A < 0:
-                trade_catelog = common.reverse_catelog(t1.catelog)
-            else:  # A >= 0
-                trade_catelog = t1.catelog
-            new_t1 = TradeInfo(p1, trade_catelog, t1.price, A)
-            config.MUTEX.acquire(True)  # blocking
-            new_t1.adjust_trade()
-            config.MUTEX.release()
-        else:  # A2 >= M2:
-            ArbitrageInfo._logger.debug('A2>=M2, A1={:<10.4f}, A2={:<10.4f}'.format(A1, A2))
-            # FIXME this may introduce bug since one of new_t1, new_t2 may be canceled
-            new_t1 = TradeInfo(p1, t1.catelog, t1.price, A1)
-            new_t2 = TradeInfo(p2, t2.catelog, t2.price, A2)
-            config.MUTEX.acquire(True)  # blocking
-            new_t1.adjust_trade()
-            new_t2.adjust_trade()
-            config.MUTEX.release()
+        #################################
+        # if A2 < M2:
+        A = A1 - A2
+        # ArbitrageInfo._logger.debug('A2<M2, A1={:<10.4f}, A2={:<10.4f}, A={:<10.4f}'.format(A1, A2, A))
+        ArbitrageInfo._logger.debug('A1={:<10.4f}, A2={:<10.4f}, A={:<10.4f}'.format(A1, A2, A))
+        if A < 0:
+            trade_catelog = common.reverse_catelog(t1.catelog)
+        else:  # A >= 0
+            trade_catelog = t1.catelog
+        new_t1 = TradeInfo(p1, trade_catelog, t1.price, abs(A))
+        config.MUTEX.acquire(True)  # blocking
+        new_t1.adjust_trade()
+        config.MUTEX.release()
+        # else:  # A2 >= M2:
+        #     ArbitrageInfo._logger.debug('A2>=M2, A1={:<10.4f}, A2={:<10.4f}'.format(A1, A2))
+        ##    FIXME this may introduce bug since one of new_t1, new_t2 may be canceled
+            # new_t1 = TradeInfo(p1, t1.catelog, t1.price, A1)
+            # new_t2 = TradeInfo(p2, t2.catelog, t2.price, A2)
+            # config.MUTEX.acquire(True)  # blocking
+            # new_t1.adjust_trade()
+            # new_t2.adjust_trade()
+            # config.MUTEX.release()
+        #################################
         ### post-condition
         self.done = True
 

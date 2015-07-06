@@ -218,8 +218,9 @@ class OKCoinAPI(BTC):
         info = self.api_order_info(order_id)['orders'][0]
         catalog = info['type']
         remaining_amount = info['amount'] - info['deal_amount']
-        create_time = info['create_date'] / 1000.0
-        order_info = OrderInfo(catalog, remaining_amount, create_time)
+        # create_time = info['create_date'] / 1000.0
+        # order_info = OrderInfo(catalog, remaining_amount, create_time)
+        order_info = OrderInfo(catalog, remaining_amount)
         return order_info
 
     def api_order_history(self):
