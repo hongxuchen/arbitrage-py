@@ -1,3 +1,5 @@
+import threading
+
 okcoin_cn_info = {
     'domain': 'https://www.okcoin.cn/api/v1',
     'symbol': 'cny'
@@ -35,3 +37,5 @@ PENDING_SECONDS = 2
 adjust_percentage = 0.1
 ASSET_WAIT_MAX = 3
 ASSET_FOR_TRAID_DIFF = 0.0005
+
+MUTEX = threading.Lock()

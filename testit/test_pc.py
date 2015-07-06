@@ -2,6 +2,7 @@
 
 from __future__ import print_function
 from collections import deque
+import threading
 import time
 
 from PySide.QtCore import *
@@ -9,6 +10,7 @@ from PySide.QtGui import *
 
 NUM = 5
 
+mutex = threading.Lock()
 
 class Item(object):
     def __init__(self, seed):
@@ -42,7 +44,9 @@ class Consumer(QThread):
     def run(self):
         while self.running or self.worklist:
             QThread.msleep(500)
-            self.do_work()
+            if mutex.acquire():
+                self.do_work()
+                mutex.release()
 
 
 class Producer(QThread):
@@ -53,14 +57,16 @@ class Producer(QThread):
 
     def do_work(self):
         print('producer do work')
-        QThread.msleep(1000)
         now = int(time.time())
         trade_pair = (Item(now * 3), Item(now * 5))
         self.worklist.append(trade_pair)
 
     def run(self):
         while self.running:
-            self.do_work()
+            QThread.msleep(1000)
+            if mutex.acquire():
+                self.do_work()
+                mutex.release()
 
 
 class Widg(QWidget):
@@ -101,13 +107,11 @@ class Widg(QWidget):
 
     def startStopThread(self):
         if self.threadRunning is False:
-            self.startStopButton.setText('Go!')
             self.startThread()
-            print("Stopped")
+            self.startStopButton.setText('Stop!')
         else:
-            self.startStopButton.setText('Stop?')
             self.stopThread()
-            print("Started")
+            self.startStopButton.setText('Go!')
 
 
 if __name__ == "__main__":
