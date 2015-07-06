@@ -16,8 +16,11 @@ class ArbitrageInfo(object):
         self.time = time
         self.done = False
 
-    ### initial trading
     def process_trade(self):
+        """
+        inital trading, this guarantees that the asset is enough
+        :return:
+        """
         ArbitrageInfo._logger.debug('Arbitrage Start')
         for trade in self.trade_pair:
             order_id = trade.regular_trade(trade.catelog, trade.price, trade.amount)

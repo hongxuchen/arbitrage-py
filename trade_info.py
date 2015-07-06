@@ -34,14 +34,14 @@ class TradeInfo(object):
         regular trade, may cause pending
         :return: order_id
         """
-        # TradeInfo._logger.debug(
-        #     'BEFORE, {:10s}: {} {:10.4f} btc at price {:10.4f} cny'.format(self.plt_name, catelog, amount,
-        #                                                                    price))
+        TradeInfo._logger.debug(
+            'BEFORE, {:10s}: {:4s} {:10.4f} btc at price {:10.4f} cny'.format(self.plt_name, catelog, amount,
+                                                                           price))
         order_id = self.plt.trade(catelog, price, amount)
         TradeInfo._logger.debug(
             'AFTER,  {:10s}: {:4s} {:10.4f} btc at price {:10.4f} cny, order_id={:d}'.format(self.plt_name, catelog,
-                                                                                          amount,
-                                                                                          price, order_id))
+                                                                                             amount,
+                                                                                             price, order_id))
         return order_id
 
     def _asset_afford_trade(self, trade_amount, trade_price):
