@@ -5,8 +5,10 @@ from __future__ import print_function
 import hashlib
 import sys
 import datetime
+from PySide.QtCore import QThread
 
 import requests
+import requests.exceptions as req_except
 
 from btc import BTC
 import common
@@ -43,10 +45,10 @@ class OKCoinAPI(BTC):
         :return:
         """
         headers = {
-            'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.130 Safari/537.36',
+            'user-agent': config.USER_AGENT,
             'Content-Type': 'application/x-www-form-urlencoded'
         }
-        try:
+        def request_impl():
             r = None
             if method in self.api_public:
                 r = requests.request('get', self._real_uri(method), params=params, headers=headers)
@@ -55,17 +57,42 @@ class OKCoinAPI(BTC):
             else:
                 OKCoinAPI._logger.critical('method [{}] not supported'.format(method))
                 sys.exit(1)
+            return r
+        def is_retry_exception(exception):
+            for except_type in config.retry_except_tuple:
+                if isinstance(exception, except_type):
+                    return True
+            return False
+        def handle_exit(exception):
+            OKCoinAPI._logger.critical('Error during request:{}, will exit'.format(exception))
+            # FIXME should terminate safely
+            sys.exit(1)
+        def handle_retry(exception):
+            OKCoinAPI._logger.warn('Exception during request:{}, will retry')
+            retry_counter = 0
+            while retry_counter < config.retry_max:
+                retry_counter += 1
+                try:
+                    QThread.msleep(100)
+                    OKCoinAPI._logger.debug('retry_counter={:<2}'.format(retry_counter))
+                    request_impl()
+                except req_except.RequestException as e: # all request exceptions
+                    if is_retry_exception(e):
+                        continue
+                    else:
+                        handle_exit(e)
+            handle_exit(exception)
+        try:
+            r = request_impl()
             # OKCoinAPI._logger.debug(r.url)
             if r is None:
-                OKCoinAPI._logger.critical('ERROR: return None for params={}')
+                OKCoinAPI._logger.critical('ERROR: return None for params={}, data={}'.format(params, data))
                 sys.exit(1)
             return r
-        except requests.ConnectionError as e:
-            OKCoinAPI._logger.critical(e)
-            sys.exit(1)
-        except requests.HTTPError as e:
-            OKCoinAPI._logger.critical(e)
-            sys.exit(1)
+        except config.retry_except_tuple as e:
+            handle_retry(e)
+        except config.exit_except_tuple as e:
+            handle_exit(e)
 
     ### public api
 
@@ -272,9 +299,10 @@ status_dict = {
 
 if __name__ == '__main__':
     okcoin_cn = OKCoinCN()
-    # print(okcoin_cn.assets())
+    while True:
+        print(okcoin_cn.ask_bid_list(2))
+        print(okcoin_cn.assets())
     # res = okcoin_cn.api_trade(trade_dict)
     # order_id = okcoin_cn.trade('buy', 10, 0.01)
     # res = okcoin_cn.order_info(order_id)
     # print(res)
-    print(okcoin_cn.ask_bid_list(2))

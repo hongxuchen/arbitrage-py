@@ -22,12 +22,12 @@ class AssetTable(QtGui.QTableWidget):
         self.setRowCount(len_row_list)
         self.setColumnCount(len_col_list)
         for i in range(len_row_list):
-            self.setRowHeight(i, config.ui_tbl_row_height)
+            self.setRowHeight(i, config.UI_TBL_ROW_HEIGHT)
             item_str = row_list[i]
             item = QtGui.QTableWidgetItem(item_str)
             self.setVerticalHeaderItem(i, item)
         for i in range(len_col_list):
-            self.setColumnWidth(i, config.ui_tbl_col_width)
+            self.setColumnWidth(i, config.UI_TBL_COL_WIDTH)
             item_str = col_list[i]
             item = QtGui.QTableWidgetItem(item_str)
             self.setHorizontalHeaderItem(i, item)

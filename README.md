@@ -3,7 +3,7 @@
 ## okcoin.py:49
 
 * 'Connection aborted.', gaierror(-5, 'No address associated with hostname')
-* 'Connection aborted.', gaierror(-2, 'Name or service not known')
+* 'Connection aborted.', gaierror(-2, 'Name or service not known')  <-- DNS, ConnectionError
 * 'ConnectionError' ('Connection aborted.', BadStatusLine(""''''"))
 * 'EOF occurred in violation of protocol (_ssl.c:581)'
 * 'Connection aborted.', error(110, 'Connection timed out')
@@ -17,9 +17,7 @@
 * when stop and exit, QThread may be unexpected terminated
 * after lock, seems pending sometimes
 
-## cases:
-* OKCoin buys more than expected
-* xxx
-File "bitbays.py", line 206, in order_info
-    create_time = BitBays._get_timestamp(info['created_at'], BitBays.fmt)
-TypeError: 'NoneType' object has no attribute '__getitem__'
+
+## hosts
+121.199.251.136 www.okcoin.cn
+119.28.48.217   okcoin.cn
