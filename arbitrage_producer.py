@@ -24,13 +24,20 @@ class ArbitrageProducer(QtCore.QThread):
         self.symbol = symbol
         self.running = False
 
-    # used each time we run; producer
     def update_ask_bid_info(self):
+        """
+        update each time we run; need to send request
+        :return:
+        """
         self._info_list = []
         for plt in self.plt_list:
             self._info_list.append(plt.ask_bid_list(1))  # request here
 
     def update_asset_info_list(self):
+        """
+        update each time we run; need to send request
+        :return:
+        """
         self._asset_info_list = []
         for plt in self.plt_list:
             asset_info = AssetInfo(plt)  # request here
@@ -63,6 +70,7 @@ class ArbitrageProducer(QtCore.QThread):
         return ask_a[0] + config.arbitrage_diff < bid_b[0]
 
     # ask_a, bid_b are of [price, amount]
+    # FIXME check whether can be uniformed with OrderInfo._asset_afford_trade
     @staticmethod
     def amount_refine(ask_a, bid_b, asset_info_a, asset_info_b):
         plt_a_buy_amount = asset_info_a.afford_buy_amount(ask_a[0]) - config.ASSET_FOR_TRAID_DIFF
@@ -74,7 +82,7 @@ class ArbitrageProducer(QtCore.QThread):
         amount = max(config.lower_bound, amount)
         return amount
 
-    # the consumer that "uses" the info
+    # FIXME: this function should be refactored to add MUTEX
     def get_arbitrage_info(self):
         self.update_ask_bid_info()
         self.update_asset_info_list()

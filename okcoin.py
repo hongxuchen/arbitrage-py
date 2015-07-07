@@ -42,12 +42,16 @@ class OKCoinAPI(BTC):
         :param data:
         :return:
         """
+        headers = {
+            'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.130 Safari/537.36',
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
         try:
             r = None
             if method in self.api_public:
-                r = requests.request('get', self._real_uri(method), params=params)
+                r = requests.request('get', self._real_uri(method), params=params, headers=headers)
             elif method in self.api_private:
-                r = requests.request('post', self._real_uri(method), data=data, params=params)
+                r = requests.request('post', self._real_uri(method), data=data, params=params, headers=headers)
             else:
                 OKCoinAPI._logger.critical('method [{}] not supported'.format(method))
                 sys.exit(1)
