@@ -24,9 +24,9 @@ class ArbitrageInfo(object):
         """
         ArbitrageInfo._logger.debug('Arbitrage Start')
         for trade in self.trade_pair:
-            config.MUTEX.acquire(True)  # blocking
+            common.MUTEX.acquire(True)  # blocking
             order_id = trade.regular_trade(trade.catelog, trade.price, trade.amount)
-            config.MUTEX.release()
+            common.MUTEX.release()
             trade.set_order_id(order_id)
 
     def normalize_trade_pair(self):
@@ -98,9 +98,9 @@ class ArbitrageInfo(object):
         else:  # A >= 0
             trade_catelog = t1.catelog
         new_t1 = TradeInfo(p1, trade_catelog, t1.price, abs(A))
-        config.MUTEX.acquire(True)  # blocking
+        common.MUTEX.acquire(True)  # blocking
         new_t1.adjust_trade()
-        config.MUTEX.release()
+        common.MUTEX.release()
         # else:  # A2 >= M2:
         #     ArbitrageInfo._logger.debug('A2>=M2, A1={:<10.4f}, A2={:<10.4f}'.format(A1, A2))
         ##    FIXME this may introduce bug since one of new_t1, new_t2 may be canceled

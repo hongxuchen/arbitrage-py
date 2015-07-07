@@ -5,6 +5,7 @@ import logging.config
 import os
 import errno
 import sys
+import threading
 
 from PySide.QtCore import QThread
 import requests
@@ -52,7 +53,7 @@ def adjust_price(trade_catelog, price):
 
 
 def is_retry_exception(exception):
-    for except_type in config.retry_except_tuple:
+    for except_type in common.retry_except_tuple:
         if isinstance(exception, except_type):
             return True
     return False
@@ -73,7 +74,7 @@ def handle_retry(exception, plt, handler):
     """
     plt._logger.warn('Exception during request:"{}", will retry'.format(exception))
     retry_counter = 0
-    while retry_counter < config.retry_max:
+    while retry_counter < config.RETRY_MAX:
         retry_counter += 1
         try:
             QThread.msleep(config.RETRY_MILLISECONDS)
@@ -99,3 +100,9 @@ def setup_logger():
         'logfilename': log_fname
     })
     return logging.getLogger()
+
+
+MUTEX = threading.Lock()
+retry_except_tuple = (req_except.ConnectionError, req_except.Timeout, req_except.HTTPError)
+exit_except_tuple = (req_except.URLRequired, req_except.TooManyRedirects)
+USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.130 Safari/537.36'

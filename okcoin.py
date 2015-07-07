@@ -17,7 +17,7 @@ from order_info import OrderInfo
 class OKCoinAPI(BTC):
     _logger = common.setup_logger()
     headers = {
-        'user-agent': config.USER_AGENT,
+        'user-agent': common.USER_AGENT,
         'Content-Type': 'application/x-www-form-urlencoded'
     }
 
@@ -68,9 +68,9 @@ class OKCoinAPI(BTC):
                 # FIXME terminate safely
                 sys.exit(1)
             return r
-        except config.retry_except_tuple as e:
+        except common.retry_except_tuple as e:
             common.handle_retry(e, OKCoinAPI, request_impl)
-        except config.exit_except_tuple as e:
+        except common.exit_except_tuple as e:
             common.handle_exit(e, OKCoinAPI)
         except Exception as e:
             common.handle_exit(e, OKCoinAPI)

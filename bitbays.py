@@ -24,7 +24,7 @@ class BitBays(BTC):
         1: 'sell'
     }
     headers = {
-        'user-agent': config.USER_AGENT
+        'user-agent': common.USER_AGENT
     }
     lower_bound = 0.001
 
@@ -85,9 +85,9 @@ class BitBays(BTC):
                 # FIXME terminate safely
                 sys.exit(1)
             return r
-        except config.retry_except_tuple as e:
+        except common.retry_except_tuple as e:
             common.handle_retry(e, BitBays, request_impl)
-        except config.exit_except_tuple as e:
+        except common.exit_except_tuple as e:
             common.handle_exit(e, BitBays)
         except Exception as e:
             common.handle_exit(e, BitBays)
