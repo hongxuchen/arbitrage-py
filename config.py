@@ -46,3 +46,4 @@ MUTEX = threading.Lock()
 
 retry_except_tuple = (req_except.ConnectionError, req_except.Timeout, req_except.HTTPError)
 exit_except_tuple = (req_except.URLRequired, req_except.TooManyRedirects)
+RETRY_MILLISECONDS = 400

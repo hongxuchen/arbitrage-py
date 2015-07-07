@@ -18,10 +18,13 @@ from order_info import OrderInfo
 
 class BitBays(BTC):
     _logger = common.setup_logger()
-    fmt = '%Y/%m/%d %H:%M:%S'
+    # fmt = '%Y/%m/%d %H:%M:%S'
     catalog_dict = {
         0: 'buy',
         1: 'sell'
+    }
+    headers = {
+        'user-agent': config.USER_AGENT
     }
     lower_bound = 0.001
 
@@ -53,8 +56,17 @@ class BitBays(BTC):
     def _real_uri(self, method):
         return self.get_url('/' + method + '/')
 
+    # TODO to see whether convert data to json string is a necessity; be careful about None
+    # FIXME headers not used here, may introduce bugs in future
     def _setup_request(self, method, params=None, data=None):
-        try:
+        """
+        :param method:
+        :param params:
+        :param data:
+        :return:
+        """
+
+        def request_impl():
             r = None
             if method in self.api_public:
                 r = requests.get(self._real_uri(method), params=params)
@@ -63,14 +75,22 @@ class BitBays(BTC):
             else:
                 BitBays._logger.critical('method [{}] not supported'.format(method))
                 sys.exit(1)
+            return r
+
+        try:
+            r = request_impl()
             # BitBays._logger.debug(r.url)
             if r is None:
                 BitBays._logger.critical('ERROR: return None when params={}'.format(params))
+                # FIXME terminate safely
                 sys.exit(1)
             return r
+        except config.retry_except_tuple as e:
+            common.handle_retry(e, BitBays, request_impl)
+        except config.exit_except_tuple as e:
+            common.handle_exit(e, BitBays)
         except Exception as e:
-            BitBays._logger.critical(e)
-            sys.exit(1)
+            common.handle_exit(e, BitBays)
 
     def api_ticker(self):
         payload = {
@@ -270,6 +290,9 @@ class BitBays(BTC):
 
 if __name__ == '__main__':
     bitbays = BitBays()
+    while True:
+        print(bitbays.ask_bid_list(2))
+        print(bitbays.assets())
     # order_id = bitbays.trade('sell', 10000, 0.001)
     # limit order id
     # res = bitbays.order_info(order_id)

@@ -4,8 +4,11 @@ import logging
 import logging.config
 import os
 import errno
+import sys
 
+from PySide.QtCore import QThread
 import requests
+import requests.exceptions as req_except
 import yaml
 
 import config
@@ -46,6 +49,42 @@ def adjust_price(trade_catelog, price):
         return price * (1 + config.adjust_percentage)
     else:  # sell
         return price * (1 - config.adjust_percentage)
+
+
+def is_retry_exception(exception):
+    for except_type in config.retry_except_tuple:
+        if isinstance(exception, except_type):
+            return True
+    return False
+
+
+def handle_exit(exception, plt):
+    plt._logger.critical('Error during request:"{}", will exit'.format(exception))
+    # FIXME should terminate safely
+    sys.exit(1)
+
+
+def handle_retry(exception, plt, handler):
+    """
+    :param exception: the relevant exception
+    :param plt: the platform class, used for logging; must has class variable '_logger' (logging module)
+    :param handler: real handler, no params, implemented as closure
+    :return: None
+    """
+    plt._logger.warn('Exception during request:"{}", will retry'.format(exception))
+    retry_counter = 0
+    while retry_counter < config.retry_max:
+        retry_counter += 1
+        try:
+            QThread.msleep(config.RETRY_MILLISECONDS)
+            plt._logger.debug('retry_counter={:<2}'.format(retry_counter))
+            handler()  # real handle function
+        except req_except.RequestException as e:  # all request exceptions
+            if is_retry_exception(e):
+                continue
+            else:
+                handle_exit(e, plt)
+    handle_exit(exception, plt)
 
 
 def setup_logger():
