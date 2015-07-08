@@ -102,7 +102,12 @@ def setup_logger():
     return logging.getLogger()
 
 
+class InvalidNonceError(Exception):
+    def __init__(self, message):
+        super(InvalidNonceError, self).__init__(message)
+
+
 MUTEX = threading.Lock()
-retry_except_tuple = (req_except.ConnectionError, req_except.Timeout, req_except.HTTPError)
+retry_except_tuple = (req_except.ConnectionError, req_except.Timeout, req_except.HTTPError, InvalidNonceError)
 exit_except_tuple = (req_except.URLRequired, req_except.TooManyRedirects)
 USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.130 Safari/537.36'

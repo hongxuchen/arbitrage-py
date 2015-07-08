@@ -28,6 +28,7 @@ select_plt_dict = {
 
 
 class ArbitrageUI(ui_main_win.Ui_MainWin):
+    _logger = common.setup_logger()
     def __init__(self, length=5):
         super(ArbitrageUI, self).__init__()
         self.depth_length = length
@@ -35,7 +36,6 @@ class ArbitrageUI(ui_main_win.Ui_MainWin):
         self.worklist = []
         self.producer = arbitrage_producer.ArbitrageProducer(self.plt_list, self.worklist, config.fiat)
         self.consumer = arbitrage_consumer.ArbitrageConsumer(self.worklist)
-        # self.display_latest_asset()
         self.monitor = asset_monitor.AssetMonitor(self.plt_list)
         self.running = False
         self.setup_actions()
@@ -92,20 +92,26 @@ class ArbitrageUI(ui_main_win.Ui_MainWin):
 
     def stop_trade(self):
         self.running = False
+        ArbitrageUI._logger.info('waiting producer')
         self.producer.running = False
         self.producer.wait()
+        ArbitrageUI._logger.info('waiting consumer')
         self.consumer.running = False
         self.consumer.wait()
+        ArbitrageUI._logger.info('waiting monitor')
         self.monitor.running = False
         self.monitor.wait()
         self.trade_button.setText('Arbitrage')
 
     def start_trade(self):
         self.running = True
+        ArbitrageUI._logger.info('start producer')
         self.producer.running = True
         self.producer.start()
+        ArbitrageUI._logger.info('start consumer')
         self.consumer.running = True
         self.consumer.start()
+        ArbitrageUI._logger.info('start monitor')
         self.monitor.running = True
         self.monitor.start()
         self.trade_button.setText('Stop')

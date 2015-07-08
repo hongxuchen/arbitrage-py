@@ -12,6 +12,7 @@ import requests
 
 from btc import BTC
 import common
+from common import InvalidNonceError
 import config
 from order_info import OrderInfo
 
@@ -76,21 +77,27 @@ class BitBays(BTC):
             else:
                 BitBays._logger.critical('method [{}] not supported'.format(method))
                 sys.exit(1)
-            return r.json()
-
-        try:
-            response_data = _request_impl()
+            # BitBays._logger.debug(r.url)
+            response_data = r.json()
             assert (response_data is not None)
             result = response_data['result']
-            # BitBays._logger.debug(r.url)
             # TODO check other methods fail
+            # TODO exception and result None logic may be wrong
             if result is None:
-                BitBays._logger.critical(
-                    'ERROR: method={}, params={}, data={}, response_data={}'.format(
-                        method, params, data, response_data))
-                if method != 'cancel':
-                    # FIXME terminate safely
-                    sys.exit(1)
+                msg = response_data['message']
+                if msg.startswith('Invalid Nonce'):
+                    raise InvalidNonceError('InvalidNonceError: {}'.format(msg))
+                else:
+                    BitBays._logger.critical(
+                        'ERROR: method={}, params={}, data={}, error_message={}'.format(
+                            method, params, data, msg))
+                    if method != 'cancel':
+                        # FIXME terminate safely
+                        sys.exit(1)
+            return result
+
+        try:
+            result = _request_impl()
             return result
         except common.retry_except_tuple as e:
             common.handle_retry(e, BitBays, _request_impl)

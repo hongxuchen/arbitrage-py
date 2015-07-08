@@ -97,7 +97,9 @@ class ArbitrageInfo(object):
             trade_catelog = t1.catelog
         new_t1 = TradeInfo(p1, trade_catelog, t1.price, abs(A))
         common.MUTEX.acquire(True)  # blocking
+        TradeInfo._logger.info('[Consumer] acquire lock')
         new_t1.adjust_trade()
+        TradeInfo._logger.info('[Consumer] adjust done, release lock')
         common.MUTEX.release()
         # else:  # A2 >= M2:
         #     ArbitrageInfo._logger.debug('A2>=M2, A1={:<10.4f}, A2={:<10.4f}'.format(A1, A2))
