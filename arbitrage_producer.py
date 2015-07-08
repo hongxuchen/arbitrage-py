@@ -15,7 +15,7 @@ from trade_info import TradeInfo
 class ArbitrageProducer(QtCore.QThread):
     notify_asset = QtCore.Signal(list)
     notify_trade = QtCore.Signal(ArbitrageInfo)
-    _logger = logging.getLogger()
+    _logger = common.setup_logger()
 
     ### stateless
     def __init__(self, plt_list, arbitrage_list, symbol, parent=None):
@@ -28,7 +28,6 @@ class ArbitrageProducer(QtCore.QThread):
 
     def run(self):
         while self.running:
-            ArbitrageInfo._logger.debug('producing')
             self.process_arbitrage()
 
     @staticmethod
@@ -54,7 +53,7 @@ class ArbitrageProducer(QtCore.QThread):
 
         ## lock here
         common.MUTEX.acquire(True)
-        ArbitrageProducer._logger.debug('producer get mutex')
+        ArbitrageProducer._logger.debug('[Producer] get mutex')
         asset_info_list = [AssetInfo(plt) for plt in self.plt_list]
         asset_info_a = asset_info_list[i]
         asset_info_b = asset_info_list[1 - i]
@@ -69,7 +68,7 @@ class ArbitrageProducer(QtCore.QThread):
 
         amount = amount_refine()
         if amount - config.lower_bound < config.minor_diff:
-            ArbitrageProducer._logger.debug('not enough amount, no arbitrage')
+            ArbitrageProducer._logger.debug('[Producer] insufficient amount, release lock')
             common.MUTEX.release()
             return False
         ArbitrageProducer._logger.debug(asset_info_a)
@@ -88,8 +87,7 @@ class ArbitrageProducer(QtCore.QThread):
         now = time.time()
         arbitrage_info = ArbitrageInfo(trade_pair, now)
         arbitrage_info.process_trade()
-        # release lock
-        ArbitrageProducer._logger.debug('producer release mutex')
+        ArbitrageProducer._logger.debug('[Producer] arbitrage done, release lock')
         common.MUTEX.release()
         self.arbitrage_queue.append(arbitrage_info)
         return True

@@ -4,12 +4,13 @@ import logging
 from PySide import QtCore
 
 from asset_info import AssetInfo
+import common
 import config
 
 
 class AssetMonitor(QtCore.QThread):
     notify_update_asset = QtCore.Signal(list)
-    _logger = logging.getLogger()
+    _logger = common.setup_logger()
 
     def __init__(self, plt_list):
         super(AssetMonitor, self).__init__()
@@ -18,6 +19,7 @@ class AssetMonitor(QtCore.QThread):
 
     def run(self, *args, **kwargs):
         while self.running:
+            AssetMonitor._logger.debug("Monitor Notifier")
             asset_list = [AssetInfo(plt) for plt in self.plt_list]
             self.notify_update_asset.emit(asset_list)
             QtCore.QThread.sleep(config.monitor_interval_seconds)
