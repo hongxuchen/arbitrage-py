@@ -24,9 +24,7 @@ class ArbitrageInfo(object):
         """
         ArbitrageInfo._logger.debug('Arbitrage Start')
         for trade in self.trade_pair:
-            common.MUTEX.acquire(True)  # blocking
             order_id = trade.regular_trade(trade.catelog, trade.price, trade.amount)
-            common.MUTEX.release()
             trade.set_order_id(order_id)
 
     def normalize_trade_pair(self):

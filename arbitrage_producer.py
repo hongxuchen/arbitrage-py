@@ -51,7 +51,7 @@ class ArbitrageProducer(QtCore.QThread):
         bid_b_price, bid_b_amount = bid_b[0], bid_b[1]
 
         ## lock here
-        common.MUTEX.acquire()
+        common.MUTEX.acquire(True)
         asset_info_list = [AssetInfo(plt) for plt in self.plt_list]
         asset_info_a = asset_info_list[i]
         asset_info_b = asset_info_list[1 - i]
@@ -82,6 +82,7 @@ class ArbitrageProducer(QtCore.QThread):
         now = time.time()
         arbitrage_info = ArbitrageInfo(trade_pair, now)
         arbitrage_info.process_trade()
+        # release lock
         common.MUTEX.release()
         self.arbitrage_queue.append(arbitrage_info)
         return True

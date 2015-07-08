@@ -44,9 +44,9 @@ class Consumer(QThread):
     def run(self):
         while self.running or self.worklist:
             QThread.msleep(500)
-            if mutex.acquire():
-                self.do_work()
-                mutex.release()
+            mutex.acquire(True)
+            self.do_work()
+            mutex.release()
 
 
 class Producer(QThread):
@@ -63,10 +63,10 @@ class Producer(QThread):
 
     def run(self):
         while self.running:
-            QThread.msleep(1000)
-            if mutex.acquire():
-                self.do_work()
-                mutex.release()
+            QThread.msleep(500)
+            mutex.acquire(True)
+            self.do_work()
+            mutex.release()
 
 
 class Widg(QWidget):
