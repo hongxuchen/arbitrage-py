@@ -24,6 +24,8 @@ UI_TBL_ROW_HEIGHT = 25
 TRADING_LOGGER = 'trading_logger'
 DEBUG_LOGGER = 'debug_logger'
 
+fiat = 'cny'
+
 precision = 4
 minor_diff = 10.0 ** (-precision)
 
@@ -37,5 +39,9 @@ adjust_percentage = 0.1
 ASSET_WAIT_MAX = 3
 ASSET_FOR_TRAID_DIFF = 0.0005
 
+CONSUMER_SLEEP_MILLISECONS = 1500
+
 RETRY_MAX = 10
 RETRY_MILLISECONDS = 2000
+
+monitor_interval_seconds = 3

@@ -34,7 +34,7 @@ class AssetInfo(object):
     def total_fiat(self):
         return self.fiat_avail + self.fiat_pending
 
-    def __str__(self):
+    def __repr__(self):
         plt_name = self.plt.__class__.__name__
         fiat_str = 'fiat : pending={:<10.4f} avail={:<10.4f}'.format(self.fiat_pending, self.fiat_avail)
         btc_str = 'btc  : pending={:<10.4f} avail={:<10.4f}'.format(self.btc_pending, self.btc_avail)

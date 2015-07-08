@@ -7,9 +7,10 @@ from PySide import QtGui
 
 import arbitrage_consumer
 import arbitrage_producer
-from asset_info import AssetInfo
+import asset_monitor
 from bitbays import BitBays
 import common
+import config
 from itbit import ItBitAPI
 from okcoin import OKCoinCN
 from ui_common import centerized
@@ -32,8 +33,10 @@ class ArbitrageUI(ui_main_win.Ui_MainWin):
         self.depth_length = length
         self.init_gui()
         self.worklist = []
-        self.producer = arbitrage_producer.ArbitrageProducer(self.plt_list, self.worklist, 'cny')
+        self.producer = arbitrage_producer.ArbitrageProducer(self.plt_list, self.worklist, config.fiat)
         self.consumer = arbitrage_consumer.ArbitrageConsumer(self.worklist)
+        # self.display_latest_asset()
+        self.monitor = asset_monitor.AssetMonitor(self.plt_list)
         self.running = False
         self.setup_actions()
 
@@ -43,8 +46,6 @@ class ArbitrageUI(ui_main_win.Ui_MainWin):
         if reply == QtGui.QMessageBox.Yes:
             if self.running:
                 self.stop_trade()
-                self.producer.wait()
-                self.consumer.wait()
             event.accept()
         else:
             event.ignore()
@@ -92,18 +93,22 @@ class ArbitrageUI(ui_main_win.Ui_MainWin):
     def stop_trade(self):
         self.running = False
         self.producer.running = False
+        self.producer.wait()
         self.consumer.running = False
+        self.consumer.wait()
+        self.monitor.running = False
+        self.monitor.wait()
         self.trade_button.setText('Arbitrage')
 
     def start_trade(self):
         self.running = True
         self.producer.running = True
-        self.consumer.running = True
         self.producer.start()
+        self.consumer.running = True
         self.consumer.start()
+        self.monitor.running = True
+        self.monitor.start()
         self.trade_button.setText('Stop')
-        asset_info_list = [AssetInfo(plt) for plt in self.plt_list]
-        self.display_asset_summary(asset_info_list)
 
     def apply_trade(self):
         if not self.running:
@@ -125,6 +130,7 @@ class ArbitrageUI(ui_main_win.Ui_MainWin):
             checkbox.stateChanged.connect(self.update_plt)
         self.trade_button.pressed.connect(self.apply_trade)
         self.producer.notify_asset.connect(self.display_asset_summary)
+        self.monitor.notify_update_asset.connect(self.display_asset_summary)
         self.producer.notify_trade.connect(self.display_arbitrage)
 
     # TODO display nicely

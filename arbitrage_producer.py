@@ -2,6 +2,7 @@
 
 import logging
 import time
+
 from PySide import QtCore
 
 from asset_info import AssetInfo
@@ -27,6 +28,7 @@ class ArbitrageProducer(QtCore.QThread):
 
     def run(self):
         while self.running:
+            ArbitrageInfo._logger.debug('producing')
             self.process_arbitrage()
 
     @staticmethod
@@ -52,6 +54,7 @@ class ArbitrageProducer(QtCore.QThread):
 
         ## lock here
         common.MUTEX.acquire(True)
+        ArbitrageProducer._logger.debug('producer get mutex')
         asset_info_list = [AssetInfo(plt) for plt in self.plt_list]
         asset_info_a = asset_info_list[i]
         asset_info_b = asset_info_list[1 - i]
@@ -66,6 +69,8 @@ class ArbitrageProducer(QtCore.QThread):
 
         amount = amount_refine()
         if amount - config.lower_bound < config.minor_diff:
+            ArbitrageProducer._logger.debug('not enough amount, no arbitrage')
+            common.MUTEX.release()
             return False
         ArbitrageProducer._logger.debug(asset_info_a)
         ArbitrageProducer._logger.debug(asset_info_b)
@@ -74,6 +79,7 @@ class ArbitrageProducer(QtCore.QThread):
         #         asset_info_a.total_btc() + asset_info_b.total_btc(),
         #         self.symbol,
         #         asset_info_a.total_fiat() + asset_info_b.total_fiat()))
+        ## FIXME this only displays the asset_info before the trade
         self.notify_asset.emit(asset_info_list)
         buy_trade = TradeInfo(plt_a, 'buy', ask_a_price, amount)  # buy at plt_a
         sell_trade = TradeInfo(plt_b, 'sell', bid_b_price, amount)  # sell at plt_b
@@ -83,6 +89,7 @@ class ArbitrageProducer(QtCore.QThread):
         arbitrage_info = ArbitrageInfo(trade_pair, now)
         arbitrage_info.process_trade()
         # release lock
+        ArbitrageProducer._logger.debug('producer release mutex')
         common.MUTEX.release()
         self.arbitrage_queue.append(arbitrage_info)
         return True
@@ -107,5 +114,6 @@ class ArbitrageProducer(QtCore.QThread):
             ask_a = ask_list[i]  # a
             bid_b = bid_list[1 - i]  # the oposite, b
             if self.can_arbitrage(ask_a, bid_b):
+                ArbitrageProducer._logger.debug('Arbitrage change: {} {}'.format(ask_a, bid_b))
                 self.arbitrage_impl(i, ask_a, bid_b)
         return None

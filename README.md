@@ -17,6 +17,10 @@
 * display asset issue
 * when stop and exit, QThread may be unexpected terminated
 * after lock, seems pending sometimes
+* producer should have higher priority
+
+## cases
+bitbays.py:284 - user_info={u'status': 400, u'message': u'Invalid Nonce: Nonce should > 1436332312433', u'result': None}
 
 
 ## hosts

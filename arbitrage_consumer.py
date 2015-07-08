@@ -37,7 +37,13 @@ class ArbitrageConsumer(QtCore.QThread):
 
     def run(self):
         while self.running or self.arbitrage_queue:
-            self.consume()
+            if not self.arbitrage_queue:
+                ArbitrageConsumer._logger.debug(
+                    'queue empty, sleep for {:d}ms'.format(config.CONSUMER_SLEEP_MILLISECONS))
+                QtCore.QThread.msleep(config.CONSUMER_SLEEP_MILLISECONS)
+            else:
+                ArbitrageConsumer._logger.debug('consuming')
+                self.consume()
 
 
 if __name__ == '__main__':
