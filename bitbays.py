@@ -35,13 +35,12 @@ class BitBays(BTC):
         self._user_data = None
         self.api_public = ['ticker', 'trades', 'depth']
         self.api_private = ['info', 'orders', 'transactions', 'trade', 'cancel', 'order']
+        self._counter = int(time.time() * 1000)
         self._orders_info = {}
 
-    # FIXME bug here
-    @staticmethod
-    def _nonce():
-        counter = int(time.time() * 1000) + 600
-        return counter
+    def _nonce(self):
+        self._counter += 1
+        return self._counter
 
     def _sign(self, params):
         return hmac.new(self.key['secret'], params, digestmod=hashlib.sha512).hexdigest()
@@ -73,6 +72,8 @@ class BitBays(BTC):
             elif api_type in self.api_private:
                 params['nonce'] = self._nonce()
                 headers = self._post_param(params)
+                if config.verbose:
+                    BitBays._logger.info('PARAMS={}'.format(params))
                 r = requests.post(self._real_uri(api_type), data=params, headers=headers)
             else:
                 BitBays._logger.critical('api_type={} not supported'.format(api_type))
@@ -99,7 +100,7 @@ class BitBays(BTC):
             result = _request_impl()
             return result
         except common.retry_except_tuple as e:
-            common.handle_retry(e, BitBays, _request_impl)
+            return common.handle_retry(e, BitBays, _request_impl)
         except common.exit_except_tuple as e:
             common.handle_exit(e, BitBays)
         except Exception as e:

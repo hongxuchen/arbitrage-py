@@ -27,7 +27,6 @@ class ArbitrageConsumer(QtCore.QThread):
     def adjust(self, arbitrage):
         arbitrage.adjust_pending()
 
-    ### only remove self.arbitrage_list item
     def consume(self):
         for arbitrage in self.arbitrage_queue:
             seconds = time.time() - arbitrage.time

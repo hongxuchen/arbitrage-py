@@ -70,7 +70,7 @@ def handle_retry(exception, plt, handler):
     :param exception: the relevant exception
     :param plt: the platform class, used for logging; must has class variable '_logger' (logging module)
     :param handler: real handler, no params, implemented as closure
-    :return: None
+    :return: if retry succeeds, should return request result; otherwise, exit abornormally
     """
     plt._logger.error('Exception during request:"{}", will retry'.format(exception))
     retry_counter = 0
@@ -79,8 +79,12 @@ def handle_retry(exception, plt, handler):
         try:
             QThread.msleep(config.RETRY_MILLISECONDS)
             plt._logger.warning('retry_counter={:<2}'.format(retry_counter))
-            handler()  # real handle function
+            config.verbose = True
+            res = handler()  # real handle function
+            config.verbose = False
+            return res
         except Exception as e:  # all request exceptions
+            plt._logger.error('EXCEPTION:"{}" '.format(e))
             if is_retry_exception(e):
                 plt._logger.error('Exception after exception:"{}", will retry'.format(e))
                 continue
