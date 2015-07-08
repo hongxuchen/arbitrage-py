@@ -27,8 +27,8 @@ class OKCoinAPI(BTC):
         self.api_public = ['ticker', 'depth', 'trades', 'kline', 'lend_depth']
         self.api_private = ['userinfo', 'trade', 'batch_trade', 'cancel_order', 'orders', 'order_info']
 
-    def _real_uri(self, method):
-        path = '/' + method + '.do'
+    def _real_uri(self, api_type):
+        path = '/' + api_type + '.do'
         return self.get_url(path)
 
     def _sign(self, params):
@@ -39,9 +39,9 @@ class OKCoinAPI(BTC):
         sign = hashlib.md5(data.encode("utf8")).hexdigest().upper()
         return sign
 
-    def _setup_request(self, method, params, data=None):
+    def _setup_request(self, api_type, params, data=None):
         """  the basic request function, also called by _private_request
-        :param method:
+        :param api_type:
         :param params:
         :param data:
         :return:
@@ -49,14 +49,14 @@ class OKCoinAPI(BTC):
 
         def _request_impl():
             r = None
-            if method in self.api_public:
-                r = requests.request('get', self._real_uri(method), params=params, headers=OKCoinAPI.headers)
-            elif method in self.api_private:
+            if api_type in self.api_public:
+                r = requests.request('get', self._real_uri(api_type), params=params, headers=OKCoinAPI.headers)
+            elif api_type in self.api_private:
                 # TODO data => js string?
-                r = requests.request('post', self._real_uri(method), data=data, params=params,
+                r = requests.request('post', self._real_uri(api_type), data=data, params=params,
                                      headers=OKCoinAPI.headers)
             else:
-                OKCoinAPI._logger.critical('method [{}] not supported'.format(method))
+                OKCoinAPI._logger.critical('api_type [{}] not supported'.format(api_type))
                 # FIXME terminate safely
                 sys.exit(1)
             # OKCoinAPI._logger.debug(r.url)
@@ -154,7 +154,7 @@ class OKCoinAPI(BTC):
         result_status = response_data['result']
         if result_status is False:
             OKCoinAPI._logger.critical(
-                'ERROR: method={}, params={}, response_data={}'.format(api_type, params, response_data))
+                'ERROR: api_type={}, response_data={}'.format(api_type, response_data))
             if api_type != 'cancel_order':
                 # FIXME terminate safely
                 sys.exit(1)
@@ -212,7 +212,7 @@ class OKCoinAPI(BTC):
         return res
 
     def cancel(self, order_id):
-        OKCoinAPI._logger.info('canceling order {}...'.format(order_id))
+        OKCoinAPI._logger.debug('canceling order {}...'.format(order_id))
         data = self.api_cancel_order(order_id)
         return data
 

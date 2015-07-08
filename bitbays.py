@@ -55,14 +55,14 @@ class BitBays(BTC):
         }
         return params
 
-    def _real_uri(self, method):
-        return self.get_url('/' + method + '/')
+    def _real_uri(self, api_type):
+        return self.get_url('/' + api_type + '/')
 
     # TODO to see whether convert data to js string is a necessity; be careful about None
     # FIXME headers not used here, may introduce bugs in future
-    def _setup_request(self, method, params=None, data=None):
+    def _setup_request(self, api_type, params=None, data=None):
         """
-        :param method:
+        :param api_type:
         :param params:
         :param data:
         :return:
@@ -70,18 +70,18 @@ class BitBays(BTC):
 
         def _request_impl():
             r = None
-            if method in self.api_public:
-                r = requests.get(self._real_uri(method), params=params)
-            elif method in self.api_private:
-                r = requests.post(self._real_uri(method), data=data, headers=params)
+            if api_type in self.api_public:
+                r = requests.get(self._real_uri(api_type), params=params)
+            elif api_type in self.api_private:
+                r = requests.post(self._real_uri(api_type), data=data, headers=params)
             else:
-                BitBays._logger.critical('method [{}] not supported'.format(method))
+                BitBays._logger.critical('api_type={} not supported'.format(api_type))
                 sys.exit(1)
             # BitBays._logger.debug(r.url)
             response_data = r.json()
             assert (response_data is not None)
             result = response_data['result']
-            # TODO check other methods fail
+            # TODO check other api_type fail
             # TODO exception and result None logic may be wrong
             if result is None:
                 msg = response_data['message']
@@ -89,9 +89,8 @@ class BitBays(BTC):
                     raise InvalidNonceError('InvalidNonceError: {}'.format(msg))
                 else:
                     BitBays._logger.critical(
-                        'ERROR: method={}, params={}, data={}, error_message={}'.format(
-                            method, params, data, msg))
-                    if method != 'cancel':
+                        'ERROR: api_type={}, error_message={}'.format(api_type, msg))
+                    if api_type != 'cancel':
                         # FIXME terminate safely
                         sys.exit(1)
             return result

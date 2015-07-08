@@ -36,8 +36,8 @@ class TradeInfo(object):
         """
         TradeInfo._logger.debug('BEFORE trade')
         order_id = self.plt.trade(catelog, price, amount)
-        TradeInfo._logger.info(
-            'Trade finished, {:10s}: {:4s} {:10.4f} btc at price {:10.4f} cny, order_id={:d}'.format(
+        TradeInfo._logger.warning(
+            'Trade in {:10s}: {:4s} {:10.4f} btc at price {:10.4f} cny, order_id={:d}'.format(
                 self.plt_name, catelog, amount, price, order_id))
         return order_id
 
@@ -82,7 +82,7 @@ class TradeInfo(object):
         M = self.plt.__class__.lower_bound
         # no trading amount
         if self.amount < config.minor_diff:
-            TradeInfo._logger.info('{}: trading amount = 0, exit adjust_trade'.format(self.plt_name))
+            TradeInfo._logger.warning('{}: trading amount = 0, exit adjust_trade'.format(self.plt_name))
             return
         # config.minor_diff <= self.amount
         wait_for_asset_times = 0
@@ -92,7 +92,7 @@ class TradeInfo(object):
             trade_catelog = self.catelog
             trade_price = common.adjust_price(trade_catelog, self.price)
             if self._asset_afford_trade(trade_amount, trade_price):
-                TradeInfo._logger.info('bi-directional adjust_trade, waited {:d} times'.format(wait_for_asset_times))
+                TradeInfo._logger.warning('bi-directional adjust_trade, waited {:d} times'.format(wait_for_asset_times))
                 # FIXME: it has data race problem with arbitrage thread, but no error within itself if single thread
                 # trade1, must succeed
                 self.regular_trade(trade_catelog, trade_price, trade_amount)
@@ -107,12 +107,13 @@ class TradeInfo(object):
             trade_amount = self.amount
             if self._asset_afford_trade(trade_amount, trade_price):
                 # trade must succeed
-                TradeInfo._logger.info(
+                TradeInfo._logger.warning(
                     '{} single adjust_trade, waited {:d} times'.format(self.plt_name, wait_for_asset_times))
                 self.regular_trade(trade_catelog, trade_price, trade_amount)
 
     def cancel(self):
         if self.order_id != -1:
+            TradeInfo._logger.warning('{:10s} cancel order_id={}'.format(self.plt_name, self.order_id))
             self.plt.cancel(self.order_id)
 
     def get_order_info(self):

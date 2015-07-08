@@ -80,7 +80,7 @@ def handle_retry(exception, plt, handler):
             QThread.msleep(config.RETRY_MILLISECONDS)
             plt._logger.warning('retry_counter={:<2}'.format(retry_counter))
             handler()  # real handle function
-        except req_except.RequestException as e:  # all request exceptions
+        except Exception as e:  # all request exceptions
             if is_retry_exception(e):
                 continue
             else:

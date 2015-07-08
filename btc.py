@@ -10,7 +10,7 @@ class BTC(object):
         self._btc_rate = None
         self.logger = setup_logger()
 
-    def _real_uri(self, method):
+    def _real_uri(self, api_type):
         pass
 
     def ask1(self):
