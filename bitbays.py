@@ -71,7 +71,9 @@ class BitBays(BTC):
             if api_type in self.api_public:
                 r = requests.get(self._real_uri(api_type), params=params)
             elif api_type in self.api_private:
-                r = requests.post(self._real_uri(api_type), data=data, headers=params)
+                params['nonce'] = self._nonce()
+                headers = self._post_param(params)
+                r = requests.post(self._real_uri(api_type), data=params, headers=headers)
             else:
                 BitBays._logger.critical('api_type={} not supported'.format(api_type))
                 sys.exit(1)
@@ -102,6 +104,8 @@ class BitBays(BTC):
             common.handle_exit(e, BitBays)
         except Exception as e:
             common.handle_exit(e, BitBays)
+
+            #############################################################################
 
     # public api
     def api_ticker(self):
@@ -143,19 +147,70 @@ class BitBays(BTC):
         res = self._setup_request('trades', params=payload)
         return res
 
-    # private
+    #############################################################################
+
     def api_trade(self, order):
         payload = {
             'market': 'btc_' + self.symbol,
-            'order_type': 0,  # limit order
-            'nonce': self._nonce()
+            'order_type': 0  # limit order
         }
+        payload.update(order)
         assert (payload['order_type'] in [0, 1])
         assert (payload['op'] in ['buy', 'sell'])
-        payload.update(order)
-        params = self._post_param(payload)
-        data = self._setup_request('trade', params, payload)
+        data = self._setup_request('trade', payload)
         return data
+
+    def api_cancel(self, order_id):
+        payload = {
+            'id': order_id
+        }
+        data = self._setup_request('cancel', payload)
+        return data
+
+    def api_order_info(self, order_id):
+        payload = {
+            'id': order_id
+        }
+        data = self._setup_request('order', payload)
+        return data
+
+    def api_user_info(self):
+        payload = {}
+        data = self._setup_request('info', payload)
+        return data
+
+    def api_orders(self, catalog, status=0):
+        payload = {
+            'market': 'btc_' + self.symbol,
+            'catalog': catalog,
+            'status': status,
+            'count': 20,
+            'nonce': self._nonce()
+        }
+        assert (catalog in [0, 1])
+        if catalog == 0:
+            payload['order'] = 'DESC'
+        else:
+            payload['order'] = 'ASC'
+        data = self._setup_request('orders', payload)
+        return data
+
+    def api_transactions(self, catalog):
+        payload = {
+            'market': 'btc_' + self.symbol,
+            'catalog': catalog,
+            'count': 20,
+            'nonce': self._nonce()
+        }
+        assert (catalog in [0, 1])
+        if catalog == 0:
+            payload['order'] = 'DESC'
+        else:
+            payload['order'] = 'ASC'
+        data = self._setup_request('transactions', payload)
+        return data
+
+    #############################################################################
 
     # uses private
     def trade(self, op_type, price, amount):
@@ -188,26 +243,6 @@ class BitBays(BTC):
         BitBays._logger.debug('BitBays.sell_market with amount {}'.format(mo_amount))
         return self._market_trade('sell', mo_amount)
 
-    # private
-    def api_cancel(self, order_id):
-        payload = {
-            'id': order_id,
-            'nonce': self._nonce()
-        }
-        params = self._post_param(payload)
-        data = self._setup_request('cancel', params, payload)  #
-        return data
-
-    # private
-    def api_order_info(self, order_id):
-        payload = {
-            'id': order_id,
-            'nonce': self._nonce()
-        }
-        params = self._post_param(payload)
-        data = self._setup_request('order', params, payload)
-        return data
-
     # uses private
     def cancel(self, order_id):
         BitBays._logger.debug('canceling order {}...'.format(order_id))
@@ -229,14 +264,6 @@ class BitBays(BTC):
                 for t in sell:
                     self.api_cancel(t['id'])
 
-    # @staticmethod
-    # def _get_timestamp(time_str, fmt):
-    #     date_obj = datetime.strptime(time_str, fmt).timetuple()
-    #     timestamp = calendar.timegm(date_obj)
-    #     ts2 = time.mktime(date_obj)
-    #     now = time.time()
-    #     return timestamp
-
     # uses private
     def order_info(self, order_id):
         info = self.api_order_info(order_id)
@@ -249,50 +276,6 @@ class BitBays(BTC):
         catalog = BitBays.catalog_dict[info['catalog']]
         order_info = OrderInfo(catalog, remaining_amount)
         return order_info
-
-    # private
-    def api_user_info(self):
-        payload = {
-            'nonce': self._nonce()
-        }
-        params = self._post_param(payload)
-        data = self._setup_request('info', params, payload)
-        return data
-
-    # private
-    def api_orders(self, catalog, status=0):
-        payload = {
-            'market': 'btc_' + self.symbol,
-            'catalog': catalog,
-            'status': status,
-            'count': 20,
-            'nonce': self._nonce()
-        }
-        assert (catalog in [0, 1])
-        if catalog == 0:
-            payload['order'] = 'DESC'
-        else:
-            payload['order'] = 'ASC'
-        params = self._post_param(payload)
-        data = self._setup_request('orders', params, payload)
-        return data
-
-    # private
-    def api_transactions(self, catalog):
-        payload = {
-            'market': 'btc_' + self.symbol,
-            'catalog': catalog,
-            'count': 20,
-            'nonce': self._nonce()
-        }
-        assert (catalog in [0, 1])
-        if catalog == 0:
-            payload['order'] = 'DESC'
-        else:
-            payload['order'] = 'ASC'
-        params = self._post_param(payload)
-        data = self._setup_request('transactions', params, payload)
-        return data
 
     # uses private
     def assets(self):
@@ -308,19 +291,20 @@ class BitBays(BTC):
 if __name__ == '__main__':
     bitbays = BitBays()
     while True:
-        print(bitbays.ask_bid_list(2))
+        # print(bitbays.ask_bid_list(2))
         print(bitbays.assets())
-    # order_id = bitbays.trade('sell', 10000, 0.001)
-    # limit order id
-    # res = bitbays.order_info(order_id)
-    # print(res)
-    order_id = bitbays.trade('buy', 10, 0.001)
-    print(order_id)
-    order_info = bitbays.order_info(order_id)
-    print(order_info)
-    # res = bitbays.buy_market(0.01)
-    # print(res)
-    # order_id = 44036603
-    # res = bitbays.order_info(order_id)
-    # res = bitbays.sell_market(0.001)
-    # print(res)
+        print(bitbays.api_transactions(0))
+        # order_id = bitbays.trade('sell', 10000, 0.001)
+        # limit order id
+        # res = bitbays.order_info(order_id)
+        # print(res)
+        # order_id = bitbays.trade('buy', 10, 0.001)
+        # print(order_id)
+        # order_info = bitbays.order_info(order_id)
+        # print(order_info)
+        # res = bitbays.buy_market(0.01)
+        # print(res)
+        # order_id = 44036603
+        # res = bitbays.order_info(order_id)
+        # res = bitbays.sell_market(0.001)
+        # print(res)
