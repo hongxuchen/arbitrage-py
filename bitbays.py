@@ -39,8 +39,9 @@ class BitBays(BTC):
         self._orders_info = {}
 
     # FIXME bug here
-    def _nonce(self):
-        counter = int(time.time() * 1000) + 60
+    @staticmethod
+    def _nonce():
+        counter = int(time.time() * 1000) + 600
         return counter
 
     def _sign(self, params):
@@ -66,7 +67,7 @@ class BitBays(BTC):
         :return:
         """
 
-        def request_impl():
+        def _request_impl():
             r = None
             if method in self.api_public:
                 r = requests.get(self._real_uri(method), params=params)
@@ -78,18 +79,21 @@ class BitBays(BTC):
             return r.json()
 
         try:
-            response_data = request_impl()
+            response_data = _request_impl()
+            assert (response_data is not None)
             result = response_data['result']
             # BitBays._logger.debug(r.url)
-            if response_data is None or result is None:
+            # TODO check other methods fail
+            if result is None:
                 BitBays._logger.critical(
                     'ERROR: method={}, params={}, data={}, response_data={}'.format(
                         method, params, data, response_data))
-                # FIXME terminate safely
-                sys.exit(1)
+                if method != 'cancel':
+                    # FIXME terminate safely
+                    sys.exit(1)
             return result
         except common.retry_except_tuple as e:
-            common.handle_retry(e, BitBays, request_impl)
+            common.handle_retry(e, BitBays, _request_impl)
         except common.exit_except_tuple as e:
             common.handle_exit(e, BitBays)
         except Exception as e:

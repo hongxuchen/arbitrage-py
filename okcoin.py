@@ -47,29 +47,27 @@ class OKCoinAPI(BTC):
         :return:
         """
 
-        def request_impl():
+        def _request_impl():
             r = None
             if method in self.api_public:
                 r = requests.request('get', self._real_uri(method), params=params, headers=OKCoinAPI.headers)
             elif method in self.api_private:
-                # TODO data => json string?
+                # TODO data => js string?
                 r = requests.request('post', self._real_uri(method), data=data, params=params,
                                      headers=OKCoinAPI.headers)
             else:
                 OKCoinAPI._logger.critical('method [{}] not supported'.format(method))
-                sys.exit(1)
-            return r
-
-        try:
-            r = request_impl()
-            # OKCoinAPI._logger.debug(r.url)
-            if r is None:
-                OKCoinAPI._logger.critical('ERROR: return None for params={}, data={}'.format(params, data))
                 # FIXME terminate safely
                 sys.exit(1)
-            return r
+            # OKCoinAPI._logger.debug(r.url)
+            return r.json()
+
+        try:
+            response_data = _request_impl()
+            assert (response_data is not None)
+            return response_data
         except common.retry_except_tuple as e:
-            common.handle_retry(e, OKCoinAPI, request_impl)
+            common.handle_retry(e, OKCoinAPI, _request_impl)
         except common.exit_except_tuple as e:
             common.handle_exit(e, OKCoinAPI)
         except Exception as e:
@@ -81,8 +79,8 @@ class OKCoinAPI(BTC):
         payload = {
             'symbol': 'btc' + self.symbol
         }
-        r = self._setup_request('ticker', payload)
-        return r.json()
+        res = self._setup_request('ticker', payload)
+        return res
 
     def ask1(self):
         ticker = self.api_ticker()
@@ -97,8 +95,8 @@ class OKCoinAPI(BTC):
             'size': length,
             'merge': 0
         }
-        r = self._setup_request('depth', payload)
-        return r.json()
+        res = self._setup_request('depth', payload)
+        return res
 
     def ask_bid_list(self, length=2):
         data = self.api_depth(length)
@@ -116,8 +114,8 @@ class OKCoinAPI(BTC):
         }
         if since is not None:
             payload['since'] = since
-        r = self._setup_request('trades', payload)
-        return r.json()
+        res = self._setup_request('trades', payload)
+        return res
 
     def api_kline(self, ktype='15min', size=10, since=None):
         payload = {
@@ -130,8 +128,8 @@ class OKCoinAPI(BTC):
         else:
             yesterday = datetime.date.today() - datetime.timedelta(1)
             payload['since'] = yesterday.strftime('%s')
-        r = self._setup_request('kline', payload)
-        return r.json()
+        res = self._setup_request('kline', payload)
+        return res
 
     def api_lend_depth(self, symbol='btc_cny'):
         if symbol not in ['btc_cny', 'cny']:
@@ -140,8 +138,8 @@ class OKCoinAPI(BTC):
         payload = {
             'symbol': symbol
         }
-        r = self._setup_request('lend_depth', params=payload)
-        return r.json()
+        res = self._setup_request('lend_depth', params=payload)
+        return res
 
     ### private api
 
@@ -151,17 +149,20 @@ class OKCoinAPI(BTC):
             params.update(param_dict)
         params['sign'] = self._sign(params)
         # print(params)
-        r = self._setup_request(api_type, None, params)
-        assert (r is not None)
-        return r
+        response_data = self._setup_request(api_type, None, params)
+        assert (response_data is not None)
+        result_status = response_data['result']
+        if result_status is False:
+            OKCoinAPI._logger.critical(
+                'ERROR: method={}, params={}, response_data={}'.format(api_type, params, response_data))
+            if api_type != 'cancel_order':
+                # FIXME terminate safely
+                sys.exit(1)
+        return response_data
 
     def api_userinfo(self):
-        r = self._private_request('userinfo', None)
-        data = r.json()
-        if data['result'] is False:
-            OKCoinAPI._logger.critical('api error')
-            sys.exit(1)
-        return data
+        res = self._private_request('userinfo', None)
+        return res
 
     def api_trade(self, trade_dict):
         params = {
@@ -171,9 +172,8 @@ class OKCoinAPI(BTC):
         if 'price' in params:
             # if params['price'] is not None:
             assert (0 < common.to_decimal(params['price']) <= 1000000)
-        r = self._private_request('trade', params)
-        data = r.json()
-        return data
+        res = self._private_request('trade', params)
+        return res
 
     def trade(self, trade_type, price, amount):
         assert (trade_type in ['buy', 'sell', 'buy_market', 'sell_market'])
@@ -208,8 +208,8 @@ class OKCoinAPI(BTC):
             'symbol': 'btc_' + self.symbol,
             'order_id': order_id
         }
-        r = self._private_request('cancel_order', params)
-        return r.json()
+        res = self._private_request('cancel_order', params)
+        return res
 
     def cancel(self, order_id):
         OKCoinAPI._logger.info('canceling order {}...'.format(order_id))
@@ -221,8 +221,8 @@ class OKCoinAPI(BTC):
             'symbol': 'btc_' + self.symbol,
             'order_id': order_id
         }
-        r = self._private_request('order_info', params)
-        return r.json()
+        res = self._private_request('order_info', params)
+        return res
 
     def order_info(self, order_id):
         # orders = self.api_order_info(order_id)

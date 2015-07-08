@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import logging
 import time
 
 from PySide import QtCore
@@ -28,6 +27,7 @@ class ArbitrageProducer(QtCore.QThread):
 
     def run(self):
         while self.running:
+            ArbitrageProducer._logger.debug('[Producer] run')
             self.process_arbitrage()
 
     @staticmethod
@@ -53,7 +53,7 @@ class ArbitrageProducer(QtCore.QThread):
 
         ## lock here
         common.MUTEX.acquire(True)
-        ArbitrageProducer._logger.debug('[Producer] get mutex')
+        ArbitrageProducer._logger.info('[Producer] get mutex')
         asset_info_list = [AssetInfo(plt) for plt in self.plt_list]
         asset_info_a = asset_info_list[i]
         asset_info_b = asset_info_list[1 - i]
@@ -68,16 +68,11 @@ class ArbitrageProducer(QtCore.QThread):
 
         amount = amount_refine()
         if amount - config.lower_bound < config.minor_diff:
-            ArbitrageProducer._logger.debug('[Producer] insufficient amount, release lock')
+            ArbitrageProducer._logger.info('[Producer] insufficient amount, release lock')
             common.MUTEX.release()
             return False
         ArbitrageProducer._logger.debug(asset_info_a)
         ArbitrageProducer._logger.debug(asset_info_b)
-        # ArbitrageProducer._logger.debug(
-        #     'BTC: {:10.4f}, {}: {:10.4f}'.format(
-        #         asset_info_a.total_btc() + asset_info_b.total_btc(),
-        #         self.symbol,
-        #         asset_info_a.total_fiat() + asset_info_b.total_fiat()))
         ## FIXME this only displays the asset_info before the trade
         self.notify_asset.emit(asset_info_list)
         buy_trade = TradeInfo(plt_a, 'buy', ask_a_price, amount)  # buy at plt_a
@@ -112,6 +107,6 @@ class ArbitrageProducer(QtCore.QThread):
             ask_a = ask_list[i]  # a
             bid_b = bid_list[1 - i]  # the oposite, b
             if self.can_arbitrage(ask_a, bid_b):
-                ArbitrageProducer._logger.debug('Arbitrage change: {} {}'.format(ask_a, bid_b))
+                ArbitrageProducer._logger.debug('[Producer] Arbitrage chance: {} {}'.format(ask_a, bid_b))
                 self.arbitrage_impl(i, ask_a, bid_b)
         return None

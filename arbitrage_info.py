@@ -22,7 +22,7 @@ class ArbitrageInfo(object):
         inital trading, this guarantees that the asset is enough
         :return:
         """
-        ArbitrageInfo._logger.debug('Arbitrage Start')
+        ArbitrageInfo._logger.info('Arbitrage Start')
         for trade in self.trade_pair:
             order_id = trade.regular_trade(trade.catelog, trade.price, trade.amount)
             trade.set_order_id(order_id)
@@ -90,7 +90,7 @@ class ArbitrageInfo(object):
         # if A2 < M2:
         A = A1 - A2
         # ArbitrageInfo._logger.debug('A2<M2, A1={:<10.4f}, A2={:<10.4f}, A={:<10.4f}'.format(A1, A2, A))
-        ArbitrageInfo._logger.debug('A1={:<10.4f}, A2={:<10.4f}, A={:<10.4f}'.format(A1, A2, A))
+        ArbitrageInfo._logger.info('A1={:<10.4f}, A2={:<10.4f}, A={:<10.4f}'.format(A1, A2, A))
         if A < 0:
             trade_catelog = common.reverse_catelog(t1.catelog)
         else:  # A >= 0

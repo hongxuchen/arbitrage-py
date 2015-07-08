@@ -72,13 +72,13 @@ def handle_retry(exception, plt, handler):
     :param handler: real handler, no params, implemented as closure
     :return: None
     """
-    plt._logger.warn('Exception during request:"{}", will retry'.format(exception))
+    plt._logger.error('Exception during request:"{}", will retry'.format(exception))
     retry_counter = 0
     while retry_counter < config.RETRY_MAX:
         retry_counter += 1
         try:
             QThread.msleep(config.RETRY_MILLISECONDS)
-            plt._logger.debug('retry_counter={:<2}'.format(retry_counter))
+            plt._logger.warning('retry_counter={:<2}'.format(retry_counter))
             handler()  # real handle function
         except req_except.RequestException as e:  # all request exceptions
             if is_retry_exception(e):

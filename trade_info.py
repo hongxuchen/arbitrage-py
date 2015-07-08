@@ -34,14 +34,11 @@ class TradeInfo(object):
         regular trade, may cause pending
         :return: order_id
         """
-        TradeInfo._logger.debug(
-            'BEFORE, {:10s}: {:4s} {:10.4f} btc at price {:10.4f} cny'.format(self.plt_name, catelog, amount,
-                                                                           price))
+        TradeInfo._logger.debug('BEFORE trade')
         order_id = self.plt.trade(catelog, price, amount)
-        TradeInfo._logger.debug(
-            'AFTER,  {:10s}: {:4s} {:10.4f} btc at price {:10.4f} cny, order_id={:d}'.format(self.plt_name, catelog,
-                                                                                             amount,
-                                                                                             price, order_id))
+        TradeInfo._logger.info(
+            'Trade finished, {:10s}: {:4s} {:10.4f} btc at price {:10.4f} cny, order_id={:d}'.format(
+                self.plt_name, catelog, amount, price, order_id))
         return order_id
 
     def _asset_afford_trade(self, trade_amount, trade_price):
@@ -65,9 +62,9 @@ class TradeInfo(object):
                 waited_asset_times += 1
                 # FIXME this is a BUG
                 if waited_asset_times >= config.ASSET_WAIT_MAX:
-                    TradeInfo._logger.debug(
-                        '{}: not afford to "{}" after waiting {} times'.format(self.plt_name, self.catelog,
-                                                                               config.ASSET_WAIT_MAX))
+                    TradeInfo._logger.error(
+                        '{}: not afford to "{}" after waiting {} times'.format(
+                            self.plt_name, self.catelog, config.ASSET_WAIT_MAX))
                     return False
 
     # noinspection PyPep8Naming
@@ -85,7 +82,7 @@ class TradeInfo(object):
         M = self.plt.__class__.lower_bound
         # no trading amount
         if self.amount < config.minor_diff:
-            TradeInfo._logger.debug('{}: trading amount = 0, exit adjust_trade'.format(self.plt_name))
+            TradeInfo._logger.info('{}: trading amount = 0, exit adjust_trade'.format(self.plt_name))
             return
         # config.minor_diff <= self.amount
         wait_for_asset_times = 0
@@ -95,7 +92,7 @@ class TradeInfo(object):
             trade_catelog = self.catelog
             trade_price = common.adjust_price(trade_catelog, self.price)
             if self._asset_afford_trade(trade_amount, trade_price):
-                TradeInfo._logger.debug('bi-directional adjust_trade, waited {:d} times'.format(wait_for_asset_times))
+                TradeInfo._logger.info('bi-directional adjust_trade, waited {:d} times'.format(wait_for_asset_times))
                 # FIXME: it has data race problem with arbitrage thread, but no error within itself if single thread
                 # trade1, must succeed
                 self.regular_trade(trade_catelog, trade_price, trade_amount)
@@ -110,7 +107,7 @@ class TradeInfo(object):
             trade_amount = self.amount
             if self._asset_afford_trade(trade_amount, trade_price):
                 # trade must succeed
-                TradeInfo._logger.debug(
+                TradeInfo._logger.info(
                     '{} single adjust_trade, waited {:d} times'.format(self.plt_name, wait_for_asset_times))
                 self.regular_trade(trade_catelog, trade_price, trade_amount)
 

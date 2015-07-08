@@ -42,7 +42,7 @@ class ArbitrageConsumer(QtCore.QThread):
                     '[Consumer] queue empty, sleep for {:d}ms'.format(config.CONSUMER_SLEEP_MILLISECONS))
                 QtCore.QThread.msleep(config.CONSUMER_SLEEP_MILLISECONS)
             else:
-                ArbitrageConsumer._logger.debug('[Consumer] consuming')
+                ArbitrageConsumer._logger.info('[Consumer] consuming')
                 self.consume()
 
 
