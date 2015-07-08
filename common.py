@@ -89,13 +89,13 @@ def handle_retry(exception, plt, handler):
 
 
 def setup_logger():
-    log_dir = os.path.join(os.path.dirname(__file__), 'logger')
+    log_dir = os.path.join(os.path.dirname(__file__), 'logger').replace('\\', '/')
     try:
         os.makedirs(log_dir)
     except OSError as e:
         if e.errno != errno.EEXIST:
             raise
-    log_fname = os.path.join(log_dir, 'arbitrage.log')
+    log_fname = os.path.join(log_dir, 'arbitrage.log').replace('\\', '/')
     logging.config.fileConfig('logging_config.ini', defaults={
         'logfilename': log_fname
     })

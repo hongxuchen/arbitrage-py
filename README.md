@@ -8,7 +8,8 @@
 
 * 'Connection aborted.', error(104, 'Connection reset by peer')
 * 'ConnectionError' ('Connection aborted.', BadStatusLine(""''''"))
-* 'EOF occurred in violation of protocol (_ssl.c:581)'
+* 'EOF occurred in violation of protocol (\_ssl.c:581)'
+* ' Expecting value: line 1 column 1 (char 0)'
 
 ## bitbays.py:132
 * account too low <-- for arbitrage pair since the consumer may have used the asset
