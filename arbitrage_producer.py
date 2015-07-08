@@ -62,6 +62,7 @@ class ArbitrageProducer(QtCore.QThread):
             amount = min(config.upper_bound, ask_a_amount, bid_b_amount, plt_a_buy_amount, plt_b_sell_amount)
             amount = float('{:.4f}'.format(amount))
             amount = max(config.lower_bound, amount)
+            return amount
 
         amount = amount_refine()
         if amount - config.lower_bound < config.minor_diff:

@@ -7,6 +7,7 @@ from PySide import QtGui
 
 import arbitrage_consumer
 import arbitrage_producer
+from asset_info import AssetInfo
 from bitbays import BitBays
 import common
 from itbit import ItBitAPI
@@ -101,6 +102,8 @@ class ArbitrageUI(ui_main_win.Ui_MainWin):
         self.producer.start()
         self.consumer.start()
         self.trade_button.setText('Stop')
+        asset_info_list = [AssetInfo(plt) for plt in self.plt_list]
+        self.display_asset_summary(asset_info_list)
 
     def apply_trade(self):
         if not self.running:
@@ -124,6 +127,7 @@ class ArbitrageUI(ui_main_win.Ui_MainWin):
         self.producer.notify_asset.connect(self.display_asset_summary)
         self.producer.notify_trade.connect(self.display_arbitrage)
 
+    # TODO display nicely
     def display_arbitrage(self, arbitrage_info):
         self.trade_viewer.append(str(arbitrage_info))
 

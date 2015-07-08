@@ -24,8 +24,8 @@ UI_TBL_ROW_HEIGHT = 25
 TRADING_LOGGER = 'trading_logger'
 DEBUG_LOGGER = 'debug_logger'
 
-minor_diff = 10.0 ** (-precision)
 precision = 4
+minor_diff = 10.0 ** (-precision)
 
 upper_bound = 0.012
 lower_bound = 0.010

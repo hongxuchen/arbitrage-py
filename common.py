@@ -53,7 +53,7 @@ def adjust_price(trade_catelog, price):
 
 
 def is_retry_exception(exception):
-    for except_type in common.retry_except_tuple:
+    for except_type in retry_except_tuple:
         if isinstance(exception, except_type):
             return True
     return False
