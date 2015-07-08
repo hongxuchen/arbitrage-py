@@ -86,7 +86,7 @@ class BitBays(BTC):
             if result is None:
                 msg = response_data['message']
                 if msg.startswith('Invalid Nonce'):
-                    raise InvalidNonceError('InvalidNonceError: {}'.format(msg))
+                    raise InvalidNonceError('InvalidNonceError: {}, current_nonce={}'.format(msg, params['nonce']))
                 else:
                     BitBays._logger.critical(
                         'ERROR: api_type={}, error_message={}'.format(api_type, msg))

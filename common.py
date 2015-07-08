@@ -82,6 +82,7 @@ def handle_retry(exception, plt, handler):
             handler()  # real handle function
         except Exception as e:  # all request exceptions
             if is_retry_exception(e):
+                plt._logger.error('Exception after exception:"{}", will retry'.format(e))
                 continue
             else:
                 handle_exit(e, plt)

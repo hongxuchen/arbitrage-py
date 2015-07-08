@@ -11,17 +11,16 @@
 * 'EOF occurred in violation of protocol (\_ssl.c:581)'
 * ' Expecting value: line 1 column 1 (char 0)'
 
-## bitbays.py:132
+## bitbays.py
 * account too low <-- for arbitrage pair since the consumer may have used the asset
 
 ## other
 * display asset issue
-* when stop and exit, QThread may be unexpected terminated
-* after lock, seems pending sometimes
+* exit error on Mac <-- maybe due to QT bug?
 * producer should have higher priority
 
 ## cases
-{u'status': 400, u'message': u'Invalid Nonce: Nonce should > 1436332312433', u'result': None} <-- may have been done
+{u'status': 400, u'message': u'Invalid Nonce: Nonce should > 1436332312433', u'result': None} !!!
 
 
 ## hosts
