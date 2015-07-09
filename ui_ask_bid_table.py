@@ -32,7 +32,7 @@ class AskBidTable(QtGui.QTableWidget):
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
     api_list = [OKCoinCN(), BitBays()]
-    widget = AskBidTable(api_list)
+    widget = AskBidTable(api_list, 2)
     widget.move(centerized(widget))
     widget.show()
     sys.exit(app.exec_())

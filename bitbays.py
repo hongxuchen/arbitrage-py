@@ -31,8 +31,6 @@ class BitBays(BTC):
         super(BitBays, self).__init__(config.bitbays_info)
         self.symbol = config.bitbays_info['symbol']
         self.key = common.get_key_from_file('BitBays')
-        self._btc_rate = None
-        self._user_data = None
         self.api_public = ['ticker', 'trades', 'depth']
         self.api_private = ['info', 'orders', 'transactions', 'trade', 'cancel', 'order']
         self._counter = int(time.time() * 1000)
@@ -83,7 +81,6 @@ class BitBays(BTC):
             assert (response_data is not None)
             result = response_data['result']
             # TODO check other api_type fail
-            # TODO exception and result None logic may be wrong
             if result is None:
                 msg = response_data['message']
                 if msg.startswith('Invalid Nonce'):
@@ -134,7 +131,6 @@ class BitBays(BTC):
         bids = sorted(res['bids'], key=lambda bid: bid[0], reverse=True)[:length]
         assert (asks[-1][0] > bids[0][0])
         asks_bids = asks + bids
-        # BitBays._logger.debug(asks_bids)
         return asks_bids
 
     def api_trades(self):

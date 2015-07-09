@@ -1,9 +1,3 @@
-thread allocation:
-
-1. Thread1 for arbitrage detection: producer
-2. Thread2 for arbitrage and monitoring: consumer
-
-
 # 监控未成交交易
 
 ## 前置条件
@@ -45,6 +39,6 @@ AdjustTrade(p, type, amount)
   if amount >= M:
     t={p, type, amount}
 ```
-    
+
 ## 后置条件
 不再有未成交交易

@@ -74,7 +74,7 @@ class ArbitrageProducer(QtCore.QThread):
         ArbitrageProducer._logger.debug(asset_info_a)
         ArbitrageProducer._logger.debug(asset_info_b)
         ## FIXME this only displays the asset_info before the trade
-        self.notify_asset.emit(asset_info_list)
+        # self.notify_asset.emit(asset_info_list)
         buy_trade = TradeInfo(plt_a, 'buy', ask_a_price, amount)  # buy at plt_a
         sell_trade = TradeInfo(plt_b, 'sell', bid_b_price, amount)  # sell at plt_b
         trade_pair = (buy_trade, sell_trade)
@@ -87,7 +87,6 @@ class ArbitrageProducer(QtCore.QThread):
         self.arbitrage_queue.append(arbitrage_info)
         return True
 
-    # FIXME: this function should be refactored to add MUTEX
     def process_arbitrage(self):
         self._info_list = [plt.ask_bid_list(1) for plt in self.plt_list]
         assert (len(self._info_list[0]) == len(self._info_list[1]))
@@ -102,7 +101,6 @@ class ArbitrageProducer(QtCore.QThread):
             ask_list.append(info[length / 2 - 1])
             bid_list.append(info[length / 2])
 
-        # if can arbitrage, return trade pair
         for i in range(2):  # len(self._info_list)
             ask_a = ask_list[i]  # a
             bid_b = bid_list[1 - i]  # the oposite, b
