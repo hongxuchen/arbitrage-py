@@ -186,7 +186,10 @@ class OKCoinAPI(BTC):
         if amount:
             trade_dict['amount'] = str(amount)
         data = self.api_trade(trade_dict)
-        return data['order_id']
+        if data['result'] is False:
+            return config.INVALID_ORDER_ID
+        else:
+            return data['order_id']
 
     def buy_market(self, mo_amount):
         OKCoinAPI._logger.debug('OKCoinAPI.buy_market with {}'.format(mo_amount))
@@ -196,9 +199,6 @@ class OKCoinAPI(BTC):
         assert (mo_amount >= config.lower_bound)
         OKCoinAPI._logger.debug('OKCoinAPI.sell_market with amount {}'.format(mo_amount))
         return self.trade('sell_market', None, mo_amount)
-
-    def api_batch_trade(self, trade_dict):
-        pass
 
     def api_cancel_order(self, order_id):
         params = {
@@ -256,7 +256,8 @@ if __name__ == '__main__':
     okcoin_cn = OKCoinCN()
     # print(okcoin_cn.ask_bid_list(2))
     # print(okcoin_cn.assets())
-    # order_id = okcoin_cn.trade('buy', 10, 0.01)
+    order_id = okcoin_cn.trade('buy', 10, 10000)
+    print(order_id)
     # print(okcoin_cn.cancel(order_id))
-    print(okcoin_cn.cancel(123456))
+    # print(okcoin_cn.cancel(123456))
     # res = okcoin_cn.order_info(order_id)

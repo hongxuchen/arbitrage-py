@@ -45,6 +45,9 @@ request_timeout = 3.0
 RETRY_MAX = 8
 RETRY_MILLISECONDS = 100
 
+
+INVALID_ORDER_ID = -1
+
 monitor_interval_seconds = 3
 
 verbose = False

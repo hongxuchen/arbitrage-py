@@ -1,6 +1,6 @@
 # known issues
 
-## okcoin.py:49
+## okcoin.py
 
 * 'Connection aborted.', gaierror(-5, 'No address associated with hostname') <-- fixed by hosts
 * 'Connection aborted.', gaierror(-2, 'Name or service not known')  <-- fixed by hosts
@@ -15,12 +15,7 @@
 * account too low <-- for arbitrage pair since the consumer may have used the asset
 
 ## other
-* display asset issue
 * exit error on Mac <-- due to QT bug?
-* producer should have higher priority
-* specify requests time-out
-
-## cases
 
 ## hosts
 121.199.251.136 www.okcoin.cn

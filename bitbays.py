@@ -211,14 +211,19 @@ class BitBays(BTC):
 
     # uses private
     def trade(self, op_type, price, amount):
+        """
+        return: order_id if succeed, otherwise invalid id
+        """
         trade_dict = {
             'op': op_type,
             'price': str(price),
             'amount': str(amount)
         }
         res = self.api_trade(trade_dict)['result']
-        order_id = res['id']
-        return order_id
+        if res is None:
+            return config.INVALID_ORDER_ID
+        else:
+            return res['id']
 
     # uses private
     def _market_trade(self, op_type, mo_amount):
@@ -293,8 +298,9 @@ if __name__ == '__main__':
         # print(bitbays.ask_bid_list(2))
         # print(bitbays.assets())
         # print(bitbays.api_transactions(0))
-        # order_id = bitbays.trade('sell', 10000, 0.001)
-    print(bitbays.cancel(123456))
+    order_id = bitbays.trade('sell', 10000, 1000)
+    print(order_id)
+    # print(bitbays.cancel(123456))
         # limit order id
         # res = bitbays.order_info(order_id)
         # print(res)

@@ -5,7 +5,6 @@ import config
 
 
 class TradeInfo(object):
-    INVALID_ORDER_ID = -1
     _logger = common.setup_logger()
 
     def __init__(self, plt, catelog, price, amount, fiat='cny'):
@@ -24,7 +23,7 @@ class TradeInfo(object):
         self.price = price
         self.fiat = fiat
         # initialized with an invalid number
-        self.order_id = TradeInfo.INVALID_ORDER_ID
+        self.order_id = config.INVALID_ORDER_ID
 
     def set_order_id(self, order_id):
         self.order_id = order_id
