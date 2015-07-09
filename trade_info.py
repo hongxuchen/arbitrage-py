@@ -113,7 +113,7 @@ class TradeInfo(object):
     def cancel(self):
         if self.order_id != -1:
             TradeInfo._logger.warning('{:10s} cancel order_id={}'.format(self.plt_name, self.order_id))
-            self.plt.cancel(self.order_id)
+            return self.plt.cancel(self.order_id)
 
     def get_order_info(self):
         return self.plt.order_info(self.order_id)

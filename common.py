@@ -43,6 +43,13 @@ def reverse_catelog(original_catelog):
     else:  # sell
         return 'buy'
 
+def adjust_arbitrage_price(trade_catelog, price):
+    assert (trade_catelog in ['buy', 'sell'])
+    if trade_catelog == 'buy':
+        return price + config.arbitrage_diff / 3.0
+    else:  # sell
+        return price - config.arbitrage_diff / 3.0
+
 
 def adjust_price(trade_catelog, price):
     assert (trade_catelog in ['buy', 'sell'])
@@ -79,9 +86,9 @@ def handle_retry(exception, plt, handler):
         try:
             QThread.msleep(config.RETRY_MILLISECONDS)
             plt._logger.warning('retry_counter={:<2}'.format(retry_counter))
-            # config.verbose = True
+            config.verbose = True
             res = handler()  # real handle function
-            # config.verbose = False
+            config.verbose = False
             return res
         # TODO check whether accessable to exception handling
         except Exception as e:  # all request exceptions
@@ -111,8 +118,11 @@ class InvalidNonceError(Exception):
     def __init__(self, message):
         super(InvalidNonceError, self).__init__(message)
 
+class NULLResponseError(Exception):
+    def __init__(self, message):
+        super(NULLResponseError, self).__init__(message)
 
 MUTEX = threading.Lock()
-retry_except_tuple = (req_except.ConnectionError, req_except.Timeout, req_except.HTTPError, InvalidNonceError)
+retry_except_tuple = (req_except.ConnectionError, req_except.Timeout, req_except.HTTPError, InvalidNonceError, NULLResponseError)
 exit_except_tuple = (req_except.URLRequired, req_except.TooManyRedirects)
 USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.130 Safari/537.36'

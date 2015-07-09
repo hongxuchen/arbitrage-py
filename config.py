@@ -32,7 +32,7 @@ minor_diff = 10.0 ** (-precision)
 upper_bound = 0.012
 lower_bound = 0.010
 lower_rate = 0.5
-arbitrage_diff = 0.3
+arbitrage_diff = 0.9
 
 PENDING_SECONDS = 3.0
 adjust_percentage = 0.1
@@ -41,7 +41,8 @@ ASSET_FOR_TRAID_DIFF = 0.0005
 
 CONSUMER_SLEEP_MILLISECONS = 500
 
-RETRY_MAX = 3
+request_timeout = 3.0
+RETRY_MAX = 8
 RETRY_MILLISECONDS = 100
 
 monitor_interval_seconds = 3

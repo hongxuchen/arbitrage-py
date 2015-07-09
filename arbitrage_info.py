@@ -22,9 +22,10 @@ class ArbitrageInfo(object):
         inital trading, this guarantees that the asset is enough
         :return:
         """
-        ArbitrageInfo._logger.info('Arbitrage Start')
+        ArbitrageInfo._logger.warning('Arbitrage Start')
         for trade in self.trade_pair:
-            order_id = trade.regular_trade(trade.catelog, trade.price, trade.amount)
+            trade_price = common.adjust_arbitrage_price(trade.catelog, trade.price)
+            order_id = trade.regular_trade(trade.catelog, trade_price, trade.amount)
             trade.set_order_id(order_id)
 
     def normalize_trade_pair(self):
@@ -44,9 +45,13 @@ class ArbitrageInfo(object):
     def seconds_since_trade(self):
         return time.time() - self.time
 
+    # FIXME decide how to cancel correctly
     def _cancel_orders(self):
         for trade in self.trade_pair:
-            trade.cancel()
+            succeed = trade.cancel()
+            if succeed is False:
+                return False
+        return True
 
     def _init_order_dict(self):
         """ self._order_dict is initialized/changed for each adjust

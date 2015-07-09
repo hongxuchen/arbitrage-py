@@ -10,7 +10,6 @@ import requests
 
 from btc import BTC
 import common
-from common import InvalidNonceError
 import config
 from order_info import OrderInfo
 
@@ -66,45 +65,45 @@ class BitBays(BTC):
         def _request_impl():
             r = None
             if api_type in self.api_public:
-                r = requests.get(self._real_uri(api_type), params=params)
+                r = requests.get(self._real_uri(api_type), params=params, timeout=config.request_timeout, verify=False)
             elif api_type in self.api_private:
                 params['nonce'] = self._nonce()
                 headers = self._post_param(params)
-                if config.verbose:
-                    BitBays._logger.info('PARAMS={}'.format(params))
-                r = requests.post(self._real_uri(api_type), data=params, headers=headers)
+                r = requests.post(self._real_uri(api_type), data=params, headers=headers, timeout=config.request_timeout, verify=False)
             else:
                 BitBays._logger.critical('api_type={} not supported'.format(api_type))
                 sys.exit(1)
             # BitBays._logger.debug(r.url)
             # FIXME check error
-            response_data = r.json()
-            assert (response_data is not None)
-            result = response_data['result']
+            res_data = r.json()
+            # if config.verbose:
+            #     BitBays._logger.warning('bitbays response={}'.format(res_data))
+            if res_data is None:
+                raise common.NULLResponseError('NULLResponseError: Response is empty for api_type={}'.format(api_type))
+            result = res_data['result']
             # TODO check other api_type fail
             if result is None:
-                msg = response_data['message']
+                msg = res_data['message']
                 if msg.startswith('Invalid Nonce'):
-                    raise InvalidNonceError('InvalidNonceError: {}, current_nonce={}'.format(msg, params['nonce']))
+                    raise common.InvalidNonceError('InvalidNonceError: {}, current_nonce={}'.format(msg, params['nonce']))
                 else:
                     BitBays._logger.critical(
                         'ERROR: api_type={}, error_message={}'.format(api_type, msg))
                     if api_type not in ['cancel', 'trade']:
                         # FIXME terminate safely
                         sys.exit(1)
-            return result
+            return res_data
 
         try:
             result = _request_impl()
             return result
-        except common.retry_except_tuple as e:
-            return common.handle_retry(e, BitBays, _request_impl)
-        except common.exit_except_tuple as e:
-            common.handle_exit(e, BitBays)
         except Exception as e:
-            common.handle_exit(e, BitBays)
+            if common.is_retry_exception(e):
+                return common.handle_retry(e, BitBays, _request_impl)
+            else:
+                common.handle_exit(e, BitBays)
 
-            #############################################################################
+    #############################################################################
 
     # public api
     def api_ticker(self):
@@ -116,7 +115,7 @@ class BitBays(BTC):
 
     # uses public api
     def ask1(self):
-        ticker = self.api_ticker()
+        ticker = self.api_ticker()['result']
         sell = ticker['sell']
         sell = common.to_decimal(sell)
         return sell
@@ -127,7 +126,7 @@ class BitBays(BTC):
         payload = {
             'market': 'btc_' + self.symbol
         }
-        res = self._setup_request('depth', params=payload)
+        res = self._setup_request('depth', params=payload)['result']
         asks = sorted(res['asks'], key=lambda ask: ask[0], reverse=True)[-length:]
         bids = sorted(res['bids'], key=lambda bid: bid[0], reverse=True)[:length]
         assert (asks[-1][0] > bids[0][0])
@@ -217,7 +216,7 @@ class BitBays(BTC):
             'price': str(price),
             'amount': str(amount)
         }
-        res = self.api_trade(trade_dict)
+        res = self.api_trade(trade_dict)['result']
         order_id = res['id']
         return order_id
 
@@ -228,7 +227,7 @@ class BitBays(BTC):
             'op': op_type,
             'mo_amount': mo_amount
         }
-        data = self.api_trade(trade_dict)
+        data = self.api_trade(trade_dict)['result']
         return data
 
     # uses private
@@ -243,28 +242,30 @@ class BitBays(BTC):
 
     # uses private
     def cancel(self, order_id):
-        BitBays._logger.debug('canceling order {}...'.format(order_id))
-        data = self.api_cancel(order_id)
-        return data
+        data = self.api_cancel(order_id)['result']
+        if data is None:
+            return False
+        else:
+            return True
 
     # uses private
     def cancel_all(self, catalog=2):
         if catalog & 1 == 1:
             BitBays._logger.info('cancelling buy orders')
-            buy = self.api_orders(0)
+            buy = self.api_orders(0)['result']
             if buy is not None:
                 for t in buy:
-                    self.api_cancel(t['buy'])
+                    self.api_cancel(t['buy'])['result']
         if (catalog >> 1) & 1 == 1:
             BitBays._logger.info('cancelling sell orders')
-            sell = self.api_orders(1)
+            sell = self.api_orders(1)['result']
             if sell is not None:
                 for t in sell:
-                    self.api_cancel(t['id'])
+                    self.api_cancel(t['id'])['result']
 
     # uses private
     def order_info(self, order_id):
-        info = self.api_order_info(order_id)
+        info = self.api_order_info(order_id)['result']
         amount = 0.0
         if 'amount_total' in info:
             amount = info['amount_total']
@@ -277,7 +278,7 @@ class BitBays(BTC):
 
     # uses private
     def assets(self):
-        user_info = self.api_user_info()
+        user_info = self.api_user_info()['result']
         info = user_info['wallet']
         l = [
             [common.to_decimal(info[self.symbol]['lock']), common.to_decimal(info[self.symbol]['avail'])],
@@ -288,11 +289,12 @@ class BitBays(BTC):
 
 if __name__ == '__main__':
     bitbays = BitBays()
-    while True:
+    # while True:
         # print(bitbays.ask_bid_list(2))
-        print(bitbays.assets())
-        print(bitbays.api_transactions(0))
+        # print(bitbays.assets())
+        # print(bitbays.api_transactions(0))
         # order_id = bitbays.trade('sell', 10000, 0.001)
+    print(bitbays.cancel(123456))
         # limit order id
         # res = bitbays.order_info(order_id)
         # print(res)

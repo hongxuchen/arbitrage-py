@@ -19,6 +19,7 @@ import ui_asset_table
 import ui_selections
 import ui_settings
 from ui_trading_viewer import TradingViewer
+import requests
 
 select_plt_dict = {
     'OKCoinCN': OKCoinCN,
@@ -29,6 +30,7 @@ select_plt_dict = {
 
 class ArbitrageUI(ui_main_win.Ui_MainWin):
     _logger = common.setup_logger()
+
     def __init__(self, length=5):
         super(ArbitrageUI, self).__init__()
         self.depth_length = length
@@ -104,6 +106,7 @@ class ArbitrageUI(ui_main_win.Ui_MainWin):
         self.trade_button.setText('Arbitrage')
 
     def start_trade(self):
+        requests.packages.urllib3.disable_warnings()
         self.running = True
         ArbitrageUI._logger.info('start producer')
         self.producer.running = True

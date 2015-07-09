@@ -16,6 +16,7 @@ from order_info import OrderInfo
 
 class OKCoinAPI(BTC):
     _logger = common.setup_logger()
+    trade_cancel_api_list = ['cancel_order', 'trade']
     headers = {
         'user-agent': common.USER_AGENT,
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -50,29 +51,32 @@ class OKCoinAPI(BTC):
         def _request_impl():
             r = None
             if api_type in self.api_public:
-                r = requests.request('get', self._real_uri(api_type), params=params, headers=OKCoinAPI.headers)
+                r = requests.request('get', self._real_uri(api_type), params=params, headers=OKCoinAPI.headers, timeout=config.request_timeout, verify=False)
             elif api_type in self.api_private:
                 # TODO data => js string?
                 r = requests.request('post', self._real_uri(api_type), data=data, params=params,
-                                     headers=OKCoinAPI.headers)
+                                     headers=OKCoinAPI.headers, timeout=config.request_timeout, verify=False)
             else:
                 OKCoinAPI._logger.critical('api_type [{}] not supported'.format(api_type))
                 # FIXME terminate safely
                 sys.exit(1)
             # OKCoinAPI._logger.debug(r.url)
             # FIXME should consider exception
-            return r.json()
+            res = r.json()
+            # if config.verbose:
+            #     OKCoinAPI._logger.warning('response={}'.format(res))
+            if res is None:
+                raise common.NULLResponseError('NULLResponseError: Response is empty for api_type={}'.format(api_type))
+            return res
 
         try:
             response_data = _request_impl()
-            assert (response_data is not None)
             return response_data
-        except common.retry_except_tuple as e:
-            common.handle_retry(e, OKCoinAPI, _request_impl)
-        except common.exit_except_tuple as e:
-            common.handle_exit(e, OKCoinAPI)
         except Exception as e:
-            common.handle_exit(e, OKCoinAPI)
+            if common.is_retry_exception(e):
+                return common.handle_retry(e, OKCoinAPI, _request_impl)
+            else:
+                common.handle_exit(e, OKCoinAPI)
 
     ### public api
 
@@ -101,12 +105,10 @@ class OKCoinAPI(BTC):
 
     def ask_bid_list(self, length=2):
         data = self.api_depth(length)
-        # OKCoinAPI._logger.debug(data)
         asks = sorted(data['asks'], key=lambda ask: ask[0], reverse=True)
         bids = sorted(data['bids'], key=lambda bid: bid[0], reverse=True)
         assert (asks[-1][0] > bids[0][0])
         asks_bids = asks + bids
-        # OKCoinAPI._logger.debug(asks_bids)
         return asks_bids
 
     def api_trades(self, since=None):
@@ -149,14 +151,12 @@ class OKCoinAPI(BTC):
         if param_dict is not None:
             params.update(param_dict)
         params['sign'] = self._sign(params)
-        # print(params)
         response_data = self._setup_request(api_type, None, params)
-        assert (response_data is not None)
         result_status = response_data['result']
         if result_status is False:
             OKCoinAPI._logger.critical(
                 'ERROR: api_type={}, response_data={}'.format(api_type, response_data))
-            if api_type not in ['cancel_order', 'trade']:
+            if api_type not in OKCoinAPI.trade_cancel_api_list:
                 # FIXME terminate safely
                 sys.exit(1)
         return response_data
@@ -185,11 +185,7 @@ class OKCoinAPI(BTC):
             trade_dict['price'] = str(price)
         if amount:
             trade_dict['amount'] = str(amount)
-
         data = self.api_trade(trade_dict)
-        if data['result'] is False:
-            OKCoinAPI._logger.critical(data)
-            sys.exit(1)
         return data['order_id']
 
     def buy_market(self, mo_amount):
@@ -213,9 +209,11 @@ class OKCoinAPI(BTC):
         return res
 
     def cancel(self, order_id):
-        OKCoinAPI._logger.debug('canceling order {}...'.format(order_id))
+        """
+        return whether cancel succeeds or not
+        """
         data = self.api_cancel_order(order_id)
-        return data
+        return data['result']
 
     def api_order_info(self, order_id):
         params = {
@@ -226,27 +224,11 @@ class OKCoinAPI(BTC):
         return res
 
     def order_info(self, order_id):
-        # orders = self.api_order_info(order_id)
-        # print(orders)
         info = self.api_order_info(order_id)['orders'][0]
         catalog = info['type']
         remaining_amount = info['amount'] - info['deal_amount']
-        # create_time = info['create_date'] / 1000.0
-        # order_info = OrderInfo(catalog, remaining_amount, create_time)
         order_info = OrderInfo(catalog, remaining_amount)
         return order_info
-
-    def api_order_history(self):
-        pass
-
-    def api_withdraw(self):
-        pass
-
-    def api_cancel_withdraw(self):
-        pass
-
-    def api_order_fee(self):
-        pass
 
     def assets(self):
         funds = self.api_userinfo()['info']['funds']
@@ -270,21 +252,11 @@ class OKCoinCOM(OKCoinAPI):
         super(OKCoinCOM, self).__init__(config.okcoin_com_info)
         self.key = common.get_key_from_file('OKCoinCOM')
 
-
-status_dict = {
-    -1: 'cancelled',
-    0: 'unfilled',
-    1: 'partially filled',
-    2: 'fully filled',
-    4: 'cancel request in process'
-}
-
 if __name__ == '__main__':
     okcoin_cn = OKCoinCN()
-    while True:
-        print(okcoin_cn.ask_bid_list(2))
-        print(okcoin_cn.assets())
-        # res = okcoin_cn.api_trade(trade_dict)
-        # order_id = okcoin_cn.trade('buy', 10, 0.01)
-        # res = okcoin_cn.order_info(order_id)
-        # print(res)
+    # print(okcoin_cn.ask_bid_list(2))
+    # print(okcoin_cn.assets())
+    # order_id = okcoin_cn.trade('buy', 10, 0.01)
+    # print(okcoin_cn.cancel(order_id))
+    print(okcoin_cn.cancel(123456))
+    # res = okcoin_cn.order_info(order_id)
