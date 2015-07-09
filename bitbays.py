@@ -91,7 +91,7 @@ class BitBays(BTC):
                 else:
                     BitBays._logger.critical(
                         'ERROR: api_type={}, error_message={}'.format(api_type, msg))
-                    if api_type != 'cancel':
+                    if api_type not in ['cancel', 'trade']:
                         # FIXME terminate safely
                         sys.exit(1)
             return result

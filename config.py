@@ -32,7 +32,7 @@ minor_diff = 10.0 ** (-precision)
 upper_bound = 0.012
 lower_bound = 0.010
 lower_rate = 0.5
-arbitrage_diff = 0.0
+arbitrage_diff = 0.3
 
 PENDING_SECONDS = 3.0
 adjust_percentage = 0.1

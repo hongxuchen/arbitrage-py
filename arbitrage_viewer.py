@@ -41,7 +41,7 @@ class ArbitrageUI(ui_main_win.Ui_MainWin):
         self.setup_actions()
 
     def closeEvent(self, event):
-        reply = QtGui.QMessageBox.question(self, 'message', 'are you sure to quit?',
+        reply = QtGui.QMessageBox.question(self, 'message', 'Really quit?',
                                            QtGui.QMessageBox.Yes | QtGui.QMessageBox.No, QtGui.QMessageBox.No)
         if reply == QtGui.QMessageBox.Yes:
             if self.running:

@@ -155,7 +155,7 @@ class OKCoinAPI(BTC):
         if result_status is False:
             OKCoinAPI._logger.critical(
                 'ERROR: api_type={}, response_data={}'.format(api_type, response_data))
-            if api_type != 'cancel_order':
+            if api_type not in ['cancel_order', 'trade']:
                 # FIXME terminate safely
                 sys.exit(1)
         return response_data

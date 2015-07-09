@@ -20,11 +20,9 @@ class AssetInfo(object):
     def has_pending_btc(self):
         return self.btc_pending > config.minor_diff
 
-    ### FIXME sub-optimal
     def afford_buy_amount(self, price):
         return self.fiat_avail / price
 
-    ### FIXME sub-optimal
     def afford_sell_amount(self):
         return self.btc_avail
 
