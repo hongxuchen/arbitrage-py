@@ -85,7 +85,6 @@ def handle_retry(exception, plt, handler):
             return res
         # TODO check whether accessable to exception handling
         except Exception as e:  # all request exceptions
-            plt._logger.error('EXCEPTION:"{}" '.format(e))
             if is_retry_exception(e):
                 plt._logger.error('Exception after exception:"{}", will retry'.format(e))
                 continue

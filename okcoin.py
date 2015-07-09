@@ -60,6 +60,7 @@ class OKCoinAPI(BTC):
                 # FIXME terminate safely
                 sys.exit(1)
             # OKCoinAPI._logger.debug(r.url)
+            # FIXME should consider exception
             return r.json()
 
         try:

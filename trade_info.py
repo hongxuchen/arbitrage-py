@@ -24,7 +24,7 @@ class TradeInfo(object):
         self.price = price
         self.fiat = fiat
         # initialized with an invalid number
-        self.order_id = TradeInfo.INVALID_ORDER_ID  # to be accomplished
+        self.order_id = TradeInfo.INVALID_ORDER_ID
 
     def set_order_id(self, order_id):
         self.order_id = order_id
@@ -60,7 +60,7 @@ class TradeInfo(object):
                 return True
             else:
                 waited_asset_times += 1
-                # FIXME this is a BUG
+                # FIXME use monitor thread to deal with this issue
                 if waited_asset_times >= config.ASSET_WAIT_MAX:
                     TradeInfo._logger.error(
                         '{}: not afford to "{}" after waiting {} times'.format(
@@ -93,7 +93,6 @@ class TradeInfo(object):
             trade_price = common.adjust_price(trade_catelog, self.price)
             if self._asset_afford_trade(trade_amount, trade_price):
                 TradeInfo._logger.warning('bi-directional adjust_trade, waited {:d} times'.format(wait_for_asset_times))
-                # FIXME: it has data race problem with arbitrage thread, but no error within itself if single thread
                 # trade1, must succeed
                 self.regular_trade(trade_catelog, trade_price, trade_amount)
                 # trade2, must succeed

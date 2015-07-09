@@ -16,8 +16,9 @@
 
 ## other
 * display asset issue
-* exit error on Mac <-- maybe due to QT bug?
+* exit error on Mac <-- due to QT bug?
 * producer should have higher priority
+* specify requests time-out
 
 ## cases
 ----------
@@ -30,7 +31,7 @@ INFO 2015-07-09 09:55:01                140508430841600           bitbays.py:  7
  WARNING 2015-07-09 09:55:02                140508430841600        trade\_info.py:  41 - Trade in BitBays   : sell     0.0120 btc at price  1508.4990 cny, order\_id=56572553
 
 ---------
-   ERROR 2015-07-09 11:56:05      140272345741056                 common.py:  75 - Exception during request:"EOF occurred in violation of protocol (_ssl.c:590)", will retry
+   ERROR 2015-07-09 11:56:05      140272345741056                 common.py:  75 - Exception during request:"EOF occurred in violation of protocol (\_ssl.c:590)", will retry
  WARNING 2015-07-09 11:56:06      140272345741056                 common.py:  81 - retry_counter=1
 Traceback (most recent call last):
   File "/home/hongxu/Dropbox/Bitcoin/arbitrage/arbitrage_producer.py", line 31, in run
@@ -40,6 +41,16 @@ Traceback (most recent call last):
   File "/home/hongxu/Dropbox/Bitcoin/arbitrage/okcoin.py", line 104, in ask_bid_list
     asks = sorted(data['asks'], key=lambda ask: ask[0], reverse=True)
 TypeError: 'NoneType' object has no attribute '__getitem__'
+
+---------
+  File "/home/hongxu/Dropbox/Bitcoin/arbitrage/asset_info.py", line 12, in __init__
+    self.asset_raw_list = plt.assets()
+  File "/home/hongxu/Dropbox/Bitcoin/arbitrage/okcoin.py", line 251, in assets
+    funds = self.api_userinfo()['info']['funds']
+  File "/home/hongxu/Dropbox/Bitcoin/arbitrage/okcoin.py", line 164, in api_userinfo
+    res = self._private_request('userinfo', None)
+  File "/home/hongxu/Dropbox/Bitcoin/arbitrage/okcoin.py", line 153, in _private_request
+    assert (response_data is not None)
 
 
 ## hosts
