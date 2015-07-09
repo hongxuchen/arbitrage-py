@@ -106,7 +106,7 @@ class ArbitrageUI(ui_main_win.Ui_MainWin):
         self.trade_button.setText('Arbitrage')
 
     def start_trade(self):
-        requests.packages.urllib3.disable_warnings()
+        # requests.packages.urllib3.disable_warnings()
         self.running = True
         ArbitrageUI._logger.info('start producer')
         self.producer.running = True

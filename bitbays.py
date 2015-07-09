@@ -65,11 +65,11 @@ class BitBays(BTC):
         def _request_impl():
             r = None
             if api_type in self.api_public:
-                r = requests.get(self._real_uri(api_type), params=params, timeout=config.request_timeout, verify=False)
+                r = requests.get(self._real_uri(api_type), params=params, timeout=config.request_timeout, verify=True)
             elif api_type in self.api_private:
                 params['nonce'] = self._nonce()
                 headers = self._post_param(params)
-                r = requests.post(self._real_uri(api_type), data=params, headers=headers, timeout=config.request_timeout, verify=False)
+                r = requests.post(self._real_uri(api_type), data=params, headers=headers, timeout=config.request_timeout, verify=True)
             else:
                 BitBays._logger.critical('api_type={} not supported'.format(api_type))
                 sys.exit(1)
