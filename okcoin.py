@@ -65,8 +65,8 @@ class OKCoinAPI(BTC):
             res = r.json()
             # if config.verbose:
             #     OKCoinAPI._logger.warning('response={}'.format(res))
-            if res is None:
-                raise common.NULLResponseError('NULLResponseError: Response is empty for api_type={}'.format(api_type))
+            if res is None or res is {}:
+                raise common.NULLResponseError('NULLResponseError: Response is empty/{} for api_type={}'.format(api_type))
             return res
 
         try:
