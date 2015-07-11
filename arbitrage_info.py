@@ -73,10 +73,12 @@ class ArbitrageInfo(object):
         A = A1 - A2
         # ArbitrageInfo._logger.debug('A2<M2, A1={:<10.4f}, A2={:<10.4f}, A={:<10.4f}'.format(A1, A2, A))
         ArbitrageInfo._logger.warning('A1={:<10.4f}, A2={:<10.4f}, A={:<10.4f}'.format(A1, A2, A))
-        if A < 0:
+        if A < -config.minor_diff:
             trade_catelog = common.reverse_catelog(t1.catelog)
-        else:  # A >= 0
+        elif A > config.minor_diff:  # A >= 0
             trade_catelog = t1.catelog
+        else:
+            return
         new_t1 = TradeInfo(p1, trade_catelog, t1.price, abs(A))
         common.MUTEX.acquire(True)  # blocking
         TradeInfo._logger.info('[Consumer] acquire lock')
