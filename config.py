@@ -20,7 +20,7 @@ itbit_info = {
 
 fiat = 'cny'
 
-precision = 4
+precision = 6
 minor_diff = 10.0 ** (-precision)
 
 ## upper_bound must > lower_bound for all platforms

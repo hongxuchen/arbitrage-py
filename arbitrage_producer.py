@@ -24,7 +24,7 @@ class ArbitrageProducer(QtCore.QThread):
         self.arbitrage_queue = arbitrage_list
         self.symbol = symbol
         self.running = False
-        self.lower_bound = min(plt_list[0].lower_bound, plt_list[1].lower_bound)
+        self.lower_bound = max(plt_list[0].lower_bound, plt_list[1].lower_bound)
 
     def run(self):
         while self.running:

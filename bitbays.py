@@ -73,7 +73,6 @@ class BitBays(BTC):
             else:
                 BitBays._logger.critical('api_type={} not supported'.format(api_type))
                 sys.exit(1)
-            # BitBays._logger.debug(r.url)
             # FIXME check error
             res_data = r.json()
             # if config.verbose:

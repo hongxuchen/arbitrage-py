@@ -33,8 +33,8 @@ class ArbitrageInfo(object):
         """
         ta = self.trade_pair[0]
         tb = self.trade_pair[1]
-        ma = ta.plt.__class__.lower_bound
-        mb = tb.plt.__class__.lower_bound
+        ma = ta.plt.lower_bound
+        mb = tb.plt.lower_bound
         if ma < mb:
             return ta, tb
         else:
@@ -43,58 +43,31 @@ class ArbitrageInfo(object):
     def seconds_since_trade(self):
         return time.time() - self.time
 
-    # FIXME decide how to cancel correctly
-    def _cancel_orders(self):
-        succeed_list = []
-        for trade in self.trade_pair:
-            status = trade.cancel()
-            succeed_list.append(status)
-        return succeed_list
-
-    def _init_order_dict(self):
-        """ self._order_dict is initialized/changed for each adjust
-        :return: order dict
+    def get_order_adjust_dict(self):
         """
-        self._order_dict = {}
-        for trade in self.trade_pair:
-            order_info = trade.get_order_info()
-            self._order_dict[trade.plt] = order_info
-        return self._order_dict
-
-    def has_pending(self):
-        """
-        has pending when at least one platform has pending
-        need to get order dict for current arbitrage pair
+        if finding pending, cancel order as soon as possible; if cancel fails, no pending
+        NOTE: order_id is useless after this
         :return:
         """
-        self._init_order_dict()
-        for order in self._order_dict.values():
-            if order.has_pending():
-                return True
-        # no remaining amount, no need to adjust_pending, done
-        return False
-
-    def adjust_pending(self):
-        if self.has_pending():
-            self.adjust_impl()
+        order_info_dict = {}
+        for trade in self.trade_pair:
+            order_info = trade.get_order_info()
+            if order_info.has_pending():
+                cancel_status = trade.cancel()
+                if cancel_status is False:
+                    order_info.remaining_amount = 0.0
+            order_info_dict[trade.plt] = order_info
+        return order_info_dict
 
     # noinspection PyPep8Naming
-    def adjust_impl(self):
-        """adjust after finding has_pending; self._order_dict has been initialized
-        :return: None
-        """
+    def adjust_pending(self):
+        adjust_dict = self.get_order_adjust_dict()
         t1, t2 = self.normalize_trade_pair()
-        # ArbitrageInfo._logger.debug('Adjust Pair: {} {}'.format(t1, t2))
         p1, p2 = t1.plt, t2.plt
-        O1, O2 = self._order_dict[p1], self._order_dict[p2]
+        O1, O2 = adjust_dict[p1], adjust_dict[p2]
         A1, A2 = O1.remaining_amount, O2.remaining_amount
-        cancel_status_list = self._cancel_orders()
-        if cancel_status_list[0] is False:
-            A1 = 0.0
-        if cancel_status_list[1] is False:
-            A2 = 0.0
-        M1 = p1.__class__.lower_bound
-        M2 = p2.__class__.lower_bound
+        M1 = p1.lower_bound
+        M2 = p2.lower_bound
         #################################
         # if A2 < M2:
         A = A1 - A2
@@ -134,7 +107,7 @@ class ArbitrageInfo(object):
             assert t2.catelog == 'buy'
             buy_trade = t2
             sell_trade = t1
-        return 'Amount={}, {:10s} buys {:10.4f} {:3s}, {:10s} sells {:10.4f} {:3s}'.format(
+        return 'Amount={:10.4f}, {:10s} buys {:10.4f} {:3s}, {:10s} sells {:10.4f} {:3s}'.format(
             trade_amount,
             buy_trade.plt_name, buy_trade.price, buy_trade.fiat,
             sell_trade.plt_name, sell_trade.price, sell_trade.fiat)

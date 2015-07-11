@@ -59,7 +59,7 @@ class TradeInfo(object):
                 return True
             else:
                 waited_asset_times += 1
-                # FIXME use monitor thread to deal with this issue
+                # FIXME critical bug; use monitor thread to deal with this issue
                 if waited_asset_times >= config.ASSET_WAIT_MAX:
                     TradeInfo._logger.error(
                         '{}: not afford to "{}" after waiting {} times'.format(
@@ -78,7 +78,7 @@ class TradeInfo(object):
              adjust_price with a certain percentage
         :return: None
         """
-        M = self.plt.__class__.lower_bound
+        M = self.plt.lower_bound
         # no trading amount
         if self.amount < config.minor_diff:
             TradeInfo._logger.warning('{}: trading amount = 0, exit adjust_trade'.format(self.plt_name))
