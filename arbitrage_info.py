@@ -4,7 +4,6 @@ import time
 
 from bitbays import BitBays
 import common
-import config
 from okcoin import OKCoinCN
 from trade_info import TradeInfo
 
@@ -47,11 +46,11 @@ class ArbitrageInfo(object):
 
     # FIXME decide how to cancel correctly
     def _cancel_orders(self):
+        succeed_list = []
         for trade in self.trade_pair:
-            succeed = trade.cancel()
-            if succeed is False:
-                return False
-        return True
+            status = trade.cancel()
+            succeed_list.append(status)
+        return succeed_list
 
     def _init_order_dict(self):
         """ self._order_dict is initialized/changed for each adjust
@@ -83,12 +82,16 @@ class ArbitrageInfo(object):
         """adjust after finding has_pending; self._order_dict has been initialized
         :return: None
         """
-        self._cancel_orders()
+        cancel_status_list = self._cancel_orders()
         t1, t2 = self.normalize_trade_pair()
         # ArbitrageInfo._logger.debug('Adjust Pair: {} {}'.format(t1, t2))
         p1, p2 = t1.plt, t2.plt
         O1, O2 = self._order_dict[p1], self._order_dict[p2]
         A1, A2 = O1.remaining_amount, O2.remaining_amount
+        if cancel_status_list[0] is False:
+            A1 = 0.0
+        if cancel_status_list[1] is False:
+            A2 = 0.0
         M1 = p1.__class__.lower_bound
         M2 = p2.__class__.lower_bound
         #################################
@@ -109,12 +112,12 @@ class ArbitrageInfo(object):
         # else:  # A2 >= M2:
         #     ArbitrageInfo._logger.debug('A2>=M2, A1={:<10.4f}, A2={:<10.4f}'.format(A1, A2))
         ##    FIXME this may introduce bug since one of new_t1, new_t2 may be canceled
-            # new_t1 = TradeInfo(p1, t1.catelog, t1.price, A1)
-            # new_t2 = TradeInfo(p2, t2.catelog, t2.price, A2)
-            # config.MUTEX.acquire(True)  # blocking
-            # new_t1.adjust_trade()
-            # new_t2.adjust_trade()
-            # config.MUTEX.release()
+        # new_t1 = TradeInfo(p1, t1.catelog, t1.price, A1)
+        # new_t2 = TradeInfo(p2, t2.catelog, t2.price, A2)
+        # config.MUTEX.acquire(True)  # blocking
+        # new_t1.adjust_trade()
+        # new_t2.adjust_trade()
+        # config.MUTEX.release()
         #################################
         ### post-condition
         self.done = True

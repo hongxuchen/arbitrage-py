@@ -78,7 +78,7 @@ class BitBays(BTC):
             res_data = r.json()
             # if config.verbose:
             #     BitBays._logger.warning('bitbays response={}'.format(res_data))
-            if res_data is None:
+            if res_data is None or res_data is {}:
                 raise common.NULLResponseError('NULLResponseError: Response is empty for api_type={}'.format(api_type))
             result = res_data['result']
             # TODO check other api_type fail
