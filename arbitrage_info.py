@@ -24,8 +24,7 @@ class ArbitrageInfo(object):
         """
         ArbitrageInfo._logger.warning('Arbitrage Start')
         for trade in self.trade_pair:
-            trade_price = common.adjust_arbitrage_price(trade.catelog, trade.price)
-            order_id = trade.regular_trade(trade.catelog, trade_price, trade.amount)
+            order_id = trade.regular_trade(trade.catelog, trade.price, trade.amount)
             trade.set_order_id(order_id)
 
     def normalize_trade_pair(self):

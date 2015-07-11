@@ -58,8 +58,11 @@ class ArbitrageProducer(QtCore.QThread):
         asset_info_a = asset_info_list[i]
         asset_info_b = asset_info_list[1 - i]
 
+        ask_a_adjust_price = common.adjust_arbitrage_price('buy', ask_a_price)
+        bid_b_adjust_price = common.adjust_arbitrage_price('sell', bid_b_price)
+
         def amount_refine():
-            plt_a_buy_amount = asset_info_a.afford_buy_amount(ask_a_price) - config.ASSET_FOR_TRAID_DIFF
+            plt_a_buy_amount = asset_info_a.afford_buy_amount(ask_a_adjust_price) - config.ASSET_FOR_TRAID_DIFF
             plt_b_sell_amount = asset_info_b.afford_sell_amount() - config.ASSET_FOR_TRAID_DIFF
             amount = min(config.upper_bound, ask_a_amount, bid_b_amount, plt_a_buy_amount, plt_b_sell_amount)
             amount = float('{:.4f}'.format(amount))
@@ -74,9 +77,8 @@ class ArbitrageProducer(QtCore.QThread):
         ArbitrageProducer._logger.debug(asset_info_a)
         ArbitrageProducer._logger.debug(asset_info_b)
         ## FIXME this only displays the asset_info before the trade
-        # self.notify_asset.emit(asset_info_list)
-        buy_trade = TradeInfo(plt_a, 'buy', ask_a_price, amount)  # buy at plt_a
-        sell_trade = TradeInfo(plt_b, 'sell', bid_b_price, amount)  # sell at plt_b
+        buy_trade = TradeInfo(plt_a, 'buy', ask_a_adjust_price, amount)  # buy at plt_a
+        sell_trade = TradeInfo(plt_b, 'sell', bid_b_adjust_price, amount)  # sell at plt_b
         trade_pair = (buy_trade, sell_trade)
         now = time.time()
         arbitrage_info = ArbitrageInfo(trade_pair, now)
