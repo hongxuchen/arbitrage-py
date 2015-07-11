@@ -258,6 +258,7 @@ if __name__ == '__main__':
     # print(okcoin_cn.assets())
     # order_id = okcoin_cn.trade('buy', 10, 10000)
     # print(order_id)
-    print(okcoin_cn.cancel(12345678))
+    print(okcoin_cn.lower_bound)
+    # print(okcoin_cn.cancel(12345678))
     # print(okcoin_cn.cancel(123456))
     # res = okcoin_cn.order_info(order_id)

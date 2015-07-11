@@ -18,20 +18,14 @@ itbit_info = {
     'symbol': 'XBTUSD'
 }
 
-UI_TBL_COL_WIDTH = 100
-UI_TBL_ROW_HEIGHT = 25
-
-TRADING_LOGGER = 'trading_logger'
-DEBUG_LOGGER = 'debug_logger'
-
 fiat = 'cny'
 
 precision = 4
 minor_diff = 10.0 ** (-precision)
 
+## upper_bound must > lower_bound for all platforms
 upper_bound = 0.015
-lower_bound = 0.010
-lower_rate = 0.5
+
 arbitrage_diff = 0.9
 
 PENDING_SECONDS = 5.0
@@ -44,7 +38,6 @@ CONSUMER_SLEEP_MILLISECONS = 500
 request_timeout = 3.0
 RETRY_MAX = 8
 RETRY_MILLISECONDS = 100
-
 
 INVALID_ORDER_ID = -1
 

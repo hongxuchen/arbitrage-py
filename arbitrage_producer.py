@@ -24,6 +24,7 @@ class ArbitrageProducer(QtCore.QThread):
         self.arbitrage_queue = arbitrage_list
         self.symbol = symbol
         self.running = False
+        self.lower_bound = min(plt_list[0].lower_bound, plt_list[1].lower_bound)
 
     def run(self):
         while self.running:
@@ -66,7 +67,7 @@ class ArbitrageProducer(QtCore.QThread):
             plt_b_sell_amount = asset_info_b.afford_sell_amount() - config.ASSET_FOR_TRAID_DIFF
             amount = min(config.upper_bound, ask_a_amount, bid_b_amount, plt_a_buy_amount, plt_b_sell_amount)
             amount = float('{:.4f}'.format(amount))
-            amount = max(config.lower_bound, amount)
+            amount = max(self.lower_bound, amount)
             return amount
 
         amount = amount_refine()
