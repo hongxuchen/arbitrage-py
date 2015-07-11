@@ -29,7 +29,7 @@ fiat = 'cny'
 precision = 4
 minor_diff = 10.0 ** (-precision)
 
-upper_bound = 0.012
+upper_bound = 0.015
 lower_bound = 0.010
 lower_rate = 0.5
 arbitrage_diff = 0.9

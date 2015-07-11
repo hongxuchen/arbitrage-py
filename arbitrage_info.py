@@ -15,7 +15,6 @@ class ArbitrageInfo(object):
     def __init__(self, trade_pair, time):
         self.trade_pair = trade_pair
         self.time = time
-        self.done = False
 
     def process_trade(self):
         """
@@ -68,26 +67,28 @@ class ArbitrageInfo(object):
         need to get order dict for current arbitrage pair
         :return:
         """
-        self.done = False
         self._init_order_dict()
         for order in self._order_dict.values():
             if order.has_pending():
                 return True
         # no remaining amount, no need to adjust_pending, done
-        self.done = True
         return False
 
-    # noinspection PyPep8Naming
     def adjust_pending(self):
+        if self.has_pending():
+            self.adjust_impl()
+
+    # noinspection PyPep8Naming
+    def adjust_impl(self):
         """adjust after finding has_pending; self._order_dict has been initialized
         :return: None
         """
-        cancel_status_list = self._cancel_orders()
         t1, t2 = self.normalize_trade_pair()
         # ArbitrageInfo._logger.debug('Adjust Pair: {} {}'.format(t1, t2))
         p1, p2 = t1.plt, t2.plt
         O1, O2 = self._order_dict[p1], self._order_dict[p2]
         A1, A2 = O1.remaining_amount, O2.remaining_amount
+        cancel_status_list = self._cancel_orders()
         if cancel_status_list[0] is False:
             A1 = 0.0
         if cancel_status_list[1] is False:
@@ -98,7 +99,7 @@ class ArbitrageInfo(object):
         # if A2 < M2:
         A = A1 - A2
         # ArbitrageInfo._logger.debug('A2<M2, A1={:<10.4f}, A2={:<10.4f}, A={:<10.4f}'.format(A1, A2, A))
-        ArbitrageInfo._logger.info('A1={:<10.4f}, A2={:<10.4f}, A={:<10.4f}'.format(A1, A2, A))
+        ArbitrageInfo._logger.warning('A1={:<10.4f}, A2={:<10.4f}, A={:<10.4f}'.format(A1, A2, A))
         if A < 0:
             trade_catelog = common.reverse_catelog(t1.catelog)
         else:  # A >= 0
@@ -118,9 +119,6 @@ class ArbitrageInfo(object):
         # new_t1.adjust_trade()
         # new_t2.adjust_trade()
         # config.MUTEX.release()
-        #################################
-        ### post-condition
-        self.done = True
 
     def __repr__(self):
         t1 = self.trade_pair[0]
@@ -136,8 +134,10 @@ class ArbitrageInfo(object):
             assert t2.catelog == 'buy'
             buy_trade = t2
             sell_trade = t1
-        return 'Amount={}, {:10} buys at {:10.4f}, {:10s} sells at {:10.4f}'.format(
-            trade_amount, buy_trade.plt_name, buy_trade.price, sell_trade.plt_name, sell_trade.price)
+        return 'Amount={}, {:10s} buys {:10.4f} {:3s}, {:10s} sells {:10.4f} {:3s}'.format(
+            trade_amount,
+            buy_trade.plt_name, buy_trade.price, buy_trade.fiat,
+            sell_trade.plt_name, sell_trade.price, sell_trade.fiat)
 
 
 if __name__ == '__main__':

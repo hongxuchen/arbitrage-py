@@ -20,13 +20,6 @@ class ArbitrageConsumer(QtCore.QThread):
         self.running = False
         self.arbitrage_queue = arbitrage_list
 
-    @staticmethod
-    def need_adjust(arbitrage_info):
-        return arbitrage_info.has_pending()
-
-    def adjust(self, arbitrage):
-        arbitrage.adjust_pending()
-
     def consume(self):
         for arbitrage in self.arbitrage_queue:
             seconds = time.time() - arbitrage.time
@@ -35,9 +28,7 @@ class ArbitrageConsumer(QtCore.QThread):
                 ArbitrageConsumer._logger.info('[Consmumer] sleep for {:4d}ms'.format(sleep_milliseconds))
                 QtCore.QThread.msleep(sleep_milliseconds)
             ArbitrageConsumer._logger.info('[Consumer] consuming')
-            if ArbitrageConsumer.need_adjust(arbitrage):
-                self.adjust(arbitrage)
-            assert arbitrage.done
+            arbitrage.adjust_pending()
             self.arbitrage_queue.remove(arbitrage)
 
     def run(self):
