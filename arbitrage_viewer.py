@@ -128,16 +128,17 @@ class ArbitrageUI(ui_main_win.Ui_MainWin):
         for checkbox in self.plt_groupbox.findChildren(QtGui.QCheckBox):
             checkbox.stateChanged.connect(self.update_plt)
         self.trade_button.pressed.connect(self.apply_trade)
-        self.producer.notify_asset.connect(self.display_asset_summary)
-        self.monitor.notify_update_asset.connect(self.display_asset_summary)
-        self.producer.notify_trade.connect(self.display_arbitrage)
+        self.monitor.notify_update_asset.connect(self.display_asset)
+        self.producer.notify_trade.connect(self.log_arbitrage)
+        self.monitor.notify_asset_change.connect(self.log_asset_change)
 
-    # TODO display nicely
-    def display_arbitrage(self, trade_pair):
-        for trade in trade_pair:
-            self.trade_viewer.append(str(trade))
+    def log_arbitrage(self, arbitrage_info):
+        self.trade_viewer.append(str(arbitrage_info))
 
-    def display_asset_summary(self, asset_info_list):
+    def log_asset_change(self, asset_report):
+        self.trade_viewer.append(asset_report)
+
+    def display_asset(self, asset_info_list):
         self.asset_widget.display_asset(asset_info_list)
 
 

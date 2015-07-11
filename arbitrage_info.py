@@ -4,6 +4,7 @@ import time
 
 from bitbays import BitBays
 import common
+import config
 from okcoin import OKCoinCN
 from trade_info import TradeInfo
 
@@ -123,11 +124,21 @@ class ArbitrageInfo(object):
         self.done = True
 
     def __repr__(self):
-        trade_info = ''
-        for trade in self.trade_pair:
-            trade_info += str(trade) + ' '
-        seconds = '{:10.2f}s ago'.format(time.time() - self.time)
-        return trade_info + seconds
+        t1 = self.trade_pair[0]
+        t2 = self.trade_pair[1]
+        a1 = t1.amount
+        a2 = t2.amount
+        assert abs(a1 - a2) < config.minor_diff
+        trade_amount = a1
+        if t1.catelog == 'buy':
+            buy_trade = t1
+            sell_trade = t2
+        else:  # sell
+            assert t2.catelog == 'buy'
+            buy_trade = t2
+            sell_trade = t1
+        return 'Amount={}, {:10s} buy at {:10.4f}, {:10s} sell at {:10.4f}'.format(
+            buy_trade.plt_name, buy_trade.price, sell_trade.plt_name, sell_trade.price)
 
 
 if __name__ == '__main__':

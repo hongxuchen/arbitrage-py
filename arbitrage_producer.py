@@ -12,8 +12,8 @@ from trade_info import TradeInfo
 
 
 class ArbitrageProducer(QtCore.QThread):
-    notify_asset = QtCore.Signal(list)
-    notify_trade = QtCore.Signal(list)
+    # notify_asset = QtCore.Signal(list)
+    notify_trade = QtCore.Signal(ArbitrageInfo)
     _logger = common.setup_logger()
 
     ### stateless
@@ -78,9 +78,9 @@ class ArbitrageProducer(QtCore.QThread):
         buy_trade = TradeInfo(plt_a, 'buy', ask_a_price, amount)  # buy at plt_a
         sell_trade = TradeInfo(plt_b, 'sell', bid_b_price, amount)  # sell at plt_b
         trade_pair = (buy_trade, sell_trade)
-        self.notify_trade.emit(trade_pair)
         now = time.time()
         arbitrage_info = ArbitrageInfo(trade_pair, now)
+        self.notify_trade.emit(arbitrage_info)
         arbitrage_info.process_trade()
         ArbitrageProducer._logger.info('[Producer] arbitrage done, release lock')
         common.MUTEX.release()
