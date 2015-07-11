@@ -127,6 +127,6 @@ class NULLResponseError(Exception):
 
 MUTEX = threading.Lock()
 retry_except_tuple = (
-req_except.ConnectionError, req_except.Timeout, req_except.HTTPError, InvalidNonceError, NULLResponseError)
+    req_except.ConnectionError, req_except.Timeout, req_except.HTTPError, InvalidNonceError, NULLResponseError)
 exit_except_tuple = (req_except.URLRequired, req_except.TooManyRedirects)
 USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.130 Safari/537.36'

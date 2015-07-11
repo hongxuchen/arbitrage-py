@@ -49,7 +49,8 @@ class AssetMonitor(QtCore.QThread):
         self.change_info = None
 
     # FIXME the amouont should be specified by the failed trade
-    def handle_asset_changes_impl(self, plt, btc, fiat):
+    @staticmethod
+    def handle_asset_changes_impl(plt, btc, fiat):
         if btc > config.minor_diff:
             catelog = 'sell'
             price = plt.bid1()  # find "buyer"
@@ -86,5 +87,5 @@ if __name__ == '__main__':
     bitbays = BitBays()
     plt_list = [okcoin_cn, bitbays]
     monitor = AssetMonitor(plt_list)
-    monitor.change_info = [0.0155, 0]
-    monitor.handle_asset_changes(okcoin_cn)
+    # monitor.change_info = [0.0155, 0]
+    # monitor.handle_asset_changes(okcoin_cn)

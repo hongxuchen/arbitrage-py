@@ -28,9 +28,11 @@ class TradeInfo(object):
     def set_order_id(self, order_id):
         self.order_id = order_id
 
+    # TODO may need to refactor
     def regular_trade(self, catelog, price, amount):
         """
         regular trade, may cause pending
+        NOTE: only platform is guaranteed to be unchanged
         :return: order_id
         """
         TradeInfo._logger.debug('BEFORE trade')
@@ -46,27 +48,35 @@ class TradeInfo(object):
         :param trade_amount:
         :return:
         """
-        # trade_price = common.adjust_price(self.catelog, self.price)
         waited_asset_times = 0
-        while True:
-            ### request here
-            asset_info = AssetInfo(self.plt)
-            if self.catelog == 'buy':
-                asset_amount = asset_info.afford_buy_amount(trade_price)
-            else:  # sell
-                asset_amount = asset_info.afford_sell_amount()
+        ### NOTE: since we lock the trade, only 1 request needed
+        ### TODO: verify correctness of above declaration
+        asset_info = AssetInfo(self.plt)
+        if self.catelog == 'sell':
+            asset_amount = asset_info.afford_sell_amount()
             if asset_amount >= trade_amount:
                 return True
             else:
-                waited_asset_times += 1
-                if waited_asset_times > config.ASSET_WAIT_MAX:
+                return False
+        # catelog == 'buy'
+        while True:
+            asset_amount = asset_info.afford_buy_amount(trade_price)
+            if asset_amount >= trade_amount:
+                return True
+            # asset_amount not enough
+            else:
+                ################################################
+                if waited_asset_times >= config.ASSET_WAIT_MAX:
                     TradeInfo._logger.critical(
                         '{}: not afford to "{}" after waiting {} times'.format(
                             self.plt_name, self.catelog, config.ASSET_WAIT_MAX))
-                    # FIXME critical bug; use monitor thread to deal with this issue
-                    # should notify about the platform that cannot afford
-                    # should avoid further "not afford"
+                    # FIXME critical bug
+                    # TODO should avoid further "not afford"
                     return False
+                waited_asset_times += 1
+                ################################################
+                # adjust to "nearer price"
+                trade_price -= (trade_price - self.price) / (config.ASSET_WAIT_MAX + 1)
 
     # noinspection PyPep8Naming
     def adjust_trade(self):
@@ -93,7 +103,8 @@ class TradeInfo(object):
             trade_amount = self.amount + M
             trade_catelog = self.catelog
             trade_price = common.adjust_price(trade_catelog, self.price)
-            if self._asset_afford_trade(trade_amount, trade_price):
+            afford_info = self._asset_afford_trade(trade_amount, trade_price)
+            if afford_info:
                 TradeInfo._logger.warning('bi-directional adjust_trade, waited {:d} times'.format(wait_for_asset_times))
                 # trade1, must succeed
                 self.regular_trade(trade_catelog, trade_price, trade_amount)
@@ -102,15 +113,20 @@ class TradeInfo(object):
                 reverse_catelog = common.reverse_catelog(trade_catelog)
                 reverse_price = common.adjust_price(reverse_catelog, self.price)
                 self.regular_trade(reverse_catelog, reverse_price, reverse_amount)
+                return True
+            return False  # not afford for 'self.amount < M'
         else:  # self.amount >= M
             trade_price = common.adjust_price(self.catelog, self.price)
             trade_catelog = self.catelog
             trade_amount = self.amount
-            if self._asset_afford_trade(trade_amount, trade_price):
-                # trade must succeed
+            afford_info = self._asset_afford_trade(trade_amount, trade_price)
+            if afford_info:
                 TradeInfo._logger.warning(
                     '{} single adjust_trade, waited {:d} times'.format(self.plt_name, wait_for_asset_times))
+                # trade must succeed
                 self.regular_trade(trade_catelog, trade_price, trade_amount)
+                return True
+            return False  # not afford for 'self.amount >= M'
 
     def cancel(self):
         if self.order_id != -1:

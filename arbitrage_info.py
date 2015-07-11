@@ -79,11 +79,21 @@ class ArbitrageInfo(object):
             trade_catelog = t1.catelog
         else:
             return
-        new_t1 = TradeInfo(p1, trade_catelog, t1.price, abs(A))
+        amount = abs(A)
+        # not really care about the EXACT price
+        new_t1 = TradeInfo(p1, trade_catelog, t1.price, amount)
         common.MUTEX.acquire(True)  # blocking
-        TradeInfo._logger.info('[Consumer] acquire lock')
-        new_t1.adjust_trade()
-        TradeInfo._logger.info('[Consumer] adjust done, release lock')
+        ArbitrageInfo._logger.info('[Consumer] acquire lock')
+        t1_adjust_status = new_t1.adjust_trade()
+        if t1_adjust_status is False:
+            new_t2 = TradeInfo(p2, trade_catelog, t1.price, amount)
+            # TODO more code review here
+            t2_adjust_status = new_t2.adjust_trade()
+            # should be rather rare case
+            if t2_adjust_status is False:
+                ArbitrageInfo._logger.critical('CRITAL: [{}, {}] cannot adjust'.format(t1.plt_name, t2.plt_name))
+                # TODO may need to use monitor here; quite complicated here
+        ArbitrageInfo._logger.info('[Consumer] adjust done, release lock')
         common.MUTEX.release()
         # else:  # A2 >= M2:
         #     ArbitrageInfo._logger.debug('A2>=M2, A1={:<10.4f}, A2={:<10.4f}'.format(A1, A2))
