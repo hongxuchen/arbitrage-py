@@ -13,13 +13,12 @@ import common
 import config
 from itbit import ItBitAPI
 from okcoin import OKCoinCN
+from ui_asset_widget import AssetWidget
 from ui_common import centerized
 import ui_main_win
-import ui_asset_table
 import ui_selections
 import ui_settings
 from ui_trading_viewer import TradingViewer
-import requests
 
 select_plt_dict = {
     'OKCoinCN': OKCoinCN,
@@ -72,25 +71,17 @@ class ArbitrageUI(ui_main_win.Ui_MainWin):
         ### right
         widget2 = QtGui.QWidget()
         layout2 = QtGui.QVBoxLayout()
-        self.asset_table_list = []
-        for i in range(len(self.plt_list) + 1):
-            tbl = ui_asset_table.AssetTable()
-            self.asset_table_list.append(tbl)
-            layout2.addWidget(tbl)
+        self.asset_widget = AssetWidget(self.plt_list)
+        layout2.addWidget(self.asset_widget)
         self.trade_viewer = TradingViewer()
         layout2.addWidget(self.trade_viewer)
-        # widget2.setMinimumWidth(config.ui_tbl_col_width * 5)
         widget2.setLayout(layout2)
         ### all
         main_layout.addWidget(widget1)
         main_layout.addWidget(widget2)
-        # main_layout.addWidget(self.trade_viewer)
         central = QtGui.QWidget()
         central.setLayout(main_layout)
         self.setCentralWidget(central)
-
-    def report_trade(self):
-        pass
 
     def stop_trade(self):
         self.running = False
@@ -124,7 +115,6 @@ class ArbitrageUI(ui_main_win.Ui_MainWin):
             self.start_trade()
         else:
             self.stop_trade()
-            self.report_trade()
 
     def update_plt(self):
         sender = self.sender()
@@ -143,23 +133,12 @@ class ArbitrageUI(ui_main_win.Ui_MainWin):
         self.producer.notify_trade.connect(self.display_arbitrage)
 
     # TODO display nicely
-    def display_arbitrage(self, arbitrage_info):
-        self.trade_viewer.append(str(arbitrage_info))
+    def display_arbitrage(self, trade_pair):
+        for trade in trade_pair:
+            self.trade_viewer.append(str(trade))
 
     def display_asset_summary(self, asset_info_list):
-        asset_raw_list_list = []
-        for tbl, asset_info in zip(self.asset_table_list, asset_info_list):
-            asset_raw = asset_info.asset_raw_list
-            tbl.display_asset(asset_raw)
-            asset_raw_list_list.append(asset_raw)
-        sum_asset_tbl = self.asset_table_list[2]
-        sum_asset_raw = []
-        for i in range(len(asset_raw_list_list[0])):
-            sum_asset_instance = []
-            for j in range(len(asset_raw_list_list[0][0])):
-                sum_asset_instance.append(asset_raw_list_list[0][i][j] + asset_raw_list_list[1][i][j])
-            sum_asset_raw.append(sum_asset_instance)
-        sum_asset_tbl.display_asset(sum_asset_raw)
+        self.asset_widget.display_asset(asset_info_list)
 
 
 if __name__ == '__main__':

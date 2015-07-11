@@ -13,7 +13,7 @@ from trade_info import TradeInfo
 
 class ArbitrageProducer(QtCore.QThread):
     notify_asset = QtCore.Signal(list)
-    notify_trade = QtCore.Signal(ArbitrageInfo)
+    notify_trade = QtCore.Signal(list)
     _logger = common.setup_logger()
 
     ### stateless
