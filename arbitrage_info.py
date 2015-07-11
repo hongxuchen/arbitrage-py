@@ -136,21 +136,21 @@ class ArbitrageInfo(object):
             assert t2.catelog == 'buy'
             buy_trade = t2
             sell_trade = t1
-        return 'Amount={}, {:10s} buy at {:10.4f}, {:10s} sell at {:10.4f}'.format(
-            buy_trade.plt_name, buy_trade.price, sell_trade.plt_name, sell_trade.price)
+        return 'Amount={}, {:10} buys at {:10.4f}, {:10s} sells at {:10.4f}'.format(
+            trade_amount, buy_trade.plt_name, buy_trade.price, sell_trade.plt_name, sell_trade.price)
 
 
 if __name__ == '__main__':
     okcoin = OKCoinCN()
     bitbays = BitBays()
-    ok_trade = TradeInfo(okcoin, 'buy', 1615, 0.01)
-    bb_trade = TradeInfo(bitbays, 'sell', 1635, 0.008)
+    ok_trade = TradeInfo(okcoin, 'buy', 10, 0.01)
+    bb_trade = TradeInfo(bitbays, 'sell', 10000, 0.01)
     trade_pair = ok_trade, bb_trade
     now = time.time()
     arbitrage = ArbitrageInfo(trade_pair, now)
     print(arbitrage)
-    arbitrage.process_trade()
+    # arbitrage.process_trade()
     # if arbitrage.has_pending():
     #     arbitrage.adjust_pending()
     # assert arbitrage.done
-    print(arbitrage)
+    # print(arbitrage)
