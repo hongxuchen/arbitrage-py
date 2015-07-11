@@ -15,9 +15,10 @@ from order_info import OrderInfo
 
 
 class OKCoinAPI(BTC):
+    lower_bound = 0.01
     _logger = common.setup_logger()
     trade_cancel_api_list = ['cancel_order', 'trade']
-    headers = {
+    common_headers = {
         'user-agent': common.USER_AGENT,
         'Content-Type': 'application/x-www-form-urlencoded'
     }
@@ -51,11 +52,12 @@ class OKCoinAPI(BTC):
         def _request_impl():
             r = None
             if api_type in self.api_public:
-                r = requests.request('get', self._real_uri(api_type), params=params, headers=OKCoinAPI.headers, timeout=config.request_timeout, verify=True)
+                r = requests.request('get', self._real_uri(api_type), params=params, headers=OKCoinAPI.common_headers,
+                                     timeout=config.request_timeout, verify=True)
             elif api_type in self.api_private:
                 # TODO data => js string?
                 r = requests.request('post', self._real_uri(api_type), data=data, params=params,
-                                     headers=OKCoinAPI.headers, timeout=config.request_timeout, verify=True)
+                                     headers=OKCoinAPI.common_headers, timeout=config.request_timeout, verify=True)
             else:
                 OKCoinAPI._logger.critical('api_type [{}] not supported'.format(api_type))
                 # FIXME terminate safely
@@ -66,7 +68,8 @@ class OKCoinAPI(BTC):
             # if config.verbose:
             #     OKCoinAPI._logger.warning('response={}'.format(res))
             if res is None or res is {}:
-                raise common.NULLResponseError('NULLResponseError: Response is empty/{} for api_type={}'.format(api_type))
+                raise common.NULLResponseError(
+                    'NULLResponseError: Response is empty/{} for api_type={}'.format(api_type))
             return res
 
         try:
@@ -196,7 +199,7 @@ class OKCoinAPI(BTC):
         return self.trade('buy_market', mo_amount, None)
 
     def sell_market(self, mo_amount):
-        assert (mo_amount >= config.lower_bound)
+        assert (mo_amount >= OKCoinAPI.lower_bound)
         OKCoinAPI._logger.debug('OKCoinAPI.sell_market with amount {}'.format(mo_amount))
         return self.trade('sell_market', None, mo_amount)
 
@@ -240,7 +243,6 @@ class OKCoinAPI(BTC):
 
 
 class OKCoinCN(OKCoinAPI):
-    lower_bound = 0.01
 
     def __init__(self):
         super(OKCoinCN, self).__init__(config.okcoin_cn_info)
@@ -251,6 +253,7 @@ class OKCoinCOM(OKCoinAPI):
     def __init__(self):
         super(OKCoinCOM, self).__init__(config.okcoin_com_info)
         self.key = common.get_key_from_file('OKCoinCOM')
+
 
 if __name__ == '__main__':
     okcoin_cn = OKCoinCN()

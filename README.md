@@ -11,9 +11,6 @@
 * 'EOF occurred in violation of protocol (\_ssl.c:581)'
 * ' Expecting value: line 1 column 1 (char 0)'               <-- when quite slow (ping failed)
 
-## bitbays.py
-* account too low <-- for arbitrage pair since the consumer may have used the asset
-
 ## other
 * exit error on Mac <-- due to QT bug?
 

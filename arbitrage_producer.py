@@ -71,13 +71,12 @@ class ArbitrageProducer(QtCore.QThread):
             return amount
 
         amount = amount_refine()
-        if amount - config.lower_bound < config.minor_diff:
+        if amount - self.lower_bound < config.minor_diff:
             ArbitrageProducer._logger.info('[Producer] insufficient amount, release lock')
             common.MUTEX.release()
             return False
         ArbitrageProducer._logger.debug(asset_info_a)
         ArbitrageProducer._logger.debug(asset_info_b)
-        ## FIXME this only displays the asset_info before the trade
         buy_trade = TradeInfo(plt_a, 'buy', ask_a_adjust_price, amount)  # buy at plt_a
         sell_trade = TradeInfo(plt_b, 'sell', bid_b_adjust_price, amount)  # sell at plt_b
         trade_pair = (buy_trade, sell_trade)

@@ -9,8 +9,6 @@ import config
 # TODO ensure that amount of BTC in a limited range; invoked when
 # - cancel/trade fails
 # - exiting
-# TODO display asset_info regularly
-# TODO report the net income when exiting
 
 class AssetMonitor(QtCore.QThread):
     notify_update_asset = QtCore.Signal(list)

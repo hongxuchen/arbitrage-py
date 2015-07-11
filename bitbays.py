@@ -21,7 +21,7 @@ class BitBays(BTC):
         0: 'buy',
         1: 'sell'
     }
-    headers = {
+    common_headers = {
         'user-agent': common.USER_AGENT
     }
     lower_bound = 0.001
@@ -47,12 +47,12 @@ class BitBays(BTC):
             'Key': self.key['api'],
             'Sign': self._sign(urllib.urlencode(payload))
         }
+        params.update(self.common_headers)
         return params
 
     def _real_uri(self, api_type):
         return self.get_url('/' + api_type + '/')
 
-    # TODO to see whether convert data to js string is a necessity; be careful about None
     # FIXME headers not used here, may introduce bugs in future
     def _setup_request(self, api_type, params=None, data=None):
         """

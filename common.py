@@ -43,6 +43,7 @@ def reverse_catelog(original_catelog):
     else:  # sell
         return 'buy'
 
+
 def adjust_arbitrage_price(trade_catelog, price):
     assert (trade_catelog in ['buy', 'sell'])
     if trade_catelog == 'buy':
@@ -118,11 +119,14 @@ class InvalidNonceError(Exception):
     def __init__(self, message):
         super(InvalidNonceError, self).__init__(message)
 
+
 class NULLResponseError(Exception):
     def __init__(self, message):
         super(NULLResponseError, self).__init__(message)
 
+
 MUTEX = threading.Lock()
-retry_except_tuple = (req_except.ConnectionError, req_except.Timeout, req_except.HTTPError, InvalidNonceError, NULLResponseError)
+retry_except_tuple = (
+req_except.ConnectionError, req_except.Timeout, req_except.HTTPError, InvalidNonceError, NULLResponseError)
 exit_except_tuple = (req_except.URLRequired, req_except.TooManyRedirects)
 USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.130 Safari/537.36'
