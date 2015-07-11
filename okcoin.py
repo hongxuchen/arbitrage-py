@@ -96,6 +96,12 @@ class OKCoinAPI(BTC):
         sell = common.to_decimal(sell)
         return sell
 
+    def bid1(self):
+        ticker = self.api_ticker()
+        buy = ticker['ticker']['buy']
+        buy = common.to_decimal(buy)
+        return buy
+
     def api_depth(self, length=2):
         assert (1 <= length <= 200)
         payload = {

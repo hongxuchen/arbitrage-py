@@ -45,7 +45,7 @@ class ArbitrageInfo(object):
 
     def get_order_adjust_dict(self):
         """
-        if finding pending, cancel order as soon as possible; if cancel fails, no pending
+        if finding pending, cancel order ASAP; cancel failure means no pending!
         NOTE: order_id is useless after this
         :return:
         """
@@ -109,7 +109,7 @@ class ArbitrageInfo(object):
             assert t2.catelog == 'buy'
             buy_trade = t2
             sell_trade = t1
-        return 'Amount={:10.4f}, {:10s} buys {:10.4f} {:3s}, {:10s} sells {:10.4f} {:3s}'.format(
+        return 'Amount={:<10.4f}; {:10s} buys {:10.4f} {:3s}; {:10s} sells {:10.4f} {:3s}'.format(
             trade_amount,
             buy_trade.plt_name, buy_trade.price, buy_trade.fiat,
             sell_trade.plt_name, sell_trade.price, sell_trade.fiat)

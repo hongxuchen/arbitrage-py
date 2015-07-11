@@ -69,7 +69,8 @@ class BitBays(BTC):
             elif api_type in self.api_private:
                 params['nonce'] = self._nonce()
                 headers = self._post_param(params)
-                r = requests.post(self._real_uri(api_type), data=params, headers=headers, timeout=config.request_timeout, verify=True)
+                r = requests.post(self._real_uri(api_type), data=params, headers=headers,
+                                  timeout=config.request_timeout, verify=True)
             else:
                 BitBays._logger.critical('api_type={} not supported'.format(api_type))
                 sys.exit(1)
@@ -84,7 +85,8 @@ class BitBays(BTC):
             if result is None:
                 msg = res_data['message']
                 if msg.startswith('Invalid Nonce'):
-                    raise common.InvalidNonceError('InvalidNonceError: {}, current_nonce={}'.format(msg, params['nonce']))
+                    raise common.InvalidNonceError(
+                        'InvalidNonceError: {}, current_nonce={}'.format(msg, params['nonce']))
                 else:
                     BitBays._logger.critical(
                         'ERROR: api_type={}, error_message={}'.format(api_type, msg))
@@ -118,6 +120,12 @@ class BitBays(BTC):
         sell = ticker['sell']
         sell = common.to_decimal(sell)
         return sell
+
+    def bid1(self):
+        ticker = self.api_ticker()['result']
+        buy = ticker['buy']
+        buy = common.to_decimal(buy)
+        return buy
 
     # public api
     def ask_bid_list(self, length=2):
@@ -294,22 +302,23 @@ class BitBays(BTC):
 if __name__ == '__main__':
     bitbays = BitBays()
     # while True:
-        # print(bitbays.ask_bid_list(2))
-        # print(bitbays.assets())
-        # print(bitbays.api_transactions(0))
-    order_id = bitbays.trade('sell', 10000, 1000)
-    print(order_id)
+    # print(bitbays.ask_bid_list(2))
+    # print(bitbays.assets())
+    # print(bitbays.api_transactions(0))
+    # order_id = bitbays.trade('sell', 10000, 1000)
+    print(bitbays.ask1())
+    # print(order_id)
     # print(bitbays.cancel(123456))
-        # limit order id
-        # res = bitbays.order_info(order_id)
-        # print(res)
-        # order_id = bitbays.trade('buy', 10, 0.001)
-        # print(order_id)
-        # order_info = bitbays.order_info(order_id)
-        # print(order_info)
-        # res = bitbays.buy_market(0.01)
-        # print(res)
-        # order_id = 44036603
-        # res = bitbays.order_info(order_id)
-        # res = bitbays.sell_market(0.001)
-        # print(res)
+    # limit order id
+    # res = bitbays.order_info(order_id)
+    # print(res)
+    # order_id = bitbays.trade('buy', 10, 0.001)
+    # print(order_id)
+    # order_info = bitbays.order_info(order_id)
+    # print(order_info)
+    # res = bitbays.buy_market(0.01)
+    # print(res)
+    # order_id = 44036603
+    # res = bitbays.order_info(order_id)
+    # res = bitbays.sell_market(0.001)
+    # print(res)

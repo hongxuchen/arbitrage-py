@@ -16,6 +16,9 @@ class BTC(object):
     def ask1(self):
         pass
 
+    def bid1(self):
+        pass
+
     def ask_bid_list(self, length):
         '''
         :param length: length of ask, bid

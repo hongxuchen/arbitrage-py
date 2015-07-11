@@ -59,11 +59,13 @@ class TradeInfo(object):
                 return True
             else:
                 waited_asset_times += 1
-                # FIXME critical bug; use monitor thread to deal with this issue
-                if waited_asset_times >= config.ASSET_WAIT_MAX:
-                    TradeInfo._logger.error(
+                if waited_asset_times > config.ASSET_WAIT_MAX:
+                    TradeInfo._logger.critical(
                         '{}: not afford to "{}" after waiting {} times'.format(
                             self.plt_name, self.catelog, config.ASSET_WAIT_MAX))
+                    # FIXME critical bug; use monitor thread to deal with this issue
+                    # should notify about the platform that cannot afford
+                    # should avoid further "not afford"
                     return False
 
     # noinspection PyPep8Naming
