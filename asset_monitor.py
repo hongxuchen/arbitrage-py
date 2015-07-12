@@ -28,8 +28,7 @@ class AssetMonitor(QtCore.QThread):
     def get_asset_list(self):
         return [AssetInfo(plt) for plt in self.plt_list]
 
-    def get_asset_changes(self):
-        asset_list = self.get_asset_list()
+    def get_asset_changes(self, asset_list):
         btc, original_btc = 0.0, 0.0
         fiat, original_fiat = 0.0, 0.0
         for original in self.original_asset_list:
@@ -40,13 +39,23 @@ class AssetMonitor(QtCore.QThread):
             fiat += asset.total_fiat()
         return btc - original_btc, fiat - original_fiat
 
-    def handle_asset_changes(self, trade_plt):
-        if self.change_info is None:
-            btc, fiat = self.get_asset_changes()
-        else:
-            btc, fiat = self.change_info
+    @staticmethod
+    def get_asset_change_report(btc, fiat):
+        report = 'Asset Change: {:10.4f}btc, {:10.4f}cny'.format(btc, fiat)
+        AssetMonitor._logger.warning(report)
+        return report
+
+    def handle_asset_changes(self, trade_plt, asset_list):
+        btc, fiat = self.get_asset_changes(asset_list)
         self.handle_asset_changes_impl(trade_plt, btc, fiat)
         self.change_info = None
+
+    def log_asset_update(self):
+        asset_list = self.get_asset_list()
+        self.notify_update_asset.emit(asset_list)
+        btc, fiat = self.get_asset_changes(asset_list)
+        report = self.get_asset_change_report(btc, fiat)
+        self.notify_asset_change.emit(report)
 
     # FIXME the amouont should be specified by the failed trade
     @staticmethod
@@ -69,17 +78,11 @@ class AssetMonitor(QtCore.QThread):
         # initialize asset
         self.original_asset_list = self.get_asset_list()
         self.notify_update_asset.emit(self.original_asset_list)
-        # update asset
+        # update asset info
         while self.running:
             QtCore.QThread.sleep(config.monitor_interval_seconds)
             AssetMonitor._logger.debug("[Monitor] Notify")
-            asset_list = self.get_asset_list()
-            self.notify_update_asset.emit(asset_list)
-        # report net income
-        self.change_info = self.get_asset_changes()
-        report = 'Asset Change: {:10.4f}btc, {:10.4f}cny'.format(self.change_info[0], self.change_info[1])
-        AssetMonitor._logger.warning(report)
-        self.notify_asset_change.emit(report)
+            self.log_asset_update()
 
 
 if __name__ == '__main__':
