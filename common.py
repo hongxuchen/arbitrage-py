@@ -81,7 +81,8 @@ def handle_retry(exception, plt, handler):
     :param handler: real handler, no params, implemented as closure
     :return: if retry succeeds, should return request result; otherwise, exit abornormally
     """
-    plt._logger.error('RETRY for Exception: "{}"'.format(exception))
+    current_exception = exception
+    plt._logger.error('RETRY for Exception: "{}"'.format(current_exception))
     retry_counter = 0
     while retry_counter < config.RETRY_MAX:
         retry_counter += 1
@@ -95,13 +96,16 @@ def handle_retry(exception, plt, handler):
         # TODO check whether accessable to exception handling
         except Exception as e:  # all request exceptions
             if is_retry_exception(e):
-                plt._logger.error('Exception during retrying:"{}", will RETRY'.format(e))
+                # only log, do nothing
+                current_exception = e
+                plt._logger.error('Exception during retrying:"{}", will RETRY'.format(current_exception))
                 continue
             else:
-                return handle_exit(e, plt)  # fail
+                return handle_exit(e, plt)  # fail, exit
     plt._logger.critical(
-        'Exception after retrying: "{}", will SLEEP {}s'.format(exception, config.REQUEST_EXCEPTION_WAIT_SECONDS))
+        'SLEEP {}s for Exception: "{}"'.format(config.REQUEST_EXCEPTION_WAIT_SECONDS, current_exception))
     QThread.sleep(config.REQUEST_EXCEPTION_WAIT_SECONDS)
+    ### FIXME this makes "stop" button not work when network error
     res = handle_retry(exception, plt, handler)  # recursive
     return res
 

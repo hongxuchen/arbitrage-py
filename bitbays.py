@@ -104,7 +104,7 @@ class BitBays(BTC):
             if common.is_retry_exception(e):
                 return common.handle_retry(e, BitBays, _request_impl)
             else:
-                common.handle_wait(e, BitBays)
+                common.handle_exit(e, BitBays)
 
     #############################################################################
 

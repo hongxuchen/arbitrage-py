@@ -79,7 +79,7 @@ class OKCoinAPI(BTC):
             if common.is_retry_exception(e):
                 return common.handle_retry(e, OKCoinAPI, _request_impl)
             else:
-                common.handle_wait(e, OKCoinAPI)
+                common.handle_exit(e, OKCoinAPI)
 
     ### public api
 
