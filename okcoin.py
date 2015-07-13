@@ -26,7 +26,7 @@ class OKCoinAPI(BTC):
     def __init__(self, info):
         super(OKCoinAPI, self).__init__(info)
         self.symbol = info['symbol']
-        self.api_public = ['ticker', 'depth', 'trades', 'kline', 'lend_depth']
+        self.api_public = ['ticker', 'depth', 'trades']
         self.api_private = ['userinfo', 'trade', 'batch_trade', 'cancel_order', 'orders', 'order_info']
 
     def _real_uri(self, api_type):
@@ -79,7 +79,7 @@ class OKCoinAPI(BTC):
             if common.is_retry_exception(e):
                 return common.handle_retry(e, OKCoinAPI, _request_impl)
             else:
-                common.handle_exit(e, OKCoinAPI)
+                common.handle_wait(e, OKCoinAPI)
 
     ### public api
 
@@ -127,30 +127,6 @@ class OKCoinAPI(BTC):
         if since is not None:
             payload['since'] = since
         res = self._setup_request('trades', payload)
-        return res
-
-    def api_kline(self, ktype='15min', size=10, since=None):
-        payload = {
-            'symbol': 'btc_' + self.symbol,
-            'size': size,
-            'type': ktype
-        }
-        if since is not None:
-            payload['since'] = since
-        else:
-            yesterday = datetime.date.today() - datetime.timedelta(1)
-            payload['since'] = yesterday.strftime('%s')
-        res = self._setup_request('kline', payload)
-        return res
-
-    def api_lend_depth(self, symbol='btc_cny'):
-        if symbol not in ['btc_cny', 'cny']:
-            OKCoinAPI._logger.critical('illegal symbol')
-            sys.exit(1)
-        payload = {
-            'symbol': symbol
-        }
-        res = self._setup_request('lend_depth', params=payload)
         return res
 
     ### private api
@@ -249,7 +225,6 @@ class OKCoinAPI(BTC):
 
 
 class OKCoinCN(OKCoinAPI):
-
     def __init__(self):
         super(OKCoinCN, self).__init__(config.okcoin_cn_info)
         self.key = common.get_key_from_file('OKCoinCN')

@@ -25,6 +25,7 @@ class BitBays(BTC):
         'user-agent': common.USER_AGENT
     }
     lower_bound = 0.001
+    trade_cancel_list = ['cancel', 'trade']
 
     def __init__(self):
         super(BitBays, self).__init__(config.bitbays_info)
@@ -90,7 +91,8 @@ class BitBays(BTC):
                 else:
                     BitBays._logger.critical(
                         'ERROR: api_type={}, error_message={}'.format(api_type, msg))
-                    if api_type not in ['cancel', 'trade']:
+                    if api_type not in BitBays.trade_cancel_list:
+                        # shouldn't fail!
                         # FIXME terminate safely
                         sys.exit(1)
             return res_data
@@ -102,7 +104,7 @@ class BitBays(BTC):
             if common.is_retry_exception(e):
                 return common.handle_retry(e, BitBays, _request_impl)
             else:
-                common.handle_exit(e, BitBays)
+                common.handle_wait(e, BitBays)
 
     #############################################################################
 

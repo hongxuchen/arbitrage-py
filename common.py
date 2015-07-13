@@ -4,8 +4,8 @@ import logging
 import logging.config
 import os
 import errno
-import sys
 import threading
+import sys
 
 from PySide.QtCore import QThread
 import requests
@@ -68,19 +68,20 @@ def is_retry_exception(exception):
 
 
 def handle_exit(exception, plt):
-    plt._logger.critical('Error during request:"{}", will exit'.format(exception))
-    # FIXME should terminate safely
+    plt._logger.critical('Error during request:"{}", will EXIT'.format(exception))
+    # should exit
     sys.exit(1)
 
 
 def handle_retry(exception, plt, handler):
     """
+    # NOTE: this handling may be blocked OR not blocked
     :param exception: the relevant exception
     :param plt: the platform class, used for logging; must has class variable '_logger' (logging module)
     :param handler: real handler, no params, implemented as closure
     :return: if retry succeeds, should return request result; otherwise, exit abornormally
     """
-    plt._logger.error('Exception during request:"{}", will retry'.format(exception))
+    plt._logger.error('RETRY for Exception: "{}"'.format(exception))
     retry_counter = 0
     while retry_counter < config.RETRY_MAX:
         retry_counter += 1
@@ -90,15 +91,19 @@ def handle_retry(exception, plt, handler):
             config.verbose = True
             res = handler()  # real handle function
             config.verbose = False
-            return res
+            return res  # succeed
         # TODO check whether accessable to exception handling
         except Exception as e:  # all request exceptions
             if is_retry_exception(e):
-                plt._logger.error('Exception after exception:"{}", will retry'.format(e))
+                plt._logger.error('Exception during retrying:"{}", will RETRY'.format(e))
                 continue
             else:
-                handle_exit(e, plt)
-    handle_exit(exception, plt)
+                return handle_exit(e, plt)  # fail
+    plt._logger.critical(
+        'Exception after retrying: "{}", will SLEEP {}s'.format(exception, config.REQUEST_EXCEPTION_WAIT_SECONDS))
+    QThread.sleep(config.REQUEST_EXCEPTION_WAIT_SECONDS)
+    res = handle_retry(exception, plt, handler)  # recursive
+    return res
 
 
 def setup_logger():

@@ -3,7 +3,6 @@
 from PySide import QtCore
 
 import config as config
-
 from asset_info import AssetInfo
 from bitbays import BitBays
 import common
@@ -27,7 +26,8 @@ class AssetMonitor(QtCore.QThread):
         self.change_info = None
         self.original_asset_list = []
         self.running = False
-        self.btc_exceed_counter = (0, 0)
+        self.btc_exceed_counter = 0
+        self.old_btc_changes = 0.0
 
     def get_asset_list(self):
         return [AssetInfo(plt) for plt in self.plt_list]
@@ -54,7 +54,7 @@ class AssetMonitor(QtCore.QThread):
         self.handle_asset_changes_impl(trade_plt, btc, fiat)
         self.change_info = None
 
-    def _get_plt_price_list(self, amount, catelog):
+    def _get_plt_price_list(self, catelog):
         p1 = self.plt_list[0]
         p2 = self.plt_list[1]
         if catelog == 'buy':
@@ -73,38 +73,56 @@ class AssetMonitor(QtCore.QThread):
                 info = [(p2, p2_bid1), (p1, p1_bid1)]
         return info
 
-    def handle_btc_changes(self, amount):
+    def handle_btc_changes(self, btc_change_amount):
         # only when exceeds
-        if amount > config.BTC_DIFF_MAX:
-            self.btc_exceed_counter += 1
+        if btc_change_amount > config.BTC_DIFF_MAX:
+            # update counter
+            AssetMonitor._logger.info(
+                '[Monitor] old_btc_changes={:10.4f}, current={:10.4f}'.format(self.old_btc_changes, btc_change_amount))
+            if self.old_btc_changes < config.minor_diff:
+                self.btc_exceed_counter = 1
+            else:
+                self.btc_exceed_counter += 1
+            # test whether trade is needed
             if self.btc_exceed_counter > config.BTC_EXCEED_COUNTER:
                 trade_catelog = 'sell'
             else:
-                return
-        elif amount < -config.BTC_DIFF_MAX:
-            self.btc_exceed_counter -= 1
+                return  # no trade
+        elif btc_change_amount < -config.BTC_DIFF_MAX:
+            # update counter
+            AssetMonitor._logger.info(
+                '[Monitor] old_btc_changes={:10.4f}, current={:10.4f}'.format(self.old_btc_changes, btc_change_amount))
+            if self.old_btc_changes > -config.minor_diff:
+                self.btc_exceed_counter = -1
+            else:
+                self.btc_exceed_counter -= 1
+            # test whether trade is needed
             if self.btc_exceed_counter < -config.BTC_EXCEED_COUNTER:
                 trade_catelog = 'buy'
-                plt, price = self._get_plt_price_list(amount, trade_catelog)
             else:
-                return
+                return  # no trade
         else:  # within change MAX
-            return
-        plt_price_list = self._get_plt_price_list(amount, trade_catelog)
+            return  # no trade
+        ### adjust trade
+        AssetMonitor._logger.warning(
+            '[Monitor] exceed_counter={}, amount={}'.format(self.btc_exceed_counter, btc_change_amount))
+        trade_amount = abs(btc_change_amount)
+        plt_price_list = self._get_plt_price_list(trade_catelog)
         ### first try
-        plt, price = plt_price_list[0]
-        monitor_t1 = TradeInfo(plt, trade_catelog, price, amount)
-        AssetMonitor._logger.warning('monitor trade at {}'.format(monitor_t1.plt_name))
+        trade_plt, trade_price = plt_price_list[0]
+        monitor_t1 = TradeInfo(trade_plt, trade_catelog, trade_price, trade_amount)
+        AssetMonitor._logger.info('[Monitor] adjust at {}'.format(monitor_t1.plt_name))
         t1_res = monitor_t1.adjust_trade()
         if t1_res is False:
             # second try
-            plt, price = plt_price_list[1]
-            monitor_t2 = TradeInfo(plt, trade_catelog, price, amount)
-            AssetMonitor._logger.warning('monitor trade at {}'.format(monitor_t2.plt_name))
+            trade_plt, trade_price = plt_price_list[1]
+            monitor_t2 = TradeInfo(trade_plt, trade_catelog, trade_price, trade_amount)
+            AssetMonitor._logger.info('[Monitor] adjust at {}'.format(monitor_t2.plt_name))
             t2_res = monitor_t2.adjust_trade()
             if t2_res is False:
                 AssetMonitor._logger.critical(
-                    'monitor trade fails for [{}, {}]'.format(monitor_t1.plt_name, monitor_t2.plt_name))
+                    '[Monitor] adjust fails for [{}, {}]'.format(monitor_t1.plt_name, monitor_t2.plt_name))
+        self.old_btc_changes = 0.0
         self.btc_exceed_counter = 0
 
     def log_asset_update(self):
@@ -115,6 +133,7 @@ class AssetMonitor(QtCore.QThread):
         report = self.get_asset_change_report(btc, fiat)
         self.notify_asset_change.emit(report)
         self.handle_btc_changes(btc)
+        self.old_btc_changes = btc
         common.MUTEX.release()
 
     # FIXME the amouont should be specified by the failed trade
@@ -137,6 +156,7 @@ class AssetMonitor(QtCore.QThread):
     def run(self, *args, **kwargs):
         # initialize asset
         self.original_asset_list = self.get_asset_list()
+        self.old_btc_changes = self.get_asset_changes(self.original_asset_list)[0]
         self.notify_update_asset.emit(self.original_asset_list)
         # update asset info
         while self.running:
