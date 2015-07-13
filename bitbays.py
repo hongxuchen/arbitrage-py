@@ -136,7 +136,7 @@ class BitBays(BTC):
         res = self._setup_request('depth', params=payload)['result']
         asks = sorted(res['asks'], key=lambda ask: ask[0], reverse=True)[-length:]
         bids = sorted(res['bids'], key=lambda bid: bid[0], reverse=True)[:length]
-        assert (asks[-1][0] > bids[0][0])
+        assert (asks[-1][0] + config.minor_diff >= bids[0][0])
         asks_bids = asks + bids
         return asks_bids
 
@@ -159,8 +159,8 @@ class BitBays(BTC):
             'order_type': 0  # limit order
         }
         payload.update(order)
-        assert (payload['order_type'] in [0, 1])
-        assert (payload['op'] in ['buy', 'sell'])
+        # assert (payload['order_type'] in [0, 1])
+        # assert (payload['op'] in ['buy', 'sell'])
         data = self._setup_request('trade', payload)
         return data
 
@@ -191,7 +191,7 @@ class BitBays(BTC):
             'count': 20,
             'nonce': self._nonce()
         }
-        assert (catalog in [0, 1])
+        # assert (catalog in [0, 1])
         if catalog == 0:
             payload['order'] = 'DESC'
         else:
@@ -206,7 +206,7 @@ class BitBays(BTC):
             'count': 20,
             'nonce': self._nonce()
         }
-        assert (catalog in [0, 1])
+        # assert (catalog in [0, 1])
         if catalog == 0:
             payload['order'] = 'DESC'
         else:

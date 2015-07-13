@@ -108,12 +108,18 @@ class TradeInfo(object):
                 TradeInfo._logger.warning('bi-directional adjust_trade, waited {:d} times'.format(wait_for_asset_times))
                 # trade1, must succeed
                 self.regular_trade(trade_catelog, trade_price, trade_amount)
-                # trade2, must succeed
+                # trade2, must succeed in principle
+                # may fail in practice since reverse_price is too high to buy with existing fiat (although not true)
                 reverse_amount = M
                 reverse_catelog = common.reverse_catelog(trade_catelog)
                 reverse_price = common.adjust_price(reverse_catelog, self.price)
-                self.regular_trade(reverse_catelog, reverse_price, reverse_amount)
-                return True
+                order_id = self.regular_trade(reverse_catelog, reverse_price, reverse_amount)
+                if order_id == config.INVALID_ORDER_ID:
+                    TradeInfo._logger.critical(
+                        'Failed reverse at {} during bi-directional trade, to be adjusted by monitor'.format(
+                            self.plt_name))
+                    return False
+                return True  # afford, and bi-directional succeeds
             return False  # not afford for 'self.amount < M'
         else:  # self.amount >= M
             trade_price = common.adjust_price(self.catelog, self.price)

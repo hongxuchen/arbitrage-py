@@ -2,15 +2,18 @@
 
 from PySide import QtCore
 
+import config as config
+
 from asset_info import AssetInfo
 from bitbays import BitBays
 import common
-import config
+
 
 # TODO ensure that amount of BTC in a limited range; invoked when
 # - cancel/trade fails
 # - exiting
 from okcoin import OKCoinCN
+from trade_info import TradeInfo
 
 
 class AssetMonitor(QtCore.QThread):
@@ -24,6 +27,7 @@ class AssetMonitor(QtCore.QThread):
         self.change_info = None
         self.original_asset_list = []
         self.running = False
+        self.btc_exceed_counter = (0, 0)
 
     def get_asset_list(self):
         return [AssetInfo(plt) for plt in self.plt_list]
@@ -50,12 +54,68 @@ class AssetMonitor(QtCore.QThread):
         self.handle_asset_changes_impl(trade_plt, btc, fiat)
         self.change_info = None
 
+    def _get_plt_price_list(self, amount, catelog):
+        p1 = self.plt_list[0]
+        p2 = self.plt_list[1]
+        if catelog == 'buy':
+            p1_ask1 = p1.ask1()
+            p2_ask1 = p2.ask1()
+            if p1_ask1 < p2_ask1:
+                info = [(p1, p1_ask1), (p2, p2_ask1)]
+            else:
+                info = [(p2, p2_ask1), (p1, p1_ask1)]
+        else:  # sell
+            p1_bid1 = p1.bid1()
+            p2_bid1 = p2.bid1()
+            if p1_bid1 > p2_bid1:
+                info = [(p1, p1_bid1), (p2, p2_bid1)]
+            else:
+                info = [(p2, p2_bid1), (p1, p1_bid1)]
+        return info
+
+    def handle_btc_changes(self, amount):
+        # only when exceeds
+        if amount > config.BTC_DIFF_MAX:
+            self.btc_exceed_counter += 1
+            if self.btc_exceed_counter > config.BTC_EXCEED_COUNTER:
+                trade_catelog = 'sell'
+            else:
+                return
+        elif amount < -config.BTC_DIFF_MAX:
+            self.btc_exceed_counter -= 1
+            if self.btc_exceed_counter < -config.BTC_EXCEED_COUNTER:
+                trade_catelog = 'buy'
+                plt, price = self._get_plt_price_list(amount, trade_catelog)
+            else:
+                return
+        else:  # within change MAX
+            return
+        plt_price_list = self._get_plt_price_list(amount, trade_catelog)
+        ### first try
+        plt, price = plt_price_list[0]
+        monitor_t1 = TradeInfo(plt, trade_catelog, price, amount)
+        AssetMonitor._logger.warning('monitor trade at {}'.format(monitor_t1.plt_name))
+        t1_res = monitor_t1.adjust_trade()
+        if t1_res is False:
+            # second try
+            plt, price = plt_price_list[1]
+            monitor_t2 = TradeInfo(plt, trade_catelog, price, amount)
+            AssetMonitor._logger.warning('monitor trade at {}'.format(monitor_t2.plt_name))
+            t2_res = monitor_t2.adjust_trade()
+            if t2_res is False:
+                AssetMonitor._logger.critical(
+                    'monitor trade fails for [{}, {}]'.format(monitor_t1.plt_name, monitor_t2.plt_name))
+        self.btc_exceed_counter = 0
+
     def log_asset_update(self):
+        common.MUTEX.acquire(True)
         asset_list = self.get_asset_list()
-        self.notify_update_asset.emit(asset_list)
         btc, fiat = self.get_asset_changes(asset_list)
+        self.notify_update_asset.emit(asset_list)
         report = self.get_asset_change_report(btc, fiat)
         self.notify_asset_change.emit(report)
+        self.handle_btc_changes(btc)
+        common.MUTEX.release()
 
     # FIXME the amouont should be specified by the failed trade
     @staticmethod

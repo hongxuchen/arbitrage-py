@@ -13,6 +13,10 @@
 
 ## other
 * exit error on Mac <-- due to QT bug?
+* cannot totally avoid btc changes since the pending amount may be changed during 'order' and 'cancel'
+* when exception, should not exit, but wait for a longer time
+* when btc changes exists for a long time(threshold), the monitor should adjust the trade according to catelog and platform ask/bid
+* smarter strategy to determine which platform to adjust trade
 
 ## cases
 

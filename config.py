@@ -24,7 +24,7 @@ precision = 6
 minor_diff = 10.0 ** (-precision)
 
 ## upper_bound must > lower_bound for all platforms
-upper_bound = 0.015
+upper_bound = 0.02
 
 arbitrage_diff = 0.9
 
@@ -42,5 +42,8 @@ RETRY_MILLISECONDS = 100
 INVALID_ORDER_ID = -1
 
 monitor_interval_seconds = 3
+
+BTC_DIFF_MAX = 0.001
+BTC_EXCEED_COUNTER = 3
 
 verbose = False

@@ -13,6 +13,11 @@ class ArbitrageInfo(object):
     _logger = common.setup_logger()
 
     def __init__(self, trade_pair, time):
+        """
+        :param trade_pair: a TradeInfo pair, (buy, sell)
+        :param time:
+        :return:
+        """
         self.trade_pair = trade_pair
         self.time = time
 
@@ -26,84 +31,102 @@ class ArbitrageInfo(object):
             order_id = trade.regular_trade(trade.catelog, trade.price, trade.amount)
             trade.set_order_id(order_id)
 
-    def normalize_trade_pair(self):
+    @staticmethod
+    def normalize_trade_pair_strategy1(trade_pair):
         """
-        only 2 platforms; first is trade whose lower_bound is smaller
-        :return: trade pair
+        :return: trade pair, first's lower_bound is smaller
         """
-        ta = self.trade_pair[0]
-        tb = self.trade_pair[1]
-        ma = ta.plt.lower_bound
-        mb = tb.plt.lower_bound
-        if ma < mb:
-            return ta, tb
+        t1 = trade_pair[0]
+        t2 = trade_pair[1]
+        p1 = t1.plt
+        p2 = t2.plt
+        if p1.lower_bound < p2.lower_bound:
+            return t1, t2
         else:
-            return tb, ta
+            return t2, t1
+
+    @staticmethod
+    def normalize_trade_pair_strategy2(trade_pair, catelog):
+        """
+        This strategy requires to request each plt once
+        :return: trade pair, first is preferred
+        """
+        t1 = trade_pair[0]
+        t2 = trade_pair[1]
+        p1 = t1.plt
+        p2 = t2.plt
+        if catelog == 'buy':  # buy lower
+            p1_ask = p1.ask1()
+            p2_ask = p2.ask1()
+            if p1_ask < p2_ask:
+                return t1, t2
+            else:
+                return t2, t1
+        else:  # sell, sell higher
+            p1_bid = p1.bid1()
+            p2_bid = p2.bid2()
+            if p1_bid > p2_bid:
+                return t1, t2
+            else:
+                return t2, t1
 
     def seconds_since_trade(self):
         return time.time() - self.time
 
-    def get_order_adjust_dict(self):
+    def get_adjust_info(self):
         """
         if finding pending, cancel order ASAP; cancel failure means no pending!
-        NOTE: order_id is useless after this
-        :return:
+        since trade_pair is of (buy, sell), this returns the *buy* amount
+        :return: None if adjust not needed; otherwise (catelog, amount)
         """
-        order_info_dict = {}
+        remaining_list = []
         for trade in self.trade_pair:
             order_info = trade.get_order_info()
             if order_info.has_pending():
                 cancel_status = trade.cancel()
                 if cancel_status is False:
                     order_info.remaining_amount = 0.0
-            order_info_dict[trade.plt] = order_info
-        return order_info_dict
+            remaining_list.append(order_info.remaining_amount)
+        amount = remaining_list[0] - remaining_list[1]
+        # A1: buy remaining, A2: sell remaining
+        # if A < 0, bought more, should sell; if A >= 0, sold more, should buy
+        ArbitrageInfo._logger.warning(
+            'A1={:<10.4f}, A2={:<10.4f}, A={:<10.4f}'.format(remaining_list[0], remaining_list[1], amount))
+        if amount < -config.minor_diff:
+            trade_catelog = 'sell'
+        elif amount > config.minor_diff:
+            trade_catelog = 'buy'
+        else:
+            return None
+        trade_amount = abs(amount)
+        return trade_catelog, trade_amount
 
     # noinspection PyPep8Naming
     def adjust_pending(self):
-        adjust_dict = self.get_order_adjust_dict()
-        t1, t2 = self.normalize_trade_pair()
-        p1, p2 = t1.plt, t2.plt
-        O1, O2 = adjust_dict[p1], adjust_dict[p2]
-        A1, A2 = O1.remaining_amount, O2.remaining_amount
-        M1 = p1.lower_bound
-        M2 = p2.lower_bound
-        #################################
-        # if A2 < M2:
-        A = A1 - A2
-        # ArbitrageInfo._logger.debug('A2<M2, A1={:<10.4f}, A2={:<10.4f}, A={:<10.4f}'.format(A1, A2, A))
-        ArbitrageInfo._logger.warning('A1={:<10.4f}, A2={:<10.4f}, A={:<10.4f}'.format(A1, A2, A))
-        if A < -config.minor_diff:
-            trade_catelog = common.reverse_catelog(t1.catelog)
-        elif A > config.minor_diff:  # A >= 0
-            trade_catelog = t1.catelog
-        else:
+        adjust_res = self.get_adjust_info()
+        if adjust_res is None:
             return
-        amount = abs(A)
+        trade_catelog, trade_amount = adjust_res[0], adjust_res[1]
+        t1, t2 = self.normalize_trade_pair_strategy1(self.trade_pair)
+        trade_plt = t1.plt
+        trade_price = t1.price
         # not really care about the EXACT price
-        new_t1 = TradeInfo(p1, trade_catelog, t1.price, amount)
+        new_t1 = TradeInfo(trade_plt, trade_catelog, trade_price, trade_amount)
         common.MUTEX.acquire(True)  # blocking
         ArbitrageInfo._logger.info('[Consumer] acquire lock')
         t1_adjust_status = new_t1.adjust_trade()
         if t1_adjust_status is False:
-            new_t2 = TradeInfo(p2, trade_catelog, t1.price, amount)
+            trade_plt = t2.plt
+            trade_price = t2.price
+            new_t2 = TradeInfo(trade_plt, trade_catelog, trade_price, trade_amount)
             # TODO more code review here
             t2_adjust_status = new_t2.adjust_trade()
             # should be rather rare case
             if t2_adjust_status is False:
                 ArbitrageInfo._logger.critical('CRITAL: [{}, {}] cannot adjust'.format(t1.plt_name, t2.plt_name))
-                # TODO may need to use monitor here; quite complicated here
+                # TODO may need to use monitor here
         ArbitrageInfo._logger.info('[Consumer] adjust done, release lock')
         common.MUTEX.release()
-        # else:  # A2 >= M2:
-        #     ArbitrageInfo._logger.debug('A2>=M2, A1={:<10.4f}, A2={:<10.4f}'.format(A1, A2))
-        ##    FIXME this may introduce bug since one of new_t1, new_t2 may be canceled
-        # new_t1 = TradeInfo(p1, t1.catelog, t1.price, A1)
-        # new_t2 = TradeInfo(p2, t2.catelog, t2.price, A2)
-        # config.MUTEX.acquire(True)  # blocking
-        # new_t1.adjust_trade()
-        # new_t2.adjust_trade()
-        # config.MUTEX.release()
 
     def __repr__(self):
         t1 = self.trade_pair[0]

@@ -23,6 +23,8 @@ class ArbitrageConsumer(QtCore.QThread):
     def consume(self):
         for arbitrage in self.arbitrage_queue:
             seconds = time.time() - arbitrage.time
+            # FIXME this has bug since the size of queue may be > 1 and will sleep too much
+            # but may not be a big problem since the sleep time is for all elem in queue
             if seconds < config.PENDING_SECONDS:
                 sleep_milliseconds = int((config.PENDING_SECONDS - seconds) * 1000)
                 ArbitrageConsumer._logger.info('[Consmumer] sleep for {:4d}ms'.format(sleep_milliseconds))
