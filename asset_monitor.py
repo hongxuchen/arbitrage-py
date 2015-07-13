@@ -23,11 +23,10 @@ class AssetMonitor(QtCore.QThread):
     def __init__(self, plt_list):
         super(AssetMonitor, self).__init__()
         self.plt_list = plt_list
-        self.change_info = None
         self.original_asset_list = []
         self.running = False
         self.btc_exceed_counter = 0
-        self.old_btc_changes = 0.0
+        self.old_btc_change_amount = 0.0
 
     def get_asset_list(self):
         return [AssetInfo(plt) for plt in self.plt_list]
@@ -48,11 +47,6 @@ class AssetMonitor(QtCore.QThread):
         report = 'Asset Change: {:10.4f}btc, {:10.4f}cny'.format(btc, fiat)
         AssetMonitor._logger.warning(report)
         return report
-
-    def handle_asset_changes(self, trade_plt, asset_list):
-        btc, fiat = self.get_asset_changes(asset_list)
-        self.handle_asset_changes_impl(trade_plt, btc, fiat)
-        self.change_info = None
 
     def _get_plt_price_list(self, catelog):
         p1 = self.plt_list[0]
@@ -78,8 +72,9 @@ class AssetMonitor(QtCore.QThread):
         if btc_change_amount > config.BTC_DIFF_MAX:
             # update counter
             AssetMonitor._logger.info(
-                '[Monitor] old_btc_changes={:10.4f}, current={:10.4f}'.format(self.old_btc_changes, btc_change_amount))
-            if self.old_btc_changes < config.minor_diff:
+                '[Monitor] old_btc_changes={:10.4f}, current={:10.4f}'.format(
+                    self.old_btc_change_amount, btc_change_amount))
+            if self.old_btc_change_amount < config.minor_diff:
                 self.btc_exceed_counter = 1
             else:
                 self.btc_exceed_counter += 1
@@ -90,9 +85,9 @@ class AssetMonitor(QtCore.QThread):
                 return  # no trade
         elif btc_change_amount < -config.BTC_DIFF_MAX:
             # update counter
-            AssetMonitor._logger.info(
-                '[Monitor] old_btc_changes={:10.4f}, current={:10.4f}'.format(self.old_btc_changes, btc_change_amount))
-            if self.old_btc_changes > -config.minor_diff:
+            AssetMonitor._logger.info('[Monitor] old_btc_changes={:10.4f}, current={:10.4f}'.format(
+                self.old_btc_change_amount, btc_change_amount))
+            if self.old_btc_change_amount > -config.minor_diff:
                 self.btc_exceed_counter = -1
             else:
                 self.btc_exceed_counter -= 1
@@ -122,7 +117,7 @@ class AssetMonitor(QtCore.QThread):
             if t2_res is False:
                 AssetMonitor._logger.critical(
                     '[Monitor] adjust fails for [{}, {}]'.format(monitor_t1.plt_name, monitor_t2.plt_name))
-        self.old_btc_changes = 0.0
+        self.old_btc_change_amount = 0.0
         self.btc_exceed_counter = 0
 
     def log_asset_update(self):
@@ -133,30 +128,13 @@ class AssetMonitor(QtCore.QThread):
         report = self.get_asset_change_report(btc, fiat)
         self.notify_asset_change.emit(report)
         self.handle_btc_changes(btc)
-        self.old_btc_changes = btc
+        self.old_btc_change_amount = btc
         common.MUTEX.release()
-
-    # FIXME the amouont should be specified by the failed trade
-    @staticmethod
-    def handle_asset_changes_impl(plt, btc, fiat):
-        if btc > config.minor_diff:
-            catelog = 'sell'
-            price = plt.bid1()  # find "buyer"
-        elif btc < -config.minor_diff:
-            catelog = 'buy'
-            price = plt.ask1()  # find "seller"
-        else:
-            return
-        # must always succeed
-        adjust_price = common.adjust_price(catelog, price)
-        AssetMonitor._logger.warning(
-            '[Monitor]: {} {}btc at {}cny [{}]'.format(catelog, abs(btc), adjust_price, plt.__class__.__name__))
-        plt.trade(catelog, adjust_price, btc)
 
     def run(self, *args, **kwargs):
         # initialize asset
         self.original_asset_list = self.get_asset_list()
-        self.old_btc_changes = self.get_asset_changes(self.original_asset_list)[0]
+        self.old_btc_change_amount = self.get_asset_changes(self.original_asset_list)[0]
         self.notify_update_asset.emit(self.original_asset_list)
         # update asset info
         while self.running:
@@ -170,5 +148,3 @@ if __name__ == '__main__':
     bitbays = BitBays()
     plt_list = [okcoin_cn, bitbays]
     monitor = AssetMonitor(plt_list)
-    # monitor.change_info = [0.0155, 0]
-    # monitor.handle_asset_changes(okcoin_cn)
