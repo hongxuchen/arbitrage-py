@@ -1,22 +1,35 @@
-# 监控未成交交易
+# 任务分工
 
-## 前置条件
+1. Producer 发现差价(`ask_bid`), 并按照ask1/bid1进行交易(`trade`)
+1. Consumer 超过一定时限后检查Producer所进行交易对是否完成(`order`), 有则调整
+1. Monitor 负责监控全局资产状况，如果比特币数量超过一定限度波动则全局调整使得在一定范围内
 
-- 2个平台: P1, P2
-- 平台最小交易下限: M1, M2; M = min{M1, M2}；假定 M1<M2, 即 M==M1
-- 交易信息: t={P, type, amount}; type是"buy"或"sell", amount 是*剩下的*数量
-- 当前未成交交易对: \<t1, t2>
-- A1 = t1.amount, A2 = t2.amount, A\_max=max{A1, A2}, A\_max>0
 
-## 策略
-- 取消 t1, t2
-- 对未成交交易进行*远位价格*交易，必须保证BTC的总量恒定；远位价格上下波动比例为pp:
-    - A1<M2,A2<M2: A=A1-A2, AdjustTrade(P1, type, |A|)，这里:
-      - A<0: type=~t1.type
-      - A>0: type=t1.type
-    - A1<M2, A2>=M2: t21={P2, t2.type, A2}, AdjustTrade(P1, t1.type, A1)
-    - A1>=M2, A2>=M2: t11={P1, t2.type, A1}, t21={P2, t2.type, A2}
-    - A1>=M2, A2<M2: A=A1-A2, t11=AdjustTrade(P1, t1.type, A)
+# Producer
+
+1. 发现bid1-ask1>D>0, 或考虑单词总收益(price, amount), 甚至历史因素
+1. 买价卖价需要适当调整(根据D或bid1-ask1), 以减少交易失败次数
+1. 数量由下面3个因素共同决定:
+   1. 不超过aks/bid最小值
+   1. 不超过每个平台的资产购买(fiat)卖出(btc)能力
+   1. 不小于单个最小限额(Ma, Mb)的最大值M, 假定Ma<Mb
+1. 和Consumer共享一个队列, 当交易完成后将交易ID及price, amount信息(`TradeInfo`)结对给Consumer
+
+# Consumer
+   1. 只要发现剩余量A1（A2）, 立即取消(`cancel`);取消后实际平台剩余量`[0, A1]`, `[0, A2]`.若`cancel`返回ID不存在错误，剩余量更新为零；但无法准确获知具体剩余量。 // AAA
+   1. 记A=A1-A2, 考虑资产能力和平台最小额度限制之后, 决定买入或卖出(catelog)
+      1. A>0, 需买入
+      1. A<0, 需卖出
+   1. 价格选用远位价格, 极大减小交易失败可能
+   1. 选用不同策略, 决定在哪个平台交易, 考虑如下因素
+      1. 两个交易平台的ask1/bid1信息; 缺陷: 通常多两次request
+         1. A>0, buy, 倾向于ask小的
+         1. A<0, sell, 倾向于bid大的
+      1. 交易数量: 当Ma<A<Mb时倾向于Ma对应平台; 否则在Mb所在平台需双向交易方可
+      1. 倾向于网络速度快的
+         1. 长期经验总结
+         1. 交易未完成原因分析
+      1. 倾向于波动差的(次要)
 
 ## AdjustTrade算法
 
@@ -35,13 +48,20 @@
         else:
           wait_for_asset_time += 1
           if wait_for_asset_times > ASSET_WAIT_TIMES: // 事先定义好的次数
-            // 等待了一定次数后CNY/BTC仍然不够
-            no_trade_and_return
+            // 等待了一定次数后仍然不够交易, 返回状态, 可能的话另一个平台交易 // BBB
+            no_trade_and_notify
       if amount >= M:
         t={p, type, amount}
+        
+# Monitor
 
-## 后置条件
-不再有未成交交易
+1. 调整由下面原因引起的比特币数量差异
+   1. 浮点数受精确度影响不能够足够准确
+      1. 平台返回的json数据不够准确
+      1. 本地精度问题
+   1. Consumer取消之前有新交易，导致剩余数量没有及时更新(即AAA)
+   1. Consumer在尝试两个平台的调整交易之后均失败(即BBB)
+2. 适时更新UI资产显示
 
 
 # OKCoin error code
