@@ -67,7 +67,6 @@ class AssetMonitor(QtCore.QThread):
                 info = [(p2, p2_bid1), (p1, p1_bid1)]
         return info
 
-    ### FIXME if last exceed is handled by consumer(<config.BTC_EXCEED_COUNTER), the btc_exceed_counter is not set to zero accordingly
     def handle_btc_changes(self, btc_change_amount):
         # only when exceeds
         if btc_change_amount > config.BTC_DIFF_MAX:
@@ -86,8 +85,9 @@ class AssetMonitor(QtCore.QThread):
                 return  # no trade
         elif btc_change_amount < -config.BTC_DIFF_MAX:
             # update counter
-            AssetMonitor._logger.warning('[Monitor] exceed_counter={}, old_btc_changes={:<10.4f}, current={:<10.4f}'.format(
-                self.btc_exceed_counter, self.old_btc_change_amount, btc_change_amount))
+            AssetMonitor._logger.warning(
+                '[Monitor] exceed_counter={}, old_btc_changes={:<10.4f}, current={:<10.4f}'.format(
+                    self.btc_exceed_counter, self.old_btc_change_amount, btc_change_amount))
             if self.old_btc_change_amount > -config.minor_diff:
                 self.btc_exceed_counter = -1
             else:
@@ -97,7 +97,8 @@ class AssetMonitor(QtCore.QThread):
                 trade_catelog = 'buy'
             else:
                 return  # no trade
-        else:  # within change MAX
+        else:  # -config.BTC_DIFF_MAX <= btc_change_amount <= config.BTC_DIFF_MAX
+            self.btc_exceed_counter = 0
             return  # no trade
         ### adjust trade
         AssetMonitor._logger.warning(
