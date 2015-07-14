@@ -107,7 +107,8 @@ class ArbitrageInfo(object):
         if adjust_res is None:
             return
         trade_catelog, trade_amount = adjust_res[0], adjust_res[1]
-        t1, t2 = self.normalize_trade_pair_strategy1(self.trade_pair)
+        # t1, t2 = self.normalize_trade_pair_strategy1(self.trade_pair)
+        t1, t2 = self.normalize_trade_pair_strategy2(self.trade_pair, trade_catelog)
         trade_plt = t1.plt
         trade_price = t1.price
         # not really care about the EXACT price

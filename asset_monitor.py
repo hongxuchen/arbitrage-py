@@ -152,6 +152,9 @@ class AssetMonitor(QtCore.QThread):
             QtCore.QThread.sleep(config.monitor_interval_seconds)
             AssetMonitor._logger.debug("[Monitor] Notify")
             self.log_asset_update()
+        self.btc_exceed_counter = 0.0
+        self.old_fiat_change_amount = 0.0
+        self.old_btc_change_amount = 0.0
 
 
 if __name__ == '__main__':
