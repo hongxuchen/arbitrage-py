@@ -64,7 +64,7 @@ class ArbitrageInfo(object):
                 return t2, t1
         else:  # sell, sell higher
             p1_bid = p1.bid1()
-            p2_bid = p2.bid2()
+            p2_bid = p2.bid1()
             if p1_bid > p2_bid:
                 return t1, t2
             else:
@@ -81,7 +81,9 @@ class ArbitrageInfo(object):
         """
         remaining_list = []
         for trade in self.trade_pair:
+            # request here
             order_info = trade.get_order_info()
+            # remaining may decrease if has_pending, [0, remaining_amount]
             if order_info.has_pending():
                 cancel_status = trade.cancel()
                 if cancel_status is False:
