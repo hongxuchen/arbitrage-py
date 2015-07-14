@@ -70,7 +70,6 @@ class TradeInfo(object):
                     TradeInfo._logger.critical(
                         '{}: not afford to "{}" after waiting {} times'.format(
                             self.plt_name, self.catelog, config.ASSET_WAIT_MAX))
-                    # FIXME critical bug
                     # TODO should avoid further "not afford"
                     return False
                 waited_asset_times += 1

@@ -60,10 +60,9 @@ class OKCoinAPI(BTC):
                                      headers=OKCoinAPI.common_headers, timeout=config.request_timeout, verify=True)
             else:
                 OKCoinAPI._logger.critical('api_type [{}] not supported'.format(api_type))
-                # FIXME terminate safely
                 sys.exit(1)
             # OKCoinAPI._logger.debug(r.url)
-            # FIXME should consider exception
+            # TODO should consider exception
             res = r.json()
             # if config.verbose:
             #     OKCoinAPI._logger.warning('response={}'.format(res))
@@ -142,7 +141,6 @@ class OKCoinAPI(BTC):
             OKCoinAPI._logger.critical(
                 'ERROR: api_type={}, response_data={}'.format(api_type, response_data))
             if api_type not in OKCoinAPI.trade_cancel_api_list:
-                # FIXME terminate safely
                 sys.exit(1)
         return response_data
 

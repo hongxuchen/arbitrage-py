@@ -54,7 +54,6 @@ class BitBays(BTC):
     def _real_uri(self, api_type):
         return self.get_url('/' + api_type + '/')
 
-    # FIXME headers not used here, may introduce bugs in future
     def _setup_request(self, api_type, params=None, data=None):
         """
         :param api_type:
@@ -75,7 +74,7 @@ class BitBays(BTC):
             else:
                 BitBays._logger.critical('api_type={} not supported'.format(api_type))
                 sys.exit(1)
-            # FIXME check error
+            # TODO check error
             res_data = r.json()
             # if config.verbose:
             #     BitBays._logger.warning('bitbays response={}'.format(res_data))
@@ -92,8 +91,7 @@ class BitBays(BTC):
                     BitBays._logger.critical(
                         'ERROR: api_type={}, error_message={}'.format(api_type, msg))
                     if api_type not in BitBays.trade_cancel_list:
-                        # shouldn't fail!
-                        # FIXME terminate safely
+                        # mustn't fail!
                         sys.exit(1)
             return res_data
 
