@@ -9,11 +9,13 @@
 
 1. 发现bid1-ask1>D>0, 或考虑单词总收益(price, amount), 甚至历史因素  
 1. 买价卖价需要适当调整(根据D或bid1-ask1), 以减少交易失败次数  
-1. 数量由下面3个因素共同决定:  
-   1. 不超过aks/bid最小值  
-   1. 不超过每个平台的资产购买(fiat)卖出(btc)能力  
-   1. 不小于单个最小限额(Ma, Mb)的最大值M, 假定Ma<Mb  
-1. 和Consumer共享一个队列, 当交易完成后将交易ID及price, amount信息(`TradeInfo`)结对给Consumer
+
+1. 数量由下面3个因素共同决定  
+   1. 不超过aks/bid最小值   
+   1. 不超过每个平台的资产购买(fiat)卖出(btc)能力   
+   1. 不小于单个最小限额(Ma, Mb)的最大值M, 假定Ma<Mb   
+   
+1. 和Consumer共享一个队列, 当交易完成后将交易ID及price, amount信息(`TradeInfo`)结对给Consumer  
 
 # Consumer
    1. 只要发现剩余量A1（A2）, 立即取消(`cancel`); 取消后实际平台剩余量`[0, A1]`, `[0, A2]`。若`cancel`返回ID不存在错误, 剩余量更新为零; 但无法准确获知具体剩余量 // AAA  
