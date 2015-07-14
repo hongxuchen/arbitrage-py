@@ -67,9 +67,11 @@ class AssetMonitor(QtCore.QThread):
                 info = [(p2, p2_bid1), (p1, p1_bid1)]
         return info
 
-    def handle_btc_changes(self, btc_change_amount):
+    def btc_update_handler(self, btc_change_amount, is_last):
         # only when exceeds
         if btc_change_amount > config.BTC_DIFF_MAX:
+            if is_last:  # make sure will sell
+                self.btc_exceed_counter = config.BTC_EXCEED_COUNTER + 2
             # update counter
             AssetMonitor._logger.warning(
                 '[Monitor] exceed_counter={}, old_btc_changes={:<10.4f}, current={:<10.4f}'.format(
@@ -82,8 +84,10 @@ class AssetMonitor(QtCore.QThread):
             if self.btc_exceed_counter > config.BTC_EXCEED_COUNTER:
                 trade_catelog = 'sell'
             else:
-                return  # no trade
+                return True  # no trade
         elif btc_change_amount < -config.BTC_DIFF_MAX:
+            if is_last:  # make sure we will buy
+                self.btc_exceed_counter = -(config.BTC_EXCEED_COUNTER + 2)
             # update counter
             AssetMonitor._logger.warning(
                 '[Monitor] exceed_counter={}, old_btc_changes={:<10.4f}, current={:<10.4f}'.format(
@@ -96,11 +100,19 @@ class AssetMonitor(QtCore.QThread):
             if self.btc_exceed_counter < -config.BTC_EXCEED_COUNTER:
                 trade_catelog = 'buy'
             else:
-                return  # no trade
+                return True  # no trade
         else:  # -config.BTC_DIFF_MAX <= btc_change_amount <= config.BTC_DIFF_MAX
             self.btc_exceed_counter = 0
-            return  # no trade
-        ### adjust trade
+            return True  # no trade
+        ## reset before trade
+        self.old_btc_change_amount = 0.0
+        self.btc_exceed_counter = 0
+        ### adjust trade; FIXME should guarantee no btc change when stop
+        adjust_status = self.adjust_trade(trade_catelog, btc_change_amount)
+        return adjust_status
+
+    def adjust_trade(self, trade_catelog, btc_change_amount):
+        adjust_status = True
         AssetMonitor._logger.warning(
             '[Monitor] exceed_counter={}, amount={}'.format(self.btc_exceed_counter, btc_change_amount))
         trade_amount = abs(btc_change_amount)
@@ -119,28 +131,29 @@ class AssetMonitor(QtCore.QThread):
             if t2_res is False:
                 AssetMonitor._logger.critical(
                     '[Monitor] adjust fails for [{}, {}]'.format(monitor_t1.plt_name, monitor_t2.plt_name))
-        self.old_btc_change_amount = 0.0
-        self.btc_exceed_counter = 0
+                adjust_status = False  # only when both False
+        return adjust_status
 
-    def log_asset_update(self):
+    def asset_update_handler(self, is_last):
         # handle btc changes
         common.MUTEX.acquire(True)
         asset_list = self.get_asset_list()
         btc, fiat = self.get_asset_changes(asset_list)
-        self.handle_btc_changes(btc)
+        status = self.btc_update_handler(btc, is_last)
         common.MUTEX.release()
         ### report
         # NOTE:this report is delayed
         self.notify_update_asset.emit(asset_list)
         report = self.get_asset_change_report(btc, fiat)
         ### always report on console; notify UI only when change
-        AssetMonitor._logger.warning(report)
+        AssetMonitor._logger.info(report)
         if abs(self.old_btc_change_amount - btc) > config.minor_diff or abs(
                         self.old_fiat_change_amount - fiat) > config.minor_diff:
             self.notify_asset_change.emit(report)
         ### update old
         self.old_btc_change_amount = btc
         self.old_fiat_change_amount = fiat
+        return status
 
     def run(self, *args, **kwargs):
         # initialize asset
@@ -151,10 +164,13 @@ class AssetMonitor(QtCore.QThread):
         while self.running:
             QtCore.QThread.sleep(config.monitor_interval_seconds)
             AssetMonitor._logger.debug("[Monitor] Notify")
-            self.log_asset_update()
-        self.btc_exceed_counter = 0.0
-        self.old_fiat_change_amount = 0.0
-        self.old_btc_change_amount = 0.0
+            self.asset_update_handler(False)  # TODO: return value not used here
+        # last adjust
+        # FIXME this strategy is fine only when exiting in the order: consumer->monitor
+        last_adjust_status = self.asset_update_handler(True)
+        if last_adjust_status is False:
+            fail_warning = 'last adjust failed, do it yourself!'
+            self.notify_asset_change.emit(fail_warning)
 
 
 if __name__ == '__main__':
