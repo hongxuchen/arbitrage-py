@@ -73,7 +73,7 @@ class AssetMonitor(QtCore.QThread):
             # update counter
             AssetMonitor._logger.warning(
                 '[Monitor] exceed_counter={}, old_btc_changes={:<10.4f}, current={:<10.4f}'.format(
-                    self.old_btc_change_amount, btc_change_amount))
+                    self.btc_exceed_counter, self.old_btc_change_amount, btc_change_amount))
             if self.old_btc_change_amount < config.minor_diff:
                 self.btc_exceed_counter = 1
             else:
