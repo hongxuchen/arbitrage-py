@@ -24,6 +24,7 @@ class ArbitrageInfo(object):
     def process_trade(self):
         """
         inital trading, this guarantees that the asset is enough
+        TODO: ensure this trade MUST succeed
         :return:
         """
         ArbitrageInfo._logger.warning('Arbitrage Start')

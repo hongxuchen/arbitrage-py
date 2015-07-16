@@ -104,11 +104,11 @@ class AssetMonitor(QtCore.QThread):
         else:  # -config.BTC_DIFF_MAX <= btc_change_amount <= config.BTC_DIFF_MAX
             self.btc_exceed_counter = 0
             return True  # no trade
-        ## reset before trade
-        self.old_btc_change_amount = 0.0
-        self.btc_exceed_counter = 0
         ### adjust trade; FIXME should guarantee no btc change when stop
         adjust_status = self.adjust_trade(trade_catelog, btc_change_amount)
+        ## reset after trade
+        self.old_btc_change_amount = 0.0
+        self.btc_exceed_counter = 0
         return adjust_status
 
     def adjust_trade(self, trade_catelog, btc_change_amount):

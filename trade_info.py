@@ -28,7 +28,7 @@ class TradeInfo(object):
     def set_order_id(self, order_id):
         self.order_id = order_id
 
-    # TODO may need to refactor
+    # TODO refactor
     def regular_trade(self, catelog, price, amount):
         """
         regular trade, may cause pending
@@ -66,13 +66,13 @@ class TradeInfo(object):
             # asset_amount not enough
             else:
                 ################################################
-                if waited_asset_times >= config.ASSET_WAIT_MAX:
+                waited_asset_times += 1
+                if waited_asset_times > config.ASSET_WAIT_MAX:
                     TradeInfo._logger.critical(
-                        '{}: not afford to "{}" after waiting {} times'.format(
+                        '{}: not afford to "{}" after waiting > {} times'.format(
                             self.plt_name, self.catelog, config.ASSET_WAIT_MAX))
                     # TODO should avoid further "not afford"
                     return False
-                waited_asset_times += 1
                 ################################################
                 # adjust to "nearer price"
                 trade_price -= (trade_price - self.price) / (config.ASSET_WAIT_MAX + 1)
@@ -96,7 +96,6 @@ class TradeInfo(object):
         #     TradeInfo._logger.info('{}: trading amount = 0, exit adjust_trade'.format(self.plt_name))
         #     return
         # config.minor_diff <= self.amount
-        wait_for_asset_times = 0
         # self.amount does not change inside
         if self.amount < M:
             trade_amount = self.amount + M
@@ -104,7 +103,7 @@ class TradeInfo(object):
             trade_price = common.adjust_price(trade_catelog, self.price)
             afford_info = self._asset_afford_trade(trade_amount, trade_price)
             if afford_info:
-                TradeInfo._logger.warning('bi-directional adjust_trade, waited {:d} times'.format(wait_for_asset_times))
+                TradeInfo._logger.warning('{} bi-directional adjust_trade'.format(self.plt_name))
                 # trade1, must succeed
                 self.regular_trade(trade_catelog, trade_price, trade_amount)
                 # trade2, must succeed in principle
@@ -112,6 +111,7 @@ class TradeInfo(object):
                 reverse_amount = M
                 reverse_catelog = common.reverse_catelog(trade_catelog)
                 reverse_price = common.adjust_price(reverse_catelog, self.price)
+                # TODO: may fail, should handle
                 order_id = self.regular_trade(reverse_catelog, reverse_price, reverse_amount)
                 if order_id == config.INVALID_ORDER_ID:
                     TradeInfo._logger.critical(
@@ -126,8 +126,7 @@ class TradeInfo(object):
             trade_amount = self.amount
             afford_info = self._asset_afford_trade(trade_amount, trade_price)
             if afford_info:
-                TradeInfo._logger.warning(
-                    '{} single adjust_trade, waited {:d} times'.format(self.plt_name, wait_for_asset_times))
+                TradeInfo._logger.warning('{} single adjust_trade'.format(self.plt_name))
                 # trade must succeed
                 self.regular_trade(trade_catelog, trade_price, trade_amount)
                 return True
