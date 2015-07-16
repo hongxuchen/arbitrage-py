@@ -64,8 +64,7 @@ class OKCoinAPI(BTC):
             # OKCoinAPI._logger.debug(r.url)
             # TODO should consider exception
             res = r.json()
-            # if config.verbose:
-            #     OKCoinAPI._logger.warning('response={}'.format(res))
+            # OKCoinAPI._logger.warning('response={}'.format(res))
             if res is None or res is {}:
                 raise common.NULLResponseError(
                     'NULLResponseError: Response is empty/{} for api_type={}'.format(api_type))

@@ -24,10 +24,6 @@ precision = 6
 minor_diff = 10.0 ** (-precision)
 
 ## upper_bound must > lower_bound for all platforms
-upper_bound = 0.02
-
-arbitrage_diff = 0.9
-
 PENDING_SECONDS = 5.0
 adjust_percentage = 0.1
 ASSET_WAIT_MAX = 1
@@ -47,4 +43,6 @@ monitor_interval_seconds = 3
 BTC_DIFF_MAX = 0.001
 BTC_EXCEED_COUNTER = 3
 
-verbose = False
+# CONFIG
+upper_bound = 0.03
+arbitrage_diff = 0.9
