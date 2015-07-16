@@ -102,6 +102,7 @@ class TradeInfo(object):
             trade_catelog = self.catelog
             trade_price = common.adjust_price(trade_catelog, self.price)
             afford_info = self._asset_afford_trade(trade_amount, trade_price)
+            # TODO: check whether running in different threads
             if afford_info:
                 TradeInfo._logger.warning('{} bi-directional adjust_trade'.format(self.plt_name))
                 # trade1, must succeed
@@ -132,6 +133,7 @@ class TradeInfo(object):
                 return True
             return False  # not afford for 'self.amount >= M'
 
+    # do nothing if order invalid
     def cancel(self):
         if self.order_id != -1:
             TradeInfo._logger.warning('{:10s} cancel order_id={}'.format(self.plt_name, self.order_id))

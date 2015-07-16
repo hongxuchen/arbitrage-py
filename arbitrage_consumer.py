@@ -18,6 +18,7 @@ class ArbitrageConsumer(QtCore.QThread):
     def __init__(self, arbitrage_list):
         super(ArbitrageConsumer, self).__init__()
         self.running = False
+        # FIXME change to Queue
         self.arbitrage_queue = arbitrage_list
 
     def consume(self):
