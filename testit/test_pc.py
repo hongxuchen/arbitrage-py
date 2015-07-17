@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 from __future__ import print_function
-from collections import deque
 import threading
 import time
 
@@ -11,6 +10,7 @@ from PySide.QtGui import *
 NUM = 5
 
 mutex = threading.Lock()
+
 
 class Item(object):
     def __init__(self, seed):
@@ -85,7 +85,7 @@ class Widg(QWidget):
         self.threadRunning = False
 
     def startThread(self):
-        assert(self.threadRunning is False)
+        assert (self.threadRunning is False)
         self.threadRunning = True
         self.producer.running = True
         self.producer.start()
@@ -93,7 +93,7 @@ class Widg(QWidget):
         self.consumer.start()
 
     def stopThread(self):
-        assert(self.threadRunning is True)
+        assert (self.threadRunning is True)
         self.threadRunning = False
         self.producer.running = False
         self.consumer.running = False
@@ -103,7 +103,6 @@ class Widg(QWidget):
             self.stopThread()
             self.producer.wait()
             self.consumer.wait()
-
 
     def startStopThread(self):
         if self.threadRunning is False:

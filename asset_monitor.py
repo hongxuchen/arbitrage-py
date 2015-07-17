@@ -73,13 +73,13 @@ class AssetMonitor(QtCore.QThread):
             if is_last:  # make sure will sell
                 self.btc_exceed_counter = config.BTC_EXCEED_COUNTER + 2
             # update counter
-            AssetMonitor._logger.warning(
-                '[Monitor] exceed_counter={}, old_btc_changes={:<10.4f}, current={:<10.4f}'.format(
-                    self.btc_exceed_counter, self.old_btc_change_amount, btc_change_amount))
             if self.old_btc_change_amount < config.minor_diff:
                 self.btc_exceed_counter = 1
             else:
                 self.btc_exceed_counter += 1
+            AssetMonitor._logger.warning(
+                '[Monitor] exceed_counter={}, old_btc_changes={:<10.4f}, current={:<10.4f}'.format(
+                    self.btc_exceed_counter, self.old_btc_change_amount, btc_change_amount))
             # test whether trade is needed
             if self.btc_exceed_counter > config.BTC_EXCEED_COUNTER:
                 trade_catelog = 'sell'

@@ -1,39 +1,66 @@
 #!/usr/bin/env python
 from __future__ import print_function
-from PySide import QtCore, QtGui
 import sys
 
+from PySide import QtCore, QtGui
 
-class Worker1(QtCore.QObject):
+
+class Worker(QtCore.QObject):
     def __init__(self, msg):
-        super(Worker1, self).__init__()
+        super(Worker, self).__init__()
         self.runnning = True
         self.msg = msg
 
-    def my_run(self):
-        print('hello')
-        while self.runnning:
-            QtCore.QThread.msleep(100)
-            print('sleep')
-            print(self.msg)
+    def trade(self):
+        QtCore.QThread.msleep(100)
+        print('{} TRADE in {:>20}'.format(self.msg, QtCore.QThread.currentThreadId()))
 
-class MyThread(QtCore.QThread):
+    def cancel(self):
+        QtCore.QThread.msleep(100)
+        print('{} cancel in {:>20}'.format(self.msg, QtCore.QThread.currentThreadId()))
+
+
+class CancelThread(QtCore.QThread):
+    def __init__(self, w):
+        super(CancelThread, self).__init__()
+        self.worker = w
+
+    def run(self, *args, **kwargs):
+        self.worker.cancel()
+
+
+class TradeThread(QtCore.QThread):
+    def __init__(self, worker):
+        super(TradeThread, self).__init__()
+        self.worker = worker
+
+    def run(self, *args, **kwargs):
+        self.worker.trade()
+
+
+class InitThread(QtCore.QThread):
     def __init__(self, parent):
-        super(MyThread, self).__init__(parent)
-        self.worker = Worker1('w1')
-        self.thread = QtCore.QThread()
-        self.thread.started.connect(self.worker.my_run)
-        self.worker.moveToThread(self.thread)
-        print('before')
-        self.thread.start()
-        print('after')
-
+        super(InitThread, self).__init__(parent)
+        self.w1 = Worker('worker1')
+        ct1 = CancelThread(self.w1)
+        tt1 = TradeThread(self.w1)
+        self.w2 = Worker('worker2')
+        ct2 = CancelThread(self.w2)
+        tt2 = TradeThread(self.w2)
+        tt1.start()
+        tt2.start()
+        ct1.start()
+        ct2.start()
+        tt1.wait()
+        tt2.wait()
+        ct1.wait()
+        ct2.wait()
 
 
 class MyWin(QtGui.QWidget):
     def __init__(self):
         super(MyWin, self).__init__()
-        self.mythread = MyThread(self)
+        self.mythread = InitThread(self)
         self.mythread.start()
 
     def closeEvent(self, *args, **kwargs):
@@ -46,4 +73,3 @@ if __name__ == '__main__':
     win = MyWin()
     win.show()
     sys.exit(app.exec_())
-
