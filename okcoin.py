@@ -112,9 +112,14 @@ class OKCoinAPI(BTC):
 
     def ask_bid_list(self, length=2):
         data = self.api_depth(length)
-        asks = sorted(data['asks'], key=lambda ask: ask[0], reverse=True)
-        bids = sorted(data['bids'], key=lambda bid: bid[0], reverse=True)
-        assert (asks[-1][0] + config.minor_diff >= bids[0][0])
+        try:
+            asks = sorted(data['asks'], key=lambda ask: ask[0], reverse=True)
+            bids = sorted(data['bids'], key=lambda bid: bid[0], reverse=True)
+        except Exception as e:
+            OKCoinAPI._logger.critical('ERROR: exception="{}", data={}'.format(e, data))
+            # FIXME
+            sys.exit(1)
+        # assert (asks[-1][0] + config.minor_diff >= bids[0][0])
         asks_bids = asks + bids
         return asks_bids
 
@@ -206,9 +211,15 @@ class OKCoinAPI(BTC):
         return res
 
     def order_info(self, order_id):
-        info = self.api_order_info(order_id)['orders'][0]
-        catalog = info['type']
-        remaining_amount = info['amount'] - info['deal_amount']
+        try:
+            response = self.api_order_info(order_id)
+            info = response['orders'][0]
+            catalog = info['type']
+            remaining_amount = info['amount'] - info['deal_amount']
+        except Exception as e:
+            OKCoinAPI._logger.critical('ERROR: exception="{}", response={}'.format(e, response))
+            # FIXME
+            sys.exit(1)
         order_info = OrderInfo(catalog, remaining_amount)
         return order_info
 

@@ -123,6 +123,7 @@ class AssetMonitor(QtCore.QThread):
         AssetMonitor._logger.warning('[Monitor] adjust at {}'.format(monitor_t1.plt_name))
         t1_res = monitor_t1.adjust_trade()
         if t1_res is False:
+            AssetMonitor._logger.warning('[Monitor] FAILED adjust at {}'.format(monitor_t1.plt_name))
             # second try
             trade_plt, trade_price = plt_price_list[1]
             monitor_t2 = TradeInfo(trade_plt, trade_catelog, trade_price, trade_amount)
