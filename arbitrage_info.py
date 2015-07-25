@@ -27,7 +27,7 @@ class ArbitrageInfo(object):
         TODO: ensure this trade MUST succeed
         :return:
         """
-        # FIXME use multithread
+        # FIXME use async
         ArbitrageInfo._logger.warning('Arbitrage Start')
         for trade in self.trade_pair:
             order_id = trade.regular_trade(trade.catelog, trade.price, trade.amount)
@@ -81,7 +81,7 @@ class ArbitrageInfo(object):
         since trade_pair is of (buy, sell), this returns the *buy* amount
         :return: None if adjust not needed; otherwise (catelog, amount)
         """
-        # FIXME: should run in different threads
+        # FIXME: use async
         remaining_list = []
         for trade in self.trade_pair:
             # request here
