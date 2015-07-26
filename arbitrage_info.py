@@ -137,7 +137,7 @@ class ArbitrageInfo(object):
             t2_adjust_status = new_t2.adjust_trade()
             # should be rather rare case
             if t2_adjust_status is False:
-                ArbitrageInfo._logger.critical('CRITAL: [{}, {}] cannot adjust'.format(t1.plt_name, t2.plt_name))
+                ArbitrageInfo._logger.critical('FAILED adjust for [{}, {}]'.format(t1.plt_name, t2.plt_name))
                 # TODO may need to use monitor here
         ArbitrageInfo._logger.info('[Consumer] adjust done, release lock')
         common.MUTEX.release()

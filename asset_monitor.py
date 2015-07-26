@@ -24,6 +24,7 @@ class AssetMonitor(QtCore.QThread):
         self.btc_exceed_counter = 0
         self.old_btc_change_amount = 0.0
         self.old_fiat_change_amount = 0.0
+        self.failed_counter = 0
 
     def get_asset_list(self):
         with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
@@ -129,7 +130,7 @@ class AssetMonitor(QtCore.QThread):
             t2_res = monitor_t2.adjust_trade()
             if t2_res is False:
                 AssetMonitor._logger.critical(
-                    '[Monitor] adjust fails for [{}, {}]'.format(monitor_t1.plt_name, monitor_t2.plt_name))
+                    '[Monitor] FAILED adjust for [{}, {}]'.format(monitor_t1.plt_name, monitor_t2.plt_name))
                 adjust_status = False  # only when both False
         return adjust_status
 
@@ -163,7 +164,12 @@ class AssetMonitor(QtCore.QThread):
         while self.running:
             QtCore.QThread.sleep(config.monitor_interval_seconds)
             AssetMonitor._logger.debug("[Monitor] Notify")
-            self.asset_update_handler(False)  # TODO: return value not used here
+            adjust_status = self.asset_update_handler(False)  # TODO: return value not used here
+            if adjust_status is False:
+                self.failed_counter += 1
+                if self.failed_counter > config.MONITOR_FAIL_MAX:
+                    # FIXME deal with this case
+                    pass
         # last adjust
         # FIXME this strategy is fine only when exiting in the order: consumer->monitor
         last_adjust_status = self.asset_update_handler(True)

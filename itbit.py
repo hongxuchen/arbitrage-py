@@ -247,19 +247,19 @@ if __name__ == '__main__':
     # wallet_id = 'e112bd40-56fd-4ebd-a570-ba0b89009963'
     wallet_id = 'e112bd40-56fd-4ebd-a570-ba0b89009963'
     # itbit.get_trades(wallet_id)
-    # itbit.get_wallet_balance(wallet_id)
-    order_info = {
-        'side': 'buy',
-        'currency': 'XBT',
-        'amount': '20.0',
-        'display': '2.5',
-        'price': '200',
-        'instrument': 'XBTUSD',
-        'metadata': {
-            'key0': 'hello',
-            'key1': 'world'
-        }
-    }
+    itbit.get_wallet_balance(wallet_id)
+    # order_info = {
+    #     'side': 'buy',
+    #     'currency': 'XBT',
+    #     'amount': '20.0',
+    #     'display': '2.5',
+    #     'price': '200',
+    #     'instrument': 'XBTUSD',
+    #     'metadata': {
+    #         'key0': 'hello',
+    #         'key1': 'world'
+    #     }
+    # }
     # itbit.new_order(wallet_id, order_info)
     # order_id = '2d2fc05f-3091-4dcb-aaf6-91b63cdb6b4d'
     # order_id = '72f6c19c-b3cd-4733-8d51-df1f82af521b'
@@ -270,17 +270,17 @@ if __name__ == '__main__':
     #     itbit.cancel_order(wallet_id, order_id)
     # else:
     #     print('no orders')
-    withdraw_info = {
-        'address': '19eU8xnmE8qeVv9hNiacpWyL3qs757X3de',
-        'amount': '0.33'
-    }
-    itbit.new_cryptocurrency_withdraw(wallet_id, withdraw_info)
-    # itbit.new_cryptocurrency_deposit(wallet_id)
+    # withdraw_info = {
+    #     'address': '19eU8xnmE8qeVv9hNiacpWyL3qs757X3de',
+    #     'amount': '0.33'
+    # }
+    # itbit.new_cryptocurrency_withdraw(wallet_id, withdraw_info)
+    # # itbit.new_cryptocurrency_deposit(wallet_id)
 
-    wallet_id_1 = '1089527c-bbde-4e10-9b90-002ef40c1571'
-    wallet_transfer_info = {
-        'sourceWalletId': wallet_id,
-        'destinationWalletId': wallet_id_1,
-        'amount': '3'
-    }
+    # wallet_id_1 = '1089527c-bbde-4e10-9b90-002ef40c1571'
+    # wallet_transfer_info = {
+    #     'sourceWalletId': wallet_id,
+    #     'destinationWalletId': wallet_id_1,
+    #     'amount': '3'
+    # }
     # itbit.new_wallet_transfer(wallet_transfer_info)

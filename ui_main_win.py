@@ -14,7 +14,7 @@ class Ui_MainWin(QtGui.QMainWindow):
     def __init__(self):
         super(Ui_MainWin, self).__init__()
         self.setObjectName("self")
-        self.resize(800, 600)
+        self.resize(840, 600)
         self.centralwidget = QtGui.QWidget(self)
 
         self.setCentralWidget(self.centralwidget)
