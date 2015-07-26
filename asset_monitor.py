@@ -1,16 +1,12 @@
 #!/usr/bin/env python
 
 from PySide import QtCore
+import concurrent.futures
 
 import config as config
 from asset_info import AssetInfo
 from bitbays import BitBays
 import common
-
-
-# TODO ensure that amount of BTC in a limited range; invoked when
-# - cancel/trade fails
-# - exiting
 from okcoin import OKCoinCN
 from trade_info import TradeInfo
 
@@ -30,7 +26,9 @@ class AssetMonitor(QtCore.QThread):
         self.old_fiat_change_amount = 0.0
 
     def get_asset_list(self):
-        return [AssetInfo(plt) for plt in self.plt_list]
+        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+            assets = executor.map(lambda plt: AssetInfo(plt), self.plt_list)
+        return list(assets)
 
     def get_asset_changes(self, asset_list):
         btc, original_btc = 0.0, 0.0

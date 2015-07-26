@@ -3,6 +3,7 @@
 import time
 
 from PySide import QtCore
+import concurrent.futures
 
 from asset_info import AssetInfo
 import common
@@ -54,7 +55,10 @@ class ArbitrageProducer(QtCore.QThread):
         ## lock here
         common.MUTEX.acquire(True)
         ArbitrageProducer._logger.info('[Producer] acquire lock')
-        asset_info_list = [AssetInfo(plt) for plt in self.plt_list]
+        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+            asset_info = executor.map(lambda plt: AssetInfo(plt), self.plt_list)
+        asset_info_list = list(asset_info)
+        # asset_info_list = [AssetInfo(plt) for plt in self.plt_list]
         asset_info_a = asset_info_list[i]
         asset_info_b = asset_info_list[1 - i]
 

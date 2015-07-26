@@ -2,6 +2,8 @@
 from __future__ import print_function
 import time
 
+import concurrent.futures
+
 from bitbays import BitBays
 import common
 import config
@@ -29,9 +31,13 @@ class ArbitrageInfo(object):
         """
         # FIXME use async
         ArbitrageInfo._logger.warning('Arbitrage Start')
-        for trade in self.trade_pair:
-            order_id = trade.regular_trade(trade.catelog, trade.price, trade.amount)
+        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+            order_ids = executor.map(lambda t: t.regular_trade(t.catelog, t.price, t.amount), self.trade_pair)
+        for trade, order_id in zip(self.trade_pair, order_ids):
             trade.set_order_id(order_id)
+            # for trade in self.trade_pair:
+            #     order_id = trade.regular_trade(trade.catelog, trade.price, trade.amount)
+            #     trade.set_order_id(order_id)
 
     @staticmethod
     def normalize_trade_pair_strategy1(trade_pair):
@@ -75,23 +81,25 @@ class ArbitrageInfo(object):
     def seconds_since_trade(self):
         return time.time() - self.time
 
+    @staticmethod
+    def _get_remaining(trade):
+        # request here
+        order_info = trade.get_order_info()
+        # remaining may decrease if has_pending, [0, remaining_amount]
+        if order_info.has_pending():
+            cancel_status = trade.cancel()
+            if cancel_status is False:
+                order_info.remaining_amount = 0.0
+        return order_info.remaining_amount
+
     def get_adjust_info(self):
         """
         if finding pending, cancel order ASAP; cancel failure means no pending!
         since trade_pair is of (buy, sell), this returns the *buy* amount
         :return: None if adjust not needed; otherwise (catelog, amount)
         """
-        # FIXME: use async
-        remaining_list = []
-        for trade in self.trade_pair:
-            # request here
-            order_info = trade.get_order_info()
-            # remaining may decrease if has_pending, [0, remaining_amount]
-            if order_info.has_pending():
-                cancel_status = trade.cancel()
-                if cancel_status is False:
-                    order_info.remaining_amount = 0.0
-            remaining_list.append(order_info.remaining_amount)
+        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+            remaining_list = list(executor.map(self._get_remaining, self.trade_pair))
         amount = remaining_list[0] - remaining_list[1]
         # A1: buy remaining, A2: sell remaining
         # if A < 0, bought more, should sell; if A >= 0, sold more, should buy
@@ -148,7 +156,7 @@ class ArbitrageInfo(object):
             assert t2.catelog == 'buy'
             buy_trade = t2
             sell_trade = t1
-        return 'Amount={:<10.4f}; {:10s} buys {:10.4f} {:3s}; {:10s} sells {:10.4f} {:3s}'.format(
+        return 'Amount={:<10.4f}; {:10s} buys at {:10.4f} {:3s}; {:10s} sells at {:10.4f} {:3s}'.format(
             trade_amount,
             buy_trade.plt_name, buy_trade.price, buy_trade.fiat,
             sell_trade.plt_name, sell_trade.price, sell_trade.fiat)
