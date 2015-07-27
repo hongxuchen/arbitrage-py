@@ -121,6 +121,7 @@ class ArbitrageInfo(object):
             return
         trade_catelog, trade_amount = adjust_res[0], adjust_res[1]
         # t1, t2 = self.normalize_trade_pair_strategy1(self.trade_pair)
+        # TODO see whether error
         t1, t2 = self.normalize_trade_pair_strategy2(self.trade_pair, trade_catelog)
         trade_plt = t1.plt
         trade_price = t1.price
