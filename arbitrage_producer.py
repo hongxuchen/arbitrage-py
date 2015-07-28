@@ -31,6 +31,7 @@ class ArbitrageProducer(QtCore.QThread):
             ArbitrageProducer._logger.debug('[Producer] run')
             self.process_arbitrage()
 
+    # TODO: should distinguish platform
     @staticmethod
     def can_arbitrage(ask_a, bid_b):
         """

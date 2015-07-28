@@ -42,7 +42,7 @@ BTC_DIFF_MAX = 0.001
 
 # CONFIG
 ## upper_bound must > lower_bound for all platforms
-upper_bound = 0.9
-arbitrage_diff = 0.6
+upper_bound = 0.6
+arbitrage_diff = 0.75
 PENDING_SECONDS = 5.0
 monitor_interval_seconds = 3

@@ -7,7 +7,7 @@
 ## other
 * exit error on Mac <-- due to QT bug?
 
-## TODO
+# TODO
 * statistical adjust
    sometimes, the price on Platform A is typically higher than B, so when there is "little" difference, we may choose to
 * [FATAL] monitor adjust still may 'cannot afford' so that it causes long-term imbalance
@@ -20,6 +20,8 @@ reverse the fiat amount for futher trade. The net strategy is that we can change
     - failed frequency
     - ask/bid diff times w.r.t. certain amount
 * add huobi
+* order/cancel frequently for one platform; when completed, reverse trade on another platform
+* different/dynamic diff for buy/sell
 
 ## cases
 
@@ -118,9 +120,7 @@ ERROR 2015-07-27 11:10:10      140555614938880                 common.py:  85 - 
 WARNING 2015-07-27 11:10:10      140555614938880                 common.py:  91 - retry_counter=1
 CRITICAL 2015-07-27 11:10:16      140556044613376                 okcoin.py: 119 - ERROR: exception="'asks'", data={}
 
-
 ```
-
 ## hosts
 - 121.199.251.136 www.okcoin.cn
 - 119.28.48.217   okcoin.cn
