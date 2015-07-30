@@ -20,6 +20,7 @@ itbit_info = {
 
 fiat = 'cny'
 
+trade_precision = 3
 precision = 6
 minor_diff = 10.0 ** (-precision)
 INVALID_ORDER_ID = -1
@@ -45,13 +46,6 @@ BTC_DIFF_MAX = 0.001
 upper_bound = 0.6
 PENDING_SECONDS = 5.0
 monitor_interval_seconds = 3
-
-# TODO: remove
-arbitrage_diff = 0.75
-# buy at bb, sell at ok
-bb_ok_diff = 0.3
-# buy at ok, sell at bb
-ok_bb_diff = 0.75
 
 diff_dict = {
     'BitBays': {

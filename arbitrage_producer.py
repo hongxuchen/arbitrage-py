@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import time
+import math
 
 from PySide import QtCore
 import concurrent.futures
@@ -61,7 +62,7 @@ class ArbitrageProducer(QtCore.QThread):
             plt_a_buy_amount = asset_info_a.afford_buy_amount(ask_a_adjust_price) - config.ASSET_FOR_TRAID_DIFF
             plt_b_sell_amount = asset_info_b.afford_sell_amount() - config.ASSET_FOR_TRAID_DIFF
             amount = min(config.upper_bound, ask_a_amount, bid_b_amount, plt_a_buy_amount, plt_b_sell_amount)
-            amount = float('{:.4f}'.format(amount))
+            amount = math.floor(amount * (10 ** config.trade_precision)) / (10 ** config.trade_precision)
             amount = max(self.lower_bound, amount)
             return amount
 
