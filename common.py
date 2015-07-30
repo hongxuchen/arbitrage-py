@@ -89,16 +89,6 @@ def handle_retry(exception, handler):
 
 
 def init_logger():
-    # log_dir = os.path.join(os.path.dirname(__file__), 'logger').replace('\\', '/')
-    # try:
-    #     os.makedirs(log_dir)
-    # except OSError as e:
-    #     if e.errno != errno.EEXIST:
-    #         raise
-    # log_fname = os.path.join(log_dir, 'arbitrage.log').replace('\\', '/')
-    # logging.config.fileConfig('logging.ini', defaults={
-    #     'logfilename': log_fname
-    # })
     with open('logging.yaml') as f:
         data = yaml.load(f)
     logging.config.dictConfig(data)
@@ -118,7 +108,7 @@ class NULLResponseError(Exception):
         super(NULLResponseError, self).__init__(message)
 
 
-def get_key(field, fname='Config.yaml'):
+def get_key(field, fname='platforms.yaml'):
     with open(fname) as yfile:
         ydata = yaml.load(yfile)
     try:
@@ -128,7 +118,7 @@ def get_key(field, fname='Config.yaml'):
         return None
 
 
-with open('Config.yaml') as yfile:
+with open('platforms.yaml') as yfile:
     ydata = yaml.load(yfile)
 
 

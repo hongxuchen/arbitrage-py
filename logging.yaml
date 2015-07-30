@@ -18,7 +18,7 @@ handlers:
         class: logging.FileHandler
         formatter: fileFormatter
         level: INFO
-        filename: arbitrage.log
+        filename: .arbitrage.log
 
 loggers:
     sLogger:
