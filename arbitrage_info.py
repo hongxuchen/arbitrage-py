@@ -157,7 +157,7 @@ class ArbitrageInfo(object):
             assert t2.catelog == 'buy'
             buy_trade = t2
             sell_trade = t1
-        return 'Amount={:<10.4f}; {:10s} buys at {:10.4f} {:3s}; {:10s} sells at {:10.4f} {:3s}'.format(
+        return 'Amount={:<10.3f}; {:10s} buys at {:10.4f} {:3s}; {:10s} sells at {:10.4f} {:3s}'.format(
             trade_amount,
             buy_trade.plt_name, buy_trade.price, buy_trade.fiat,
             sell_trade.plt_name, sell_trade.price, sell_trade.fiat)
