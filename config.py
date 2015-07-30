@@ -43,6 +43,21 @@ BTC_DIFF_MAX = 0.001
 # CONFIG
 ## upper_bound must > lower_bound for all platforms
 upper_bound = 0.6
-arbitrage_diff = 0.75
 PENDING_SECONDS = 5.0
 monitor_interval_seconds = 3
+
+# TODO: remove
+arbitrage_diff = 0.75
+# buy at bb, sell at ok
+bb_ok_diff = 0.3
+# buy at ok, sell at bb
+ok_bb_diff = 0.75
+
+diff_dict = {
+    'BitBays': {
+        'OKCoinCN': 0.3
+    },
+    'OKCoinCN': {
+        'BitBays': 0.75
+    }
+}

@@ -30,16 +30,6 @@ class ArbitrageProducer(QtCore.QThread):
             ArbitrageProducer._logger.debug('[Producer] run')
             self.process_arbitrage()
 
-    # TODO: should distinguish platform
-    @staticmethod
-    def can_arbitrage(ask_a, bid_b):
-        """
-        arbitrage necssary condition
-        ask_a, bid_b are of [price, amount]
-        :return:
-        """
-        return ask_a[0] + config.arbitrage_diff < bid_b[0]
-
     def arbitrage_impl(self, i, ask_a, bid_b):
         """
         :param i: the index of platform for buy; 1-i index of platform for sell
@@ -95,23 +85,37 @@ class ArbitrageProducer(QtCore.QThread):
         self.arbitrage_queue.append(arbitrage_info)
         return True
 
+    def try_arbitrage(self, ask_list, bid_list, i):
+        """
+        arbitrage necssary condition
+        ask_a, bid_b are of [price, amount]
+        :return:
+        """
+
+        def get_plt_name(plt):
+            return plt.__class__.__name__
+
+        ask_a, bid_b = ask_list[i], bid_list[1 - i]
+        plt_name_a, plt_name_b = get_plt_name(self.plt_list[i]), get_plt_name(self.plt_list[1 - i])
+
+        arbitrage_diff = config.diff_dict[plt_name_a][plt_name_b]
+        ArbitrageProducer._logger.debug('[Producer] [{}, {}] diff={}'.format(plt_name_a, plt_name_b, arbitrage_diff))
+        if ask_a[0] + arbitrage_diff < bid_b[0]:
+            ArbitrageProducer._logger.debug('[Producer] Arbitrage chance: {} {}'.format(ask_a, bid_b))
+            self.arbitrage_impl(i, ask_list[i], bid_list[1 - i])
+            return True
+        else:
+            return False
+
     def process_arbitrage(self):
         with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
             self._info_list = list(executor.map(lambda plt: plt.ask_bid_list(1), self.plt_list))
         length = len(self._info_list[0])
 
-        # collect ask, bid info
-        ask_list = []
-        bid_list = []
-        for i in range(2):  # len(self._info_list)
-            info = self._info_list[i]
-            ask_list.append(info[length / 2 - 1])
-            bid_list.append(info[length / 2])
+        ask_list = [info[length / 2 - 1] for info in self._info_list]
+        bid_list = [info[length / 2] for info in self._info_list]
 
-        for i in range(2):  # len(self._info_list)
-            ask_a = ask_list[i]  # a
-            bid_b = bid_list[1 - i]  # the oposite, b
-            if self.can_arbitrage(ask_a, bid_b):
-                ArbitrageProducer._logger.debug('[Producer] Arbitrage chance: {} {}'.format(ask_a, bid_b))
-                self.arbitrage_impl(i, ask_a, bid_b)
-        return None
+        for i in range(2):
+            if self.try_arbitrage(ask_list, bid_list, i):
+                return True
+        return False

@@ -4,7 +4,6 @@
 from __future__ import print_function
 import hashlib
 import sys
-import datetime
 
 import requests
 
