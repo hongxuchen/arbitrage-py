@@ -12,7 +12,7 @@ from trade_info import TradeInfo
 
 
 class ArbitrageInfo(object):
-    _logger = common.setup_logger()
+    _logger = common.get_logger()
 
     def __init__(self, trade_pair, time):
         """
@@ -172,8 +172,3 @@ if __name__ == '__main__':
     now = time.time()
     arbitrage = ArbitrageInfo(trade_pair, now)
     print(arbitrage)
-    # arbitrage.process_trade()
-    # if arbitrage.has_pending():
-    #     arbitrage.adjust_pending()
-    # assert arbitrage.done
-    # print(arbitrage)

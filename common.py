@@ -43,6 +43,7 @@ def reverse_catelog(original_catelog):
     else:  # sell
         return 'buy'
 
+
 def adjust_price(trade_catelog, price):
     assert (trade_catelog in ['buy', 'sell'])
     if trade_catelog == 'buy':
@@ -58,46 +59,46 @@ def is_retry_exception(exception):
     return False
 
 
-def handle_exit(exception, plt):
-    plt._logger.critical('Error during request:"{}", will EXIT'.format(exception))
+def handle_exit(exception):
+    get_logger().critical('Error during request:"{}", will EXIT'.format(exception))
     sys.exit(1)
 
 
-def handle_retry(exception, plt, handler):
+def handle_retry(exception, handler):
     """
     # NOTE: this handling may be blocked OR not blocked
     :param exception: the relevant exception
-    :param plt: the platform class, used for logging; must has class variable '_logger' (logging module)
     :param handler: real handler, no params, implemented as closure
     :return: if retry succeeds, should return request result; otherwise, exit abornormally
     """
+    logger = get_logger()
     current_exception = exception
-    plt._logger.error('RETRY for Exception: "{}"'.format(current_exception))
+    logger.error('RETRY for Exception: "{}"'.format(current_exception))
     retry_counter = 0
     while retry_counter < config.RETRY_MAX:
         retry_counter += 1
         try:
             QThread.msleep(config.RETRY_MILLISECONDS)
-            plt._logger.warning('retry_counter={:<2}'.format(retry_counter))
+            logger.warning('retry_counter={:<2}'.format(retry_counter))
             res = handler()  # real handle function
             return res  # succeed
         except Exception as e:  # all request exceptions
             if is_retry_exception(e):
                 # only log, do nothing
                 current_exception = e
-                plt._logger.error('Exception during retrying:"{}", will RETRY'.format(current_exception))
+                logger.error('Exception during retrying:"{}", will RETRY'.format(current_exception))
                 continue
             else:
-                return handle_exit(e, plt)  # fail, exit
-    plt._logger.critical(
+                return handle_exit(e)  # fail, exit
+    logger.critical(
         'SLEEP {}s for Exception: "{}"'.format(config.REQUEST_EXCEPTION_WAIT_SECONDS, current_exception))
     QThread.sleep(config.REQUEST_EXCEPTION_WAIT_SECONDS)
     ### FIXME this makes "stop" button not work when network error
-    res = handle_retry(exception, plt, handler)  # recursive
+    res = handle_retry(exception, handler)  # recursive
     return res
 
 
-def setup_logger():
+def init_logger():
     log_dir = os.path.join(os.path.dirname(__file__), 'logger').replace('\\', '/')
     try:
         os.makedirs(log_dir)
@@ -108,7 +109,10 @@ def setup_logger():
     logging.config.fileConfig('logging_config.ini', defaults={
         'logfilename': log_fname
     })
-    return logging.getLogger()
+
+
+def get_logger():
+    return logging.getLogger('sLogger')
 
 
 class InvalidNonceError(Exception):

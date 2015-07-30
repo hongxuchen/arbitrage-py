@@ -15,7 +15,7 @@ from operator import itemgetter
 class AssetMonitor(QtCore.QThread):
     notify_update_asset = QtCore.Signal(list)
     notify_asset_change = QtCore.Signal(str)
-    _logger = common.setup_logger()
+    _logger = common.get_logger()
 
     def __init__(self, plt_list):
         super(AssetMonitor, self).__init__()
@@ -141,7 +141,7 @@ class AssetMonitor(QtCore.QThread):
         self.notify_update_asset.emit(asset_list)
         report = self.get_asset_change_report(btc, fiat)
         ### always report on console; notify UI only when change
-        AssetMonitor._logger.info(report)
+        AssetMonitor._logger.debug(report)
         if abs(self.old_btc_change_amount - btc) > config.minor_diff or abs(
                         self.old_fiat_change_amount - fiat) > config.minor_diff:
             self.notify_asset_change.emit(report)

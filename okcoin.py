@@ -7,15 +7,15 @@ import sys
 
 import requests
 
-from btc import BTC
+from plt_api import Platform
 import common
 import config
 from order_info import OrderInfo
 
 
-class OKCoinAPI(BTC):
+class OKCoinAPI(Platform):
     lower_bound = 0.01
-    _logger = common.setup_logger()
+    _logger = common.get_logger()
     trade_cancel_api_list = ['cancel_order', 'trade']
     common_headers = {
         'user-agent': common.USER_AGENT,
@@ -74,9 +74,9 @@ class OKCoinAPI(BTC):
             return response_data
         except Exception as e:
             if common.is_retry_exception(e):
-                return common.handle_retry(e, OKCoinAPI, _request_impl)
+                return common.handle_retry(e, _request_impl)
             else:
-                common.handle_exit(e, OKCoinAPI)
+                common.handle_exit(e)
 
     ### public api
 

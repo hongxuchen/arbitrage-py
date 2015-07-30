@@ -17,7 +17,6 @@ from ui_asset_widget import AssetWidget
 from ui_common import centerized
 import ui_main_win
 import ui_selections
-import ui_settings
 from ui_trading_viewer import TradingViewer
 
 select_plt_dict = {
@@ -28,11 +27,12 @@ select_plt_dict = {
 
 
 class ArbitrageUI(ui_main_win.Ui_MainWin):
-    _logger = common.setup_logger()
+    _logger = common.get_logger()
 
     def __init__(self, length=5):
         super(ArbitrageUI, self).__init__()
         self.depth_length = length
+        common.init_logger()
         self.init_gui()
         self.worklist = []
         self.producer = arbitrage_producer.ArbitrageProducer(self.plt_list, self.worklist, config.fiat)

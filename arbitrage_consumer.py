@@ -13,7 +13,7 @@ from okcoin import OKCoinCN
 
 
 class ArbitrageConsumer(QtCore.QThread):
-    _logger = common.setup_logger()
+    _logger = common.get_logger()
 
     def __init__(self, arbitrage_list):
         super(ArbitrageConsumer, self).__init__()

@@ -11,10 +11,10 @@ import requests
 
 import config
 import common
-from btc import BTC
+from plt_api import Platform
 
 
-class ItBitAPI(BTC):
+class ItBitAPI(Platform):
     markets = ['XBTUSD', 'XBTSGD', 'XBTEUR']
 
     def __init__(self, info):

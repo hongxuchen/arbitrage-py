@@ -5,7 +5,7 @@ import config
 
 
 class TradeInfo(object):
-    _logger = common.setup_logger()
+    _logger = common.get_logger()
 
     def __init__(self, plt, catelog, price, amount, fiat='cny'):
         """

@@ -1,14 +1,9 @@
 #!/usr/bin/env python
-from common import setup_logger
 
-
-class BTC(object):
+class Platform(object):
     def __init__(self, info):
-        self.info = info
         self.domain = info['domain']
         self.key = None
-        self._btc_rate = None
-        self.logger = setup_logger()
 
     def _real_uri(self, api_type):
         pass

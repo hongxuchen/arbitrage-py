@@ -8,14 +8,14 @@ import time
 
 import requests
 
-from btc import BTC
+from plt_api import Platform
 import common
 import config
 from order_info import OrderInfo
 
 
-class BitBays(BTC):
-    _logger = common.setup_logger()
+class BitBays(Platform):
+    _logger = common.get_logger()
     # fmt = '%Y/%m/%d %H:%M:%S'
     catalog_dict = {
         0: 'buy',
@@ -99,9 +99,9 @@ class BitBays(BTC):
             return result
         except Exception as e:
             if common.is_retry_exception(e):
-                return common.handle_retry(e, BitBays, _request_impl)
+                return common.handle_retry(e, _request_impl)
             else:
-                common.handle_exit(e, BitBays)
+                common.handle_exit(e)
 
     #############################################################################
 

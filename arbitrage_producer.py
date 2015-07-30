@@ -15,7 +15,7 @@ from trade_info import TradeInfo
 
 class ArbitrageProducer(QtCore.QThread):
     notify_trade = QtCore.Signal(ArbitrageInfo)
-    _logger = common.setup_logger()
+    _logger = common.get_logger()
 
     ### stateless
     def __init__(self, plt_list, arbitrage_list, symbol, parent=None):
