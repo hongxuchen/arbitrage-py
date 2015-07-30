@@ -43,16 +43,6 @@ def reverse_catelog(original_catelog):
     else:  # sell
         return 'buy'
 
-
-# TODO use real diff
-def adjust_arbitrage_price(trade_catelog, price):
-    assert (trade_catelog in ['buy', 'sell'])
-    if trade_catelog == 'buy':
-        return price + config.arbitrage_diff / 3.0
-    else:  # sell
-        return price - config.arbitrage_diff / 3.0
-
-
 def adjust_price(trade_catelog, price):
     assert (trade_catelog in ['buy', 'sell'])
     if trade_catelog == 'buy':

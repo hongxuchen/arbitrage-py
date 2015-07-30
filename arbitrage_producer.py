@@ -62,8 +62,10 @@ class ArbitrageProducer(QtCore.QThread):
         asset_info_a = asset_info_list[i]
         asset_info_b = asset_info_list[1 - i]
 
-        ask_a_adjust_price = common.adjust_arbitrage_price('buy', ask_a_price)
-        bid_b_adjust_price = common.adjust_arbitrage_price('sell', bid_b_price)
+        # ask_a_price < bid_b_price
+        price_diff = bid_b_price - ask_a_price
+        ask_a_adjust_price = ask_a_price + price_diff / 3
+        bid_b_adjust_price = bid_b_price - price_diff / 3
 
         def amount_refine():
             plt_a_buy_amount = asset_info_a.afford_buy_amount(ask_a_adjust_price) - config.ASSET_FOR_TRAID_DIFF
