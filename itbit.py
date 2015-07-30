@@ -21,7 +21,7 @@ class ItBitAPI(Platform):
         super(ItBitAPI, self).__init__(info)
         self.domain = info['domain']
         self.symbol = info['symbol']
-        self.key = common.get_key_from_file('ItBit')
+        self.key = common.get_key_from_data('ItBit')
 
     @staticmethod
     def _to_json(data):

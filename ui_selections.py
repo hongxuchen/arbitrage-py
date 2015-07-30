@@ -22,8 +22,8 @@ class SelectGB(QtGui.QGroupBox):
 
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
-    available_plt = common.get_key_from_file('Available')
-    enabled_plt = common.get_key_from_file('Enabled')
+    available_plt = common.get_key_from_data('Available')
+    enabled_plt = common.get_key_from_data('Enabled')
     widget = SelectGB(available_plt, enabled_plt)
     widget.move(centerized(widget))
     widget.show()

@@ -30,7 +30,7 @@ class BitBays(Platform):
     def __init__(self):
         super(BitBays, self).__init__(config.bitbays_info)
         self.symbol = config.bitbays_info['symbol']
-        self.key = common.get_key_from_file('BitBays')
+        self.key = common.get_key_from_data('BitBays')
         self.api_public = ['ticker', 'trades', 'depth']
         self.api_private = ['info', 'orders', 'transactions', 'trade', 'cancel', 'order']
         self._counter = int(time.time() * 1000)

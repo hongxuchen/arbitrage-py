@@ -57,8 +57,8 @@ class ArbitrageUI(ui_main_win.Ui_MainWin):
         ### left
         widget1 = QtGui.QWidget()
         layout1 = QtGui.QVBoxLayout()
-        available_plt = common.get_key_from_file('Available')
-        enabled_plt = common.get_key_from_file('Enabled')
+        available_plt = common.get_key_from_data('Available')
+        enabled_plt = common.get_key_from_data('Enabled')
         self.plt_list = [select_plt_dict[plt]() for plt in enabled_plt]
         assert (len(self.plt_list) == 2)
         self.plt_groupbox = ui_selections.SelectGB(available_plt, enabled_plt)

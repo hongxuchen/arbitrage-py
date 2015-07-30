@@ -1,9 +1,9 @@
 #!/usr/bin/env python
+
+from __future__ import print_function
 import decimal
 import logging
 import logging.config
-import os
-import errno
 import threading
 import sys
 
@@ -24,16 +24,6 @@ def get_usd_cny_rate():
 
 def to_decimal(value_str, precision=config.precision):
     return round(float(value_str), precision)
-
-
-def get_key_from_file(field, fname='Config.yaml'):
-    with open(fname) as yfile:
-        ydata = yaml.load(yfile)
-    try:
-        return ydata[field]
-    except:
-        print('no ydata')
-        return None
 
 
 def reverse_catelog(original_catelog):
@@ -126,6 +116,30 @@ class InvalidNonceError(Exception):
 class NULLResponseError(Exception):
     def __init__(self, message):
         super(NULLResponseError, self).__init__(message)
+
+
+def get_key(field, fname='Config.yaml'):
+    with open(fname) as yfile:
+        ydata = yaml.load(yfile)
+    try:
+        return ydata[field]
+    except:
+        print('no ydata', file=sys.stderr)
+        return None
+
+
+with open('Config.yaml') as yfile:
+    ydata = yaml.load(yfile)
+
+
+def get_key_from_data(field, dict_data=None):
+    if dict_data is None:
+        dict_data = ydata
+    try:
+        return dict_data[field]
+    except:
+        print('no ydata', file=sys.stderr)
+        sys.exit(1)
 
 
 MUTEX = threading.Lock()

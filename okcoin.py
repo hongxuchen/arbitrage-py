@@ -231,13 +231,13 @@ class OKCoinAPI(Platform):
 class OKCoinCN(OKCoinAPI):
     def __init__(self):
         super(OKCoinCN, self).__init__(config.okcoin_cn_info)
-        self.key = common.get_key_from_file('OKCoinCN')
+        self.key = common.get_key_from_data('OKCoinCN')
 
 
 class OKCoinCOM(OKCoinAPI):
     def __init__(self):
         super(OKCoinCOM, self).__init__(config.okcoin_com_info)
-        self.key = common.get_key_from_file('OKCoinCOM')
+        self.key = common.get_key_from_data('OKCoinCOM')
 
 
 if __name__ == '__main__':
