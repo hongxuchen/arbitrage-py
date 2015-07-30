@@ -44,6 +44,7 @@ def reverse_catelog(original_catelog):
         return 'buy'
 
 
+# TODO use real diff
 def adjust_arbitrage_price(trade_catelog, price):
     assert (trade_catelog in ['buy', 'sell'])
     if trade_catelog == 'buy':
@@ -69,7 +70,6 @@ def is_retry_exception(exception):
 
 def handle_exit(exception, plt):
     plt._logger.critical('Error during request:"{}", will EXIT'.format(exception))
-    # should exit
     sys.exit(1)
 
 
@@ -91,7 +91,6 @@ def handle_retry(exception, plt, handler):
             plt._logger.warning('retry_counter={:<2}'.format(retry_counter))
             res = handler()  # real handle function
             return res  # succeed
-        # TODO check whether accessable to exception handling
         except Exception as e:  # all request exceptions
             if is_retry_exception(e):
                 # only log, do nothing

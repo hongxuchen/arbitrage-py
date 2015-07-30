@@ -20,7 +20,6 @@ class ArbitrageProducer(QtCore.QThread):
     def __init__(self, plt_list, arbitrage_list, symbol, parent=None):
         super(ArbitrageProducer, self).__init__(parent)
         self.plt_list = plt_list
-        assert (len(plt_list) == 2)
         self.arbitrage_queue = arbitrage_list
         self.symbol = symbol
         self.running = False

@@ -20,10 +20,6 @@ class AssetTable(QtGui.QTableWidget):
         self.setColumnCount(len_col_list)
         self.setHorizontalHeaderLabels(col_list)
         self.setVerticalHeaderLabels(row_list)
-        # for i in range(len_row_list):
-        #     self.setRowHeight(i, config.UI_TBL_ROW_HEIGHT)
-        # for i in range(len_col_list):
-        #     self.setColumnWidth(i, config.UI_TBL_COL_WIDTH)
 
     def display_asset(self, asset_raw_list):
         for i in range(len(asset_raw_list)):
