@@ -83,6 +83,7 @@ class ArbitrageProducer(QtCore.QThread):
         ArbitrageProducer._logger.debug(asset_info_b)
         buy_trade = TradeInfo(plt_a, 'buy', ask_a_adjust_price, amount)  # buy at plt_a
         sell_trade = TradeInfo(plt_b, 'sell', bid_b_adjust_price, amount)  # sell at plt_b
+        # (buy, sell)
         trade_pair = (buy_trade, sell_trade)
         now = time.time()
         arbitrage_info = ArbitrageInfo(trade_pair, now)
@@ -96,9 +97,7 @@ class ArbitrageProducer(QtCore.QThread):
     def process_arbitrage(self):
         with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
             self._info_list = list(executor.map(lambda plt: plt.ask_bid_list(1), self.plt_list))
-        assert (len(self._info_list[0]) == len(self._info_list[1]))
         length = len(self._info_list[0])
-        assert (length % 2 == 0)
 
         # collect ask, bid info
         ask_list = []
