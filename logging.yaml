@@ -1,0 +1,30 @@
+version: 1
+
+formatters:
+    fileFormatter:
+        format: '%(levelname)9s %(asctime)s %(filename)25s: %(lineno)3s - %(message)s'
+        datefmt: '%Y-%m-%d %H:%M:%S'
+    consoleFormatter:
+        format: '%(levelname)9s %(asctime)s %(thread)20d %(filename)25s: %(lineno)3s - %(message)s'
+        datefmt: '%Y-%m-%d %H:%M:%S'
+
+handlers:
+    console:
+        class: logging.StreamHandler
+        formatter: consoleFormatter
+        level: WARNING
+        stream: ext://sys.stdout
+    file:
+        class: logging.FileHandler
+        formatter: fileFormatter
+        level: INFO
+        filename: arbitrage.log
+
+loggers:
+    sLogger:
+        level: INFO
+        handlers: [file]
+
+root:
+    level: WARNING
+    handlers: [console]

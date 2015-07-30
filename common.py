@@ -99,16 +99,19 @@ def handle_retry(exception, handler):
 
 
 def init_logger():
-    log_dir = os.path.join(os.path.dirname(__file__), 'logger').replace('\\', '/')
-    try:
-        os.makedirs(log_dir)
-    except OSError as e:
-        if e.errno != errno.EEXIST:
-            raise
-    log_fname = os.path.join(log_dir, 'arbitrage.log').replace('\\', '/')
-    logging.config.fileConfig('logging_config.ini', defaults={
-        'logfilename': log_fname
-    })
+    # log_dir = os.path.join(os.path.dirname(__file__), 'logger').replace('\\', '/')
+    # try:
+    #     os.makedirs(log_dir)
+    # except OSError as e:
+    #     if e.errno != errno.EEXIST:
+    #         raise
+    # log_fname = os.path.join(log_dir, 'arbitrage.log').replace('\\', '/')
+    # logging.config.fileConfig('logging.ini', defaults={
+    #     'logfilename': log_fname
+    # })
+    with open('logging.yaml') as f:
+        data = yaml.load(f)
+    logging.config.dictConfig(data)
 
 
 def get_logger():
@@ -130,3 +133,12 @@ retry_except_tuple = (
     req_except.ConnectionError, req_except.Timeout, req_except.HTTPError, InvalidNonceError, NULLResponseError)
 exit_except_tuple = (req_except.URLRequired, req_except.TooManyRedirects)
 USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.130 Safari/537.36'
+
+if __name__ == '__main__':
+    init_logger()
+    logger = get_logger()
+    logger.debug('debug')
+    logger.info('info')
+    logger.warning('warning')
+    logger.error('error')
+    logger.critical('critical')
