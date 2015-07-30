@@ -9,6 +9,7 @@ from bitbays import BitBays
 import common
 from okcoin import OKCoinCN
 from trade_info import TradeInfo
+from operator import itemgetter
 
 
 class AssetMonitor(QtCore.QThread):
@@ -47,24 +48,18 @@ class AssetMonitor(QtCore.QThread):
         report = 'Asset Change: {:10.4f}btc, {:10.4f}cny'.format(btc, fiat)
         return report
 
+    # TODO: check whether only works for python2
     def _get_plt_price_list(self, catelog):
-        p1 = self.plt_list[0]
-        p2 = self.plt_list[1]
         if catelog == 'buy':
-            p1_ask1 = p1.ask1()
-            p2_ask1 = p2.ask1()
-            if p1_ask1 < p2_ask1:
-                info = [(p1, p1_ask1), (p2, p2_ask1)]
-            else:
-                info = [(p2, p2_ask1), (p1, p1_ask1)]
+            with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+                ask1_list = list(executor.map(lambda plt: plt.ask1(), self.plt_list))
+            pack = zip(self.plt_list, ask1_list)
+            return sorted(pack, key=itemgetter(1))
         else:  # sell
-            p1_bid1 = p1.bid1()
-            p2_bid1 = p2.bid1()
-            if p1_bid1 > p2_bid1:
-                info = [(p1, p1_bid1), (p2, p2_bid1)]
-            else:
-                info = [(p2, p2_bid1), (p1, p1_bid1)]
-        return info
+            with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+                bid1_list = list(executor.map(lambda plt: plt.bid1(), self.plt_list))
+            pack = zip(self.plt_list, bid1_list)
+            return sorted(pack, key=itemgetter(1), reverse=True)
 
     def btc_update_handler(self, btc_change_amount, is_last):
         # only when exceeds

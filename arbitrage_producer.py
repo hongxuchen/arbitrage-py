@@ -94,7 +94,8 @@ class ArbitrageProducer(QtCore.QThread):
         return True
 
     def process_arbitrage(self):
-        self._info_list = [plt.ask_bid_list(1) for plt in self.plt_list]
+        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+            self._info_list = list(executor.map(lambda plt: plt.ask_bid_list(1), self.plt_list))
         assert (len(self._info_list[0]) == len(self._info_list[1]))
         length = len(self._info_list[0])
         assert (length % 2 == 0)
