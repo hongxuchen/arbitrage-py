@@ -95,7 +95,7 @@ def init_logger():
 
 
 def get_logger():
-    return logging.getLogger('sLogger')
+    return logging.getLogger('logger')
 
 
 def get_asset_logger():

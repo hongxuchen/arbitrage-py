@@ -9,6 +9,7 @@ from bitbays import BitBays
 class AssetInfo(object):
     def __init__(self, plt):
         self.plt = plt
+        self.plt_name = self.plt.__class__.__name__
         self.asset_raw_list = plt.assets()
         assert (len(self.asset_raw_list) == 2)
         [self.fiat_pending, self.fiat_avail] = self.asset_raw_list[0]

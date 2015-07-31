@@ -2,36 +2,38 @@ version: 1
 
 formatters:
     fileFormatter:
-        format: '%(levelname)9s %(asctime)s %(filename)25s: %(lineno)3s - %(message)s'
+        format: '%(levelname)9s %(asctime)s %(thread)20d %(filename)25s: %(lineno)3s - %(message)s'
         datefmt: '%Y-%m-%d %H:%M:%S'
     consoleFormatter:
-        format: '%(levelname)9s %(asctime)s %(thread)20d %(filename)25s: %(lineno)3s - %(message)s'
+        format: '%(levelname)9s %(asctime)s %(filename)25s: %(lineno)3s - %(message)s'
         datefmt: '%Y-%m-%d %H:%M:%S'
 
 handlers:
     console:
         class: logging.StreamHandler
         formatter: consoleFormatter
-        level: INFO
+        level: WARNING
         stream: ext://sys.stdout
-    file:
+    tracker_file:
         class: logging.FileHandler
         formatter: fileFormatter
-        level: DEBUG
-        filename: log_exception.LOG
+        level: INFO
+        filename: tracker.LOG
     asset_file:
         class: logging.FileHandler
         formatter: fileFormatter
-        level: DEBUG
-        filename: log_asset.LOG
+        level: INFO
+        filename: asset.LOG
 
 loggers:
-    sLogger:
+    logger:
         level: DEBUG
-        handlers: [file]
-    assetLogger:
+        handlers: [tracker_file]
+        propagate: yes
+    asset_logger:
         level: DEBUG
         handlers: [asset_file]
+        propagate: no
 
 root:
     level: DEBUG

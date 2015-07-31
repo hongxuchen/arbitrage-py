@@ -30,7 +30,22 @@ class AssetMonitor(threading.Thread):
     def get_asset_list(self):
         with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
             assets = executor.map(lambda plt: AssetInfo(plt), self.plt_list)
-        return list(assets)
+        asset_list = list(assets)
+        self.report_asset(asset_list)
+        return asset_list
+
+    @staticmethod
+    def report_asset(asset_list):
+        asset_logger = common.get_asset_logger()
+        report_template = '{:10s} btc={:<10.4f}, cny={:<10.4f}'
+        all_btc = 0.0
+        all_fiat = 0.0
+        for asset in asset_list:
+            plt_btc, plt_fiat = asset.total_btc(), asset.total_fiat()
+            all_btc += plt_btc
+            all_fiat += plt_fiat
+            asset_logger.info(report_template.format(asset.plt_name, plt_btc, plt_fiat))
+        asset_logger.info(report_template.format('ALL', all_btc, all_fiat))
 
     def get_asset_changes(self, asset_list):
         btc, original_btc = 0.0, 0.0
@@ -44,9 +59,9 @@ class AssetMonitor(threading.Thread):
         return btc - original_btc, fiat - original_fiat
 
     @staticmethod
-    def get_asset_change_report(btc, fiat):
+    def report_asset_changes(btc, fiat):
         report = 'Asset Change: {:10.4f}btc, {:10.4f}cny'.format(btc, fiat)
-        return report
+        common.get_asset_logger().warning(report)
 
     def _get_plt_price_list(self, catelog):
         if catelog == 'buy':
@@ -136,11 +151,10 @@ class AssetMonitor(threading.Thread):
         status = self.btc_update_handler(btc, is_last)
         common.MUTEX.release()
         ### report
-        # NOTE:this report is delayed
-        report = self.get_asset_change_report(btc, fiat)
+        # NOTE: this report is delayed
         if abs(self.old_btc_change_amount - btc) > config.MINOR_DIFF or abs(
                         self.old_fiat_change_amount - fiat) > config.MINOR_DIFF:
-            AssetMonitor._logger.warning(report)
+            self.report_asset_changes(btc, fiat)
         ### update old
         self.old_btc_change_amount = btc
         self.old_fiat_change_amount = fiat
