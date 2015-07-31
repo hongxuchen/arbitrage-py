@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+
 class Platform(object):
     def __init__(self, info):
         self.domain = info['domain']
