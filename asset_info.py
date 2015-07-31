@@ -15,10 +15,10 @@ class AssetInfo(object):
         [self.btc_pending, self.btc_avail] = self.asset_raw_list[1]
 
     def has_pending_fiat(self):
-        return self.fiat_pending > config.minor_diff
+        return self.fiat_pending > config.MINOR_DIFF
 
     def has_pending_btc(self):
-        return self.btc_pending > config.minor_diff
+        return self.btc_pending > config.MINOR_DIFF
 
     def afford_buy_amount(self, price):
         return self.fiat_avail / price

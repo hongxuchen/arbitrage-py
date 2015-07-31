@@ -29,9 +29,8 @@ select_plt_dict = {
 class ArbitrageUI(ui_main_win.Ui_MainWin):
     _logger = common.get_logger()
 
-    def __init__(self, length=5):
+    def __init__(self):
         super(ArbitrageUI, self).__init__()
-        self.depth_length = length
         common.init_logger()
         self.init_gui()
         self.worklist = []
@@ -144,7 +143,7 @@ class ArbitrageUI(ui_main_win.Ui_MainWin):
 
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
-    widget = ArbitrageUI(2)
+    widget = ArbitrageUI()
     widget.move(centerized(widget))
     widget.show()
     sys.exit(app.exec_())

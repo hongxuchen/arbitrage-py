@@ -9,9 +9,15 @@ class Platform(object):
         pass
 
     def ask1(self):
+        '''
+        :return: ask1 price
+        '''
         pass
 
     def bid1(self):
+        '''
+        :return: bid1 price
+        '''
         pass
 
     def ask_bid_list(self, length):
@@ -23,17 +29,17 @@ class Platform(object):
 
     def trade(self, trade_type, price, amount):
         '''
-        :param trade_type:
+        :param trade_type: sell/buy
         :param price:
         :param amount:
-        :return:
+        :return: order id; if failed, return an invalid id
         '''
         pass
 
     def cancel(self, order_id):
         '''
         :param order_id:
-        :return:
+        :return: True/False
         '''
         pass
 
@@ -43,6 +49,7 @@ class Platform(object):
         '''
         pass
 
+    # unused
     def buy_market(self, mo_amount):
         '''
         :param mo_amount: fiat unit
@@ -51,6 +58,7 @@ class Platform(object):
         pass
 
     # sell amount is the BTC unit
+    # unused
     def sell_market(self, mo_amount):
         '''
         :param mo_amount: btc unit
@@ -61,11 +69,10 @@ class Platform(object):
     def order_info(self, order_id):
         '''
         :param order_id: order id
-        :return: a OrderInfo instance
+        :return: an OrderInfo instance
         '''
         pass
 
     def get_url(self, path):
         url = self.domain + path
-        # print(url)
         return url

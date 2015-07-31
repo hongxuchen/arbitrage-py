@@ -9,7 +9,7 @@ class OrderInfo(object):
         self.remaining_amount = remaining_amount
 
     def has_pending(self):
-        return self.remaining_amount > config.minor_diff
+        return self.remaining_amount > config.MINOR_DIFF
 
     def __repr__(self):
         return 'catalog: {}, remaining: {:10.4f}'.format(self.catalog, self.remaining_amount)

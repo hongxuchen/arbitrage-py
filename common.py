@@ -22,7 +22,7 @@ def get_usd_cny_rate():
     return decimal.Decimal(r.text.split(",")[1])
 
 
-def to_decimal(value_str, precision=config.precision):
+def to_decimal(value_str, precision=config.DISPLAY_PRECISION):
     return round(float(value_str), precision)
 
 
@@ -37,9 +37,9 @@ def reverse_catelog(original_catelog):
 def adjust_price(trade_catelog, price):
     assert (trade_catelog in ['buy', 'sell'])
     if trade_catelog == 'buy':
-        return price * (1 + config.adjust_percentage)
+        return price * (1 + config.ASJUST_PERCENTAGE)
     else:  # sell
-        return price * (1 - config.adjust_percentage)
+        return price * (1 - config.ASJUST_PERCENTAGE)
 
 
 def is_retry_exception(exception):

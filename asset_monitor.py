@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from operator import itemgetter
+
 from PySide import QtCore
 import concurrent.futures
 
@@ -9,7 +11,6 @@ from bitbays import BitBays
 import common
 from okcoin import OKCoinCN
 from trade_info import TradeInfo
-from operator import itemgetter
 
 
 class AssetMonitor(QtCore.QThread):
@@ -48,7 +49,6 @@ class AssetMonitor(QtCore.QThread):
         report = 'Asset Change: {:10.4f}btc, {:10.4f}cny'.format(btc, fiat)
         return report
 
-    # TODO: check whether only works for python2
     def _get_plt_price_list(self, catelog):
         if catelog == 'buy':
             with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
@@ -67,7 +67,7 @@ class AssetMonitor(QtCore.QThread):
             if is_last:  # make sure will sell
                 self.btc_exceed_counter = config.BTC_EXCEED_COUNTER + 2
             # update counter
-            if self.old_btc_change_amount < config.minor_diff:
+            if self.old_btc_change_amount < config.MINOR_DIFF:
                 self.btc_exceed_counter = 1
             else:
                 self.btc_exceed_counter += 1
@@ -86,7 +86,7 @@ class AssetMonitor(QtCore.QThread):
             AssetMonitor._logger.warning(
                 '[Monitor] exceed_counter={}, old_btc_changes={:<10.4f}, current={:<10.4f}'.format(
                     self.btc_exceed_counter, self.old_btc_change_amount, btc_change_amount))
-            if self.old_btc_change_amount > -config.minor_diff:
+            if self.old_btc_change_amount > -config.MINOR_DIFF:
                 self.btc_exceed_counter = -1
             else:
                 self.btc_exceed_counter -= 1
@@ -142,8 +142,8 @@ class AssetMonitor(QtCore.QThread):
         report = self.get_asset_change_report(btc, fiat)
         ### always report on console; notify UI only when change
         AssetMonitor._logger.debug(report)
-        if abs(self.old_btc_change_amount - btc) > config.minor_diff or abs(
-                        self.old_fiat_change_amount - fiat) > config.minor_diff:
+        if abs(self.old_btc_change_amount - btc) > config.MINOR_DIFF or abs(
+                        self.old_fiat_change_amount - fiat) > config.MINOR_DIFF:
             self.notify_asset_change.emit(report)
         ### update old
         self.old_btc_change_amount = btc
@@ -157,7 +157,7 @@ class AssetMonitor(QtCore.QThread):
         self.notify_update_asset.emit(self.original_asset_list)
         # update asset info
         while self.running:
-            QtCore.QThread.sleep(config.monitor_interval_seconds)
+            QtCore.QThread.sleep(config.MONITOR_INTERVAL_SECONDS)
             AssetMonitor._logger.debug("[Monitor] Notify")
             adjust_status = self.asset_update_handler(False)  # TODO: return value not used here
             if adjust_status is False:

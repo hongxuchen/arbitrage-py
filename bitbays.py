@@ -65,12 +65,12 @@ class BitBays(Platform):
         def _request_impl():
             r = None
             if api_type in self.api_public:
-                r = requests.get(self._real_uri(api_type), params=params, timeout=config.request_timeout, verify=True)
+                r = requests.get(self._real_uri(api_type), params=params, timeout=config.TIMEOUT, verify=True)
             elif api_type in self.api_private:
                 params['nonce'] = self._nonce()
                 headers = self._post_param(params)
                 r = requests.post(self._real_uri(api_type), data=params, headers=headers,
-                                  timeout=config.request_timeout, verify=True)
+                                  timeout=config.TIMEOUT, verify=True)
             else:
                 BitBays._logger.critical('api_type={} not supported'.format(api_type))
                 sys.exit(1)
@@ -135,7 +135,7 @@ class BitBays(Platform):
         res = self._setup_request('depth', params=payload)['result']
         asks = sorted(res['asks'], key=lambda ask: ask[0], reverse=True)[-length:]
         bids = sorted(res['bids'], key=lambda bid: bid[0], reverse=True)[:length]
-        assert (asks[-1][0] + config.minor_diff >= bids[0][0])
+        assert (asks[-1][0] + config.MINOR_DIFF >= bids[0][0])
         asks_bids = asks + bids
         return asks_bids
 

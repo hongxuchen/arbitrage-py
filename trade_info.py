@@ -91,7 +91,7 @@ class TradeInfo(object):
         """
         M = self.plt.lower_bound
         # no trading amount
-        assert self.amount >= config.minor_diff
+        assert self.amount >= config.MINOR_DIFF
         # if self.amount < config.minor_diff:
         #     TradeInfo._logger.info('{}: trading amount = 0, exit adjust_trade'.format(self.plt_name))
         #     return

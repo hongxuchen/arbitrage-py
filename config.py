@@ -20,18 +20,18 @@ itbit_info = {
 
 fiat = 'cny'
 
-trade_precision = 3
-precision = 6
-minor_diff = 10.0 ** (-precision)
+TRADE_PRECISION = 3
+DISPLAY_PRECISION = 6
+MINOR_DIFF = 10.0 ** (-DISPLAY_PRECISION)
 INVALID_ORDER_ID = -1
 
-adjust_percentage = 0.1
+ASJUST_PERCENTAGE = 0.1
 ASSET_WAIT_MAX = 1
 ASSET_FOR_TRAID_DIFF = 0.0005
 
 CONSUMER_SLEEP_MILLISECONS = 500
 
-request_timeout = 3.0
+TIMEOUT = 3.0
 RETRY_MAX = 8
 RETRY_MILLISECONDS = 100
 REQUEST_EXCEPTION_WAIT_SECONDS = 10
@@ -43,13 +43,13 @@ BTC_DIFF_MAX = 0.001
 
 # CONFIG
 ## upper_bound must > lower_bound for all platforms
-upper_bound = 0.6
+UPPER_BOUND = 0.6
 PENDING_SECONDS = 5.0
-monitor_interval_seconds = 3
+MONITOR_INTERVAL_SECONDS = 3
 
 diff_dict = {
     'BitBays': {
-        'OKCoinCN': 0.3
+        'OKCoinCN': 0.45
     },
     'OKCoinCN': {
         'BitBays': 0.75

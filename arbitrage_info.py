@@ -105,9 +105,9 @@ class ArbitrageInfo(object):
         # if A < 0, bought more, should sell; if A >= 0, sold more, should buy
         ArbitrageInfo._logger.warning(
             'A1={:<10.4f}, A2={:<10.4f}, A={:<10.4f}'.format(remaining_list[0], remaining_list[1], amount))
-        if amount < -config.minor_diff:
+        if amount < -config.MINOR_DIFF:
             trade_catelog = 'sell'
-        elif amount > config.minor_diff:
+        elif amount > config.MINOR_DIFF:
             trade_catelog = 'buy'
         else:
             return None
@@ -148,7 +148,7 @@ class ArbitrageInfo(object):
         t2 = self.trade_pair[1]
         a1 = t1.amount
         a2 = t2.amount
-        assert abs(a1 - a2) < config.minor_diff
+        assert abs(a1 - a2) < config.MINOR_DIFF
         trade_amount = a1
         if t1.catelog == 'buy':
             buy_trade = t1
