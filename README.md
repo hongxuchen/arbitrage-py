@@ -20,6 +20,8 @@ reverse the fiat amount for futher trade. The net strategy is that we can change
 * different/dynamic diff for buy/sell
 * okcoin can only preserve 3 decimal fractions for floating points
 * Deal with common.py init issue
+* send email regularly to me about asset
+* distinguish error message and asset changes
 
 ## hosts
 - 121.199.251.136 www.okcoin.cn

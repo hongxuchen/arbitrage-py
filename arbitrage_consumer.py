@@ -26,7 +26,7 @@ class ArbitrageConsumer(threading.Thread):
             # but may not be a big problem since the sleep time is for all elem in queue
             if seconds < config.PENDING_SECONDS:
                 sleep_seconds = config.PENDING_SECONDS - seconds
-                ArbitrageConsumer._logger.info('[Consmumer] sleep for {:4d}ms'.format(sleep_seconds))
+                ArbitrageConsumer._logger.info('[Consmumer] sleep for {:.3f}s'.format(sleep_seconds))
                 time.sleep(sleep_seconds)
             ArbitrageConsumer._logger.info('[Consumer] consuming')
             arbitrage.adjust_pending()
@@ -37,7 +37,7 @@ class ArbitrageConsumer(threading.Thread):
             ArbitrageConsumer._logger.debug('[Consumer] run')
             if not self.arbitrage_queue:
                 ArbitrageConsumer._logger.debug(
-                    '[Consumer] queue empty, sleep for {:d}s'.format(config.CONSUMER_SLEEP_SECONS))
+                    '[Consumer] queue empty, sleep for {:.3f}s'.format(config.CONSUMER_SLEEP_SECONS))
                 time.sleep(config.CONSUMER_SLEEP_SECONS)
             else:
                 self.consume()

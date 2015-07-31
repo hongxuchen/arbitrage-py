@@ -12,27 +12,27 @@ handlers:
     console:
         class: logging.StreamHandler
         formatter: consoleFormatter
-        level: WARNING
+        level: INFO
         stream: ext://sys.stdout
     file:
         class: logging.FileHandler
         formatter: fileFormatter
-        level: INFO
-        filename: .arbitrage.log
+        level: DEBUG
+        filename: log_exception.LOG
     asset_file:
         class: logging.FileHandler
         formatter: fileFormatter
-        level: INFO
-        filename: .asset.log
+        level: DEBUG
+        filename: log_asset.LOG
 
 loggers:
     sLogger:
-        level: INFO
+        level: DEBUG
         handlers: [file]
     assetLogger:
-        level: INFO
+        level: DEBUG
         handlers: [asset_file]
 
 root:
-    level: WARNING
+    level: DEBUG
     handlers: [console]

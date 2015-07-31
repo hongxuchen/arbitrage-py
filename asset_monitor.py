@@ -154,7 +154,6 @@ class AssetMonitor(threading.Thread):
         # update asset info
         while self.running:
             time.sleep(config.MONITOR_INTERVAL_SECONDS)
-            AssetMonitor._logger.debug("[Monitor] Notify")
             adjust_status = self.asset_update_handler(False)  # TODO: return value not used here
             if adjust_status is False:
                 self.failed_counter += 1

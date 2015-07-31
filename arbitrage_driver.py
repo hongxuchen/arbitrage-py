@@ -46,14 +46,14 @@ class ArbitrageDriver():
         self.monitor.join()
 
     def main_run(self):
-        print('start trade')
+        common.get_logger().info('start trade')
         driver.start_trade()
         while True:
             # FIXME only works for python2
-            value = input()
+            value = raw_input()
             if value == 'q':
                 break
-        print('stop trade')
+        common.get_logger().info('stop trade')
         self.stop_trade()
 
 

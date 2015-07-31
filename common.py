@@ -98,6 +98,10 @@ def get_logger():
     return logging.getLogger('sLogger')
 
 
+def get_asset_logger():
+    return logging.getLogger('asset_logger')
+
+
 class InvalidNonceError(Exception):
     def __init__(self, message):
         super(InvalidNonceError, self).__init__(message)

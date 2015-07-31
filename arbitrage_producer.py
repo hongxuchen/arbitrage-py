@@ -98,7 +98,6 @@ class ArbitrageProducer(threading.Thread):
         plt_name_a, plt_name_b = get_plt_name(self.plt_list[i]), get_plt_name(self.plt_list[1 - i])
 
         arbitrage_diff = config.diff_dict[plt_name_a][plt_name_b]
-        ArbitrageProducer._logger.debug('[Producer] [{}, {}] diff={}'.format(plt_name_a, plt_name_b, arbitrage_diff))
         if ask_a[0] + arbitrage_diff < bid_b[0]:
             ArbitrageProducer._logger.debug('[Producer] Arbitrage chance: {} {}'.format(ask_a, bid_b))
             self.arbitrage_impl(i, ask_list[i], bid_list[1 - i])
