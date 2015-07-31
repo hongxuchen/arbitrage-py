@@ -19,11 +19,19 @@ handlers:
         formatter: fileFormatter
         level: INFO
         filename: .arbitrage.log
+    asset_file:
+        class: logging.FileHandler
+        formatter: fileFormatter
+        level: INFO
+        filename: .asset.log
 
 loggers:
     sLogger:
         level: INFO
         handlers: [file]
+    assetLogger:
+        level: INFO
+        handlers: [asset_file]
 
 root:
     level: WARNING

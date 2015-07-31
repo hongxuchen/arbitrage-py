@@ -2,8 +2,8 @@
 
 import time
 import math
+import threading
 
-from PySide import QtCore
 import concurrent.futures
 
 from asset_info import AssetInfo
@@ -13,8 +13,7 @@ from arbitrage_info import ArbitrageInfo
 from trade_info import TradeInfo
 
 
-class ArbitrageProducer(QtCore.QThread):
-    notify_trade = QtCore.Signal(ArbitrageInfo)
+class ArbitrageProducer(threading.Thread):
     _logger = common.get_logger()
 
     ### stateless
@@ -79,7 +78,6 @@ class ArbitrageProducer(QtCore.QThread):
         trade_pair = (buy_trade, sell_trade)
         now = time.time()
         arbitrage_info = ArbitrageInfo(trade_pair, now)
-        self.notify_trade.emit(arbitrage_info)
         arbitrage_info.process_trade()
         ArbitrageProducer._logger.info('[Producer] arbitrage done, release lock')
         common.MUTEX.release()

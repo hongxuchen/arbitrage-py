@@ -6,8 +6,8 @@ import logging
 import logging.config
 import threading
 import sys
+import time
 
-from PySide.QtCore import QThread
 import requests
 import requests.exceptions as req_except
 import yaml
@@ -68,7 +68,7 @@ def handle_retry(exception, handler):
     while retry_counter < config.RETRY_MAX:
         retry_counter += 1
         try:
-            QThread.msleep(config.RETRY_MILLISECONDS)
+            time.sleep(config.RETRY_SECONDS)
             logger.warning('retry_counter={:<2}'.format(retry_counter))
             res = handler()  # real handle function
             return res  # succeed
@@ -82,7 +82,7 @@ def handle_retry(exception, handler):
                 return handle_exit(e)  # fail, exit
     logger.critical(
         'SLEEP {}s for Exception: "{}"'.format(config.REQUEST_EXCEPTION_WAIT_SECONDS, current_exception))
-    QThread.sleep(config.REQUEST_EXCEPTION_WAIT_SECONDS)
+    time.sleep(config.REQUEST_EXCEPTION_WAIT_SECONDS)
     ### FIXME this makes "stop" button not work when network error
     res = handle_retry(exception, handler)  # recursive
     return res

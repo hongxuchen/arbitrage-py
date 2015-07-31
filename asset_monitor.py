@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 
 from operator import itemgetter
+import threading
+import time
 
-from PySide import QtCore
 import concurrent.futures
 
 import config as config
@@ -13,9 +14,7 @@ from okcoin import OKCoinCN
 from trade_info import TradeInfo
 
 
-class AssetMonitor(QtCore.QThread):
-    notify_update_asset = QtCore.Signal(list)
-    notify_asset_change = QtCore.Signal(str)
+class AssetMonitor(threading.Thread):
     _logger = common.get_logger()
 
     def __init__(self, plt_list):
@@ -138,13 +137,10 @@ class AssetMonitor(QtCore.QThread):
         common.MUTEX.release()
         ### report
         # NOTE:this report is delayed
-        self.notify_update_asset.emit(asset_list)
         report = self.get_asset_change_report(btc, fiat)
-        ### always report on console; notify UI only when change
-        AssetMonitor._logger.debug(report)
         if abs(self.old_btc_change_amount - btc) > config.MINOR_DIFF or abs(
                         self.old_fiat_change_amount - fiat) > config.MINOR_DIFF:
-            self.notify_asset_change.emit(report)
+            AssetMonitor._logger.warning(report)
         ### update old
         self.old_btc_change_amount = btc
         self.old_fiat_change_amount = fiat
@@ -154,10 +150,10 @@ class AssetMonitor(QtCore.QThread):
         # initialize asset
         self.original_asset_list = self.get_asset_list()
         self.old_btc_change_amount = self.get_asset_changes(self.original_asset_list)[0]
-        self.notify_update_asset.emit(self.original_asset_list)
+        # TODO add asset log
         # update asset info
         while self.running:
-            QtCore.QThread.sleep(config.MONITOR_INTERVAL_SECONDS)
+            time.sleep(config.MONITOR_INTERVAL_SECONDS)
             AssetMonitor._logger.debug("[Monitor] Notify")
             adjust_status = self.asset_update_handler(False)  # TODO: return value not used here
             if adjust_status is False:
@@ -170,7 +166,7 @@ class AssetMonitor(QtCore.QThread):
         last_adjust_status = self.asset_update_handler(True)
         if last_adjust_status is False:
             fail_warning = 'last adjust failed, do it yourself!'
-            self.notify_asset_change.emit(fail_warning)
+            AssetMonitor._logger.warning(report)
 
 
 if __name__ == '__main__':
