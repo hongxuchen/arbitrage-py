@@ -116,6 +116,16 @@ class NULLResponseError(Exception):
         super(NULLResponseError, self).__init__(message)
 
 
+class HuoBiError(Exception):
+    def __init__(self, msg):
+        super(HuoBiError, self).__init__(msg)
+
+
+class HuoBiExitError(Exception):
+    def __init__(self, msg):
+        super(HuoBiExitError, self).__init__(msg)
+
+
 plt_yaml = os.path.join(os.path.dirname(__file__), 'platforms.yaml')
 
 
@@ -145,8 +155,9 @@ def get_key_from_data(field, dict_data=None):
 
 MUTEX = threading.Lock()
 retry_except_tuple = (
-    req_except.ConnectionError, req_except.Timeout, req_except.HTTPError, InvalidNonceError, NULLResponseError)
-exit_except_tuple = (req_except.URLRequired, req_except.TooManyRedirects)
+    req_except.ConnectionError, req_except.Timeout, req_except.HTTPError, InvalidNonceError, NULLResponseError,
+    HuoBiError)
+exit_except_tuple = (req_except.URLRequired, req_except.TooManyRedirects, HuoBiExitError)
 USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.130 Safari/537.36'
 
 if __name__ == '__main__':

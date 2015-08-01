@@ -60,7 +60,14 @@ class HuoBi(Platform):
                 print(param_dict)
                 del param_dict['secret_key']
                 r = requests.post(self.domain, params=param_dict)
-
+                res_data = r.json()
+                if 'code' in res_data and res_data['code'] != 0:
+                    code = res_data['code']
+                    HuoBi._logger.error(u'HuoBi Error: code={}, msg={}'.format(code, res_data['msg']))
+                    if code in [5, 7]:
+                        raise common.HuoBiExitError('HuoBiExitError: code={}'.format(code))
+                    else:
+                        raise common.HuoBiError('HuoBiError: code={}'.format(code))
             return r.json()
 
         try:
@@ -107,6 +114,8 @@ class HuoBi(Platform):
         params = {
             'id': order_id
         }
+        res = self.setup_request('cancel_order', params)
+        return res
 
     def assets(self):
         funds = self.setup_request('get_account_info')
@@ -120,10 +129,12 @@ class HuoBi(Platform):
 if __name__ == '__main__':
     common.init_logger()
     huobi = HuoBi()
-    res = huobi.trade('buy', 123, 0.1)
-    print(res)
-    res = res = huobi.trade('sell', 12345, 0.1)
+    # res = huobi.trade('buy', 123, 0.1)
+    # print(res)
+    # res = res = huobi.trade('sell', 12345, 0.1)
+    # print(res)
+    res = huobi.cancel(123456)
     print(res)
     # print(huobi.assets())
     # print(huobi.ask1(), huobi.bid1())
-    # print(huobi.ask_bid_list(1))
+    print(huobi.ask_bid_list(1))
