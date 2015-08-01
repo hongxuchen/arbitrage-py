@@ -60,6 +60,8 @@ UPPER_BOUND = 0.6
 PENDING_SECONDS = 5.0
 MONITOR_INTERVAL_SECONDS = 3
 
+EMAILING_INTERVAL_SECONDS = 3600
+
 # when Pa.ask1 + buy_diff <= Pb.bid1, buy at Pa, sell at Pb
 diff_dict = {
     'BitBays': {

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
-
+from email.mime.text import MIMEText
 from operator import itemgetter
+import smtplib
 import threading
 import time
 
@@ -26,6 +27,7 @@ class AssetMonitor(threading.Thread):
         self.old_btc_change_amount = 0.0
         self.old_fiat_change_amount = 0.0
         self.failed_counter = 0
+        self.last_notifier_time = time.time()
 
     def get_asset_list(self):
         with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
@@ -61,7 +63,32 @@ class AssetMonitor(threading.Thread):
     @staticmethod
     def report_asset_changes(btc, fiat):
         report = 'Asset Change: {:10.4f}btc, {:10.4f}cny'.format(btc, fiat)
+        now = time.time()
         common.get_asset_logger().warning(report)
+
+    @staticmethod
+    def send_msg(report):
+        # print('sending email')
+        emailing_info = common.get_key_from_data('Emailing')
+        sender = emailing_info['sender']
+        receiver = emailing_info['receiver']
+        server = emailing_info['server']
+        msg = MIMEText(report)
+        msg['Subject'] = 'Asset Change Report'
+        msg['From'] = sender
+        msg['To'] = receiver
+        session = smtplib.SMTP(server)
+        session.sendmail(sender, [receiver], msg.as_string())
+        session.quit()
+
+    def try_notify_asset_changes(self, btc, fiat):
+        report = 'Asset Change: {:10.4f}btc, {:10.4f}cny'.format(btc, fiat)
+        now = time.time()
+        # config.EMAILING_INTERVAL_SECONDS = 8
+        if now - self.last_notifier_time >= config.EMAILING_INTERVAL_SECONDS:
+            AssetMonitor._logger.warning('notifying asset changes via email')
+            self.send_msg(report)
+            self.last_notifier_time = now
 
     def _get_plt_price_list(self, catelog):
         if catelog == 'buy':
@@ -155,6 +182,7 @@ class AssetMonitor(threading.Thread):
         if abs(self.old_btc_change_amount - btc) > config.MINOR_DIFF or abs(
                         self.old_fiat_change_amount - fiat) > config.MINOR_DIFF:
             self.report_asset_changes(btc, fiat)
+        self.try_notify_asset_changes(btc, fiat)
         ### update old
         self.old_btc_change_amount = btc
         self.old_fiat_change_amount = fiat
@@ -179,7 +207,7 @@ class AssetMonitor(threading.Thread):
         last_adjust_status = self.asset_update_handler(True)
         if last_adjust_status is False:
             fail_warning = 'last adjust failed, do it yourself!'
-            AssetMonitor._logger.warning(report)
+            AssetMonitor._logger.warning(fail_warning)
 
 
 if __name__ == '__main__':
