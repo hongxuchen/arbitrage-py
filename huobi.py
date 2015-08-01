@@ -1,5 +1,8 @@
 #!/usr/bin/env python
+import hashlib
 import sys
+import urllib
+import time
 
 import requests
 
@@ -9,7 +12,6 @@ from plt_api import Platform
 
 
 class HuoBi(Platform):
-    # TODO
     lower_bound = 0.001
     _logger = common.get_logger()
     data_domain = config.huobi_info['data_domain']
@@ -20,16 +22,45 @@ class HuoBi(Platform):
 
     def __init__(self):
         super(HuoBi, self).__init__(config.huobi_info)
+        self.key = common.get_key_from_data('HuoBi')
         self.coin_type = 'btc'
+        self.api_private = ['cancel_order', 'get_account_info', 'buy', 'sell']
 
     def _real_uri(self, api_type):
         print('not used, exit')
         sys.exit(1)
 
+    @staticmethod
+    def _sign(params):
+        params = sorted(params.iteritems(), key=lambda d: d[0], reverse=False)
+        message = urllib.urlencode(params)
+        m = hashlib.md5()
+        m.update(message)
+        m.digest()
+        sig = m.hexdigest()
+        return sig
+
+    # noinspection PyMethodMayBeStatic
     def setup_request(self, api_uri, params=None, data=None):
         def _request_impl():
             r = None
-            r = requests.get(api_uri, params=params, timeout=config.TIMEOUT, verify=True)
+            if api_uri not in self.api_private:
+                r = requests.get(api_uri, params=params, headers=HuoBi.common_headers, timeout=config.TIMEOUT,
+                                 verify=True)
+            else:
+                timestamp = long(time.time())
+                param_dict = {
+                    'access_key': self.key['api'],
+                    'secret_key': self.key['secret'],
+                    'created': timestamp,
+                    'method': api_uri
+                }
+                param_dict.update(params)
+                param_dict['sign'] = self._sign(param_dict)
+                print(param_dict)
+                del param_dict['secret_key']
+                r = requests.post(self.domain, params=param_dict)
+
             return r.json()
 
         try:
@@ -65,17 +96,34 @@ class HuoBi(Platform):
         return asks_bids
 
     def trade(self, trade_type, price, amount):
-        pass
+        params = {
+            'price': str(price),
+            'amount': str(amount)
+        }
+        res = self.setup_request(trade_type, params)
+        return res
 
     def cancel(self, order_id):
-        pass
+        params = {
+            'id': order_id
+        }
 
     def assets(self):
-        pass
+        funds = self.setup_request('get_account_info')
+        l = [
+            [common.to_decimal(funds['frozen_cny_display']), common.to_decimal(funds['available_cny_display'])],
+            [common.to_decimal(funds['frozen_btc_display']), common.to_decimal(funds['available_btc_display'])]
+        ]
+        return l
 
 
 if __name__ == '__main__':
     common.init_logger()
     huobi = HuoBi()
-    print(huobi.ask1(), huobi.bid1())
-    print(huobi.ask_bid_list(2))
+    res = huobi.trade('buy', 123, 0.1)
+    print(res)
+    res = res = huobi.trade('sell', 12345, 0.1)
+    print(res)
+    # print(huobi.assets())
+    # print(huobi.ask1(), huobi.bid1())
+    # print(huobi.ask_bid_list(1))

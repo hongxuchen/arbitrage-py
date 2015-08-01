@@ -4,7 +4,7 @@ okcoin_cn_info = {
 }
 
 huobi_info = {
-    'domain': 'huobi.com',
+    'domain': 'https://api.huobi.com/apiv3',
     'symbol': 'cny',
     'data_domain': 'http://api.huobi.com/staticmarket'
 }
@@ -60,11 +60,15 @@ UPPER_BOUND = 0.6
 PENDING_SECONDS = 5.0
 MONITOR_INTERVAL_SECONDS = 3
 
+# when Pa.ask1 + buy_diff <= Pb.bid1, buy at Pa, sell at Pb
 diff_dict = {
     'BitBays': {
-        'OKCoinCN': 0.45
+        'OKCoinCN': 0.45, 'HuoBi': 0.45
     },
     'OKCoinCN': {
-        'BitBays': 0.75
+        'BitBays': 0.75, 'HuoBi': 0.75
+    },
+    'HuoBi': {
+        'OKCoinCN': 0.75, 'BitBays': 0.45
     }
 }
