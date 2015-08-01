@@ -130,8 +130,8 @@ class HuoBi(Platform):
 if __name__ == '__main__':
     common.init_logger()
     huobi = HuoBi()
-    # res = huobi.trade('sell', 123456, 0.1)
-    # print(res)
+    res = huobi.trade('sell', 123456, 0.1)
+    print(res)
     # res = res = huobi.trade('sell', 12345, 0.1)
     # print(res)
     # res = huobi.cancel(123456)
