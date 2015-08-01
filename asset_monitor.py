@@ -190,6 +190,7 @@ class AssetMonitor(threading.Thread):
     def run(self, *args, **kwargs):
         # initialize asset
         self.original_asset_list = self.get_asset_list()
+        self.report_asset(self.original_asset_list)
         self.old_btc_change_amount = self.get_asset_changes(self.original_asset_list)[0]
         # TODO add asset log
         # update asset info

@@ -56,7 +56,7 @@ BTC_DIFF_MAX = 0.001
 
 # CONFIG
 ## upper_bound must > lower_bound for all platforms
-UPPER_BOUND = 0.6
+UPPER_BOUND = 0.06
 PENDING_SECONDS = 5.0
 MONITOR_INTERVAL_SECONDS = 3
 
