@@ -58,7 +58,7 @@ class HuoBi(Platform):
                 if params is not None:
                     param_dict.update(params)
                 param_dict['sign'] = self._sign(param_dict)
-                print(param_dict)
+                # print(param_dict)
                 del param_dict['secret_key']
                 r = requests.post(self.domain, params=param_dict)
                 res_data = r.json()
@@ -130,12 +130,14 @@ class HuoBi(Platform):
 if __name__ == '__main__':
     common.init_logger()
     huobi = HuoBi()
-    res = huobi.trade('sell', 123456, 0.1)
+    res = huobi.trade('buy', 123456, 0.1)
     print(res)
+    # res = huobi.trade('sell', 123456, 0.1)
+    # print(res)
     # res = res = huobi.trade('sell', 12345, 0.1)
     # print(res)
     # res = huobi.cancel(123456)
     # print(res)
-    print(huobi.assets())
+    # print(huobi.assets())
     # print(huobi.ask1(), huobi.bid1())
     # print(huobi.ask_bid_list(1))
