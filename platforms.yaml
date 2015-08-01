@@ -30,3 +30,8 @@ BTC38:
 Available: [OKCoinCN, BitBays, ItBit, HuoBi]
 
 Enabled: [OKCoinCN, BitBays]
+
+Emailing:
+    sender:   btc_hongxuchen@outlook.com
+    receiver: leftcopy.chx@gmail.com
+    server:   localhost
