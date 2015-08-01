@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from huobi import HuoBi
 from itbit import ItBitAPI
 from okcoin import OKCoinCN
 import arbitrage_consumer
@@ -11,7 +12,8 @@ import config
 select_plt_dict = {
     'OKCoinCN': OKCoinCN,
     'BitBays': BitBays,
-    'ItBit': ItBitAPI
+    'ItBit': ItBitAPI,
+    'HuoBi': HuoBi
 }
 
 

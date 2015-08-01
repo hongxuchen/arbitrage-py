@@ -66,7 +66,7 @@ diff_dict = {
         'OKCoinCN': 0.45, 'HuoBi': 0.45
     },
     'OKCoinCN': {
-        'BitBays': 0.75, 'HuoBi': 0.75
+        'BitBays': 0.45, 'HuoBi': 0.75
     },
     'HuoBi': {
         'OKCoinCN': 0.75, 'BitBays': 0.45

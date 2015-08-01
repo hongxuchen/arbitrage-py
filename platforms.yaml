@@ -27,6 +27,6 @@ BTC38:
     api:    38584E0A009DBBACFA32DEDEBE68DCE5
     secret: 9AB2E17DE79E62C3844684F83DC16222
 
-Available: [OKCoinCN, BitBays, ItBit]
+Available: [OKCoinCN, BitBays, ItBit, HuoBi]
 
 Enabled: [OKCoinCN, BitBays]
