@@ -33,7 +33,7 @@ loggers:
     asset_logger:
         level: DEBUG
         handlers: [asset_file]
-        propagate: no
+        propagate: yes
 
 root:
     level: DEBUG

@@ -33,7 +33,6 @@ class AssetMonitor(threading.Thread):
         with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
             assets = executor.map(lambda plt: AssetInfo(plt), self.plt_list)
         asset_list = list(assets)
-        self.report_asset(asset_list)
         return asset_list
 
     @staticmethod
@@ -63,7 +62,6 @@ class AssetMonitor(threading.Thread):
     @staticmethod
     def report_asset_changes(btc, fiat):
         report = 'Asset Change: {:10.4f}btc, {:10.4f}cny'.format(btc, fiat)
-        now = time.time()
         common.get_asset_logger().warning(report)
 
     @staticmethod
@@ -181,6 +179,7 @@ class AssetMonitor(threading.Thread):
         # NOTE: this report is delayed
         if abs(self.old_btc_change_amount - btc) > config.MINOR_DIFF or abs(
                         self.old_fiat_change_amount - fiat) > config.MINOR_DIFF:
+            self.report_asset(asset_list)
             self.report_asset_changes(btc, fiat)
         self.try_notify_asset_changes(btc, fiat)
         ### update old
