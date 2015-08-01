@@ -6,6 +6,10 @@ BitBays:
     api:    1D-E3E40687-2DBF5237-E64AB02F
     secret: 5965981998D692EF09DFFE42B86B75C8662EFF6F
 
+Huobi:
+    api:    09c77932-27624ec6-ac6e34e6-e7a34
+    secret: 0d73d1f4-db907569-5493b4af-44060
+
 BTCChina:
     api:    03f9e8e7-71bb-476a-b58e-fa0b092f1f32
     secret: d0ecaae2-f860-48d0-ad5d-ac84c499f0e1

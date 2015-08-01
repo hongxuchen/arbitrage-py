@@ -4,6 +4,7 @@ from __future__ import print_function
 import decimal
 import logging
 import logging.config
+import os
 import threading
 import sys
 import time
@@ -88,8 +89,11 @@ def handle_retry(exception, handler):
     return res
 
 
+logging_yaml = os.path.join(os.path.dirname(__file__), 'logging.yaml')
+
+
 def init_logger():
-    with open('logging.yaml') as f:
+    with open(logging_yaml) as f:
         data = yaml.load(f)
     logging.config.dictConfig(data)
 
@@ -112,7 +116,10 @@ class NULLResponseError(Exception):
         super(NULLResponseError, self).__init__(message)
 
 
-def get_key(field, fname='platforms.yaml'):
+plt_yaml = os.path.join(os.path.dirname(__file__), 'platforms.yaml')
+
+
+def get_key(field, fname=plt_yaml):
     with open(fname) as yfile:
         ydata = yaml.load(yfile)
     try:
@@ -122,7 +129,7 @@ def get_key(field, fname='platforms.yaml'):
         return None
 
 
-with open('platforms.yaml') as yfile:
+with open(plt_yaml) as yfile:
     ydata = yaml.load(yfile)
 
 
