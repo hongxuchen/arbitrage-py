@@ -55,6 +55,7 @@ BTC_EXCEED_COUNTER = 3
 BTC_DIFF_MAX = 0.001
 
 HuoBi_Precision = 2
+SLEEP_SECONDS = 0.34
 
 # CONFIG
 ## upper_bound must > lower_bound for all platforms

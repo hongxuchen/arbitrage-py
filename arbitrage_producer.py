@@ -28,6 +28,7 @@ class ArbitrageProducer(threading.Thread):
     def run(self):
         while self.running:
             ArbitrageProducer._logger.debug('[Producer] run')
+            time.sleep(config.SLEEP_SECONDS)
             self.process_arbitrage()
 
     def arbitrage_impl(self, i, ask_a, bid_b):
