@@ -59,7 +59,7 @@ SLEEP_SECONDS = 0.34
 
 # CONFIG
 ## upper_bound must > lower_bound for all platforms
-UPPER_BOUND = 0.06
+UPPER_BOUND = 0.6
 PENDING_SECONDS = 5.0
 MONITOR_INTERVAL_SECONDS = 3
 
