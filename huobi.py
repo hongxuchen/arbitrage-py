@@ -8,10 +8,21 @@ import requests
 
 import common
 import config
+from order_info import OrderInfo
 from plt_api import Platform
 
 
 class HuoBi(Platform):
+    coin_type_map = {
+        'btc': 1,
+        'ltc': 2
+    }
+    catelog_map = {
+        1: 'buy',
+        2: 'sell',
+        3: 'buy',
+        4: 'sell'
+    }
     lower_bound = 0.001
     _logger = common.get_logger()
     data_domain = config.huobi_info['data_domain']
@@ -24,7 +35,7 @@ class HuoBi(Platform):
         super(HuoBi, self).__init__(config.huobi_info)
         self.key = common.get_key_from_data('HuoBi')
         self.coin_type = 'btc'
-        self.api_private = ['cancel_order', 'get_account_info', 'buy', 'sell']
+        self.api_private = ['cancel_order', 'get_account_info', 'buy', 'sell', 'order_info']
 
     def _real_uri(self, api_type):
         print('not used, exit')
@@ -65,9 +76,9 @@ class HuoBi(Platform):
                 if 'code' in res_data and res_data['code'] != 0:
                     code = res_data['code']
                     HuoBi._logger.error(u'HuoBi Error: code={}, msg={}'.format(code, res_data['msg']))
-                    if code in [5, 7]:
+                    if code in [5, 7, 61, 63, 74]:
                         raise common.HuoBiExitError('HuoBiExitError: code={}'.format(code))
-                    else:
+                    elif code in [1]:
                         raise common.HuoBiError('HuoBiError: code={}'.format(code))
             return r.json()
 
@@ -105,18 +116,39 @@ class HuoBi(Platform):
 
     def trade(self, trade_type, price, amount):
         params = {
+            'coin_type': HuoBi.coin_type_map[self.coin_type],
             'price': str(price),
             'amount': str(amount)
         }
         res = self.setup_request(trade_type, params)
-        return res
+        if 'result' in res and res['result'] == u'success':
+            return res['id']
+        else:
+            return config.INVALID_ORDER_ID
 
     def cancel(self, order_id):
         params = {
+            'coin_type': HuoBi.coin_type_map[self.coin_type],
             'id': order_id
         }
         res = self.setup_request('cancel_order', params)
-        return res
+        if 'result' in res and res['result'] == u'success':
+            return True
+        else:
+            return False
+
+    def order_info(self, order_id):
+        params = {
+            'coin_type': HuoBi.coin_type_map[self.coin_type],
+            'id': order_id
+        }
+        res = self.setup_request('order_info', params)
+        order_amount = common.to_decimal(res['order_amount'])
+        processed = common.to_decimal(res['processed_amount'])
+        remaining_amount = order_amount - processed
+        catelog = HuoBi.catelog_map[res['type']]
+        order_info = OrderInfo(catelog, remaining_amount)
+        return order_info
 
     def assets(self):
         funds = self.setup_request('get_account_info')
@@ -130,8 +162,19 @@ class HuoBi(Platform):
 if __name__ == '__main__':
     common.init_logger()
     huobi = HuoBi()
-    res = huobi.trade('buy', 123456, 0.1)
-    print(res)
+    # sell = huobi.trade('sell', 13456, 0.1)
+    # print(sell)
+    sell = 255053206
+    order_info = huobi.order_info(sell)
+    print(order_info)
+    c1 = huobi.cancel(sell)
+    print(c1)
+    # buy = huobi.trade('buy', 100, 0.1)
+    # print(buy)
+    # order_info = huobi.order_info(buy)
+    # print(order_info)
+    # c2 = huobi.cancel(buy)
+    # print(c2)
     # res = huobi.trade('sell', 123456, 0.1)
     # print(res)
     # res = res = huobi.trade('sell', 12345, 0.1)

@@ -35,12 +35,17 @@ def reverse_catelog(original_catelog):
         return 'buy'
 
 
+def round_price(price, precision=config.HuoBi_Precision):
+    return round(price, precision)
+
+
 def adjust_price(trade_catelog, price):
     assert (trade_catelog in ['buy', 'sell'])
     if trade_catelog == 'buy':
-        return price * (1 + config.ASJUST_PERCENTAGE)
+        new_price = price * (1 + config.ASJUST_PERCENTAGE)
     else:  # sell
-        return price * (1 - config.ASJUST_PERCENTAGE)
+        new_price = price * (1 - config.ASJUST_PERCENTAGE)
+    return round_price(new_price)
 
 
 def is_retry_exception(exception):
@@ -124,6 +129,11 @@ class HuoBiError(Exception):
 class HuoBiExitError(Exception):
     def __init__(self, msg):
         super(HuoBiExitError, self).__init__(msg)
+
+
+class HuoBiIgnoreError(Exception):
+    def __init__(self, msg):
+        super(HuoBiIgnoreError, self).__init__(msg)
 
 
 plt_yaml = os.path.join(os.path.dirname(__file__), 'platforms.yaml')

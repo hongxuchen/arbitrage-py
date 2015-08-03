@@ -34,6 +34,7 @@ class ArbitrageInfo(object):
         with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
             order_ids = executor.map(lambda t: t.regular_trade(t.catelog, t.price, t.amount), self.trade_pair)
         for trade, order_id in zip(self.trade_pair, order_ids):
+            assert (order_id != config.INVALID_ORDER_ID)
             trade.set_order_id(order_id)
             # for trade in self.trade_pair:
             #     order_id = trade.regular_trade(trade.catelog, trade.price, trade.amount)
