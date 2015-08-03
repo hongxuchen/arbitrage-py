@@ -243,7 +243,7 @@ class OKCoinCOM(OKCoinAPI):
 if __name__ == '__main__':
     okcoin_cn = OKCoinCN()
     # print(okcoin_cn.ask_bid_list(2))
-    # print(okcoin_cn.assets())
+    print(okcoin_cn.assets())
     # order_id = okcoin_cn.trade('buy', 10, 10000)
     # print(order_id)
     # print(okcoin_cn.cancel(12345678))

@@ -60,7 +60,7 @@ class HuoBi(Platform):
                 param_dict['sign'] = self._sign(param_dict)
                 # print(param_dict)
                 del param_dict['secret_key']
-                r = requests.post(self.domain, params=param_dict)
+                r = requests.post(self.domain, params=param_dict, headers=HuoBi.common_headers)
                 res_data = r.json()
                 if 'code' in res_data and res_data['code'] != 0:
                     code = res_data['code']
