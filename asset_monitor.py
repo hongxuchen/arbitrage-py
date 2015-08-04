@@ -40,7 +40,7 @@ class AssetMonitor(threading.Thread):
     @staticmethod
     def report_asset(asset_list):
         asset_logger = common.get_asset_logger()
-        report_template = '{:10s} {:3s}={:<10.4f}, cny={:<10.4f}'.format(AssetMonitor.coin_type)
+        report_template = '{:10s} ' + AssetMonitor.coin_type + '={:<10.4f}, cny={:<10.4f}'
         all_coin = 0.0
         all_fiat = 0.0
         for asset in asset_list:
