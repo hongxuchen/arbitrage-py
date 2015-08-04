@@ -11,7 +11,7 @@
 1. 买价卖价需要适当调整(根据D或bid1-ask1), 以减少交易失败次数
 1. 数量由下面3个因素共同决定
     1. 不超过aks/bid最小值
-    1. 不超过每个平台的资产购买(fiat)卖出(btc)能力
+    1. 不超过每个平台的资产购买卖出能力
     1. 不小于单个最小限额(Ma, Mb)的最大值M, 假定Ma<Mb
 1. 和Consumer共享一个队列, 当交易完成后将交易ID及price, amount信息(`TradeInfo`)结对给Consumer
 
@@ -39,7 +39,7 @@
       M = p.M // 交易平台p的下限
       if amount == 0:
         no_trade_and_return
-      wait_for_asset_times = 0  // 因为CNY或BTC不够的等待次数
+      wait_for_asset_times = 0  // 因为CNY或crypto不够的等待次数
       while amount < M: // 需要交易和反向交易
         // asset.amount 每次从交易平台读取,一直会改变
         if asset.amount > amount+M:
@@ -71,11 +71,11 @@
 10002	系统错误
 10009	订单不存在
 10010	余额不足
-10011	买卖的数量小于BTC/LTC最小买卖额度
+10011	买卖的数量小于crypto最小买卖额度
 10014	下单价格不得≤0或≥1000000
 10015	下单价格与最新成交价偏差过大
 10016	币数量不足
 10023	获取最新成交价错误
-10035	可用BTC/LTC不足
+10035	可用crypto不足
 503	用户请求过于频繁(Http)
 ```

@@ -9,13 +9,6 @@ huobi_info = {
     'data_domain': 'http://api.huobi.com/staticmarket'
 }
 
-btcc_info = {
-    'domain': 'btcchina.com',
-    'symbol': 'cny',
-    'data_domain': 'data.btcchina.com/data',
-    'trade_domain': 'api.btcchina.com'
-}
-
 okcoin_com_info = {
     'domain': 'https://www.okcoin.com/api/v1',
     'symbol': 'usd'

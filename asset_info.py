@@ -27,7 +27,7 @@ class AssetInfo(object):
     def afford_sell_amount(self):
         return self.btc_avail
 
-    def total_btc(self):
+    def total_crypto(self):
         return self.btc_avail + self.btc_pending
 
     def total_fiat(self):
@@ -47,5 +47,5 @@ if __name__ == '__main__':
     bb = BitBays()
     info2 = AssetInfo(bb)
     print(info2)
-    print(info1.total_btc() + info2.total_btc())
+    print(info1.total_crypto() + info2.total_crypto())
     print(info1.total_fiat() + info2.total_fiat())

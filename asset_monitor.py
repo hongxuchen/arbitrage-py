@@ -23,8 +23,8 @@ class AssetMonitor(threading.Thread):
         self.plt_list = plt_list
         self.original_asset_list = []
         self.running = False
-        self.btc_exceed_counter = 0
-        self.old_btc_change_amount = 0.0
+        self.crypto_exceed_counter = 0
+        self.old_crypto_change_amount = 0.0
         self.old_fiat_change_amount = 0.0
         self.failed_counter = 0
         self.last_notifier_time = time.time()
@@ -39,29 +39,29 @@ class AssetMonitor(threading.Thread):
     def report_asset(asset_list):
         asset_logger = common.get_asset_logger()
         report_template = '{:10s} btc={:<10.4f}, cny={:<10.4f}'
-        all_btc = 0.0
+        all_crypto = 0.0
         all_fiat = 0.0
         for asset in asset_list:
-            plt_btc, plt_fiat = asset.total_btc(), asset.total_fiat()
-            all_btc += plt_btc
+            plt_crypto, plt_fiat = asset.total_crypto(), asset.total_fiat()
+            all_crypto += plt_crypto
             all_fiat += plt_fiat
-            asset_logger.info(report_template.format(asset.plt_name, plt_btc, plt_fiat))
-        asset_logger.info(report_template.format('ALL', all_btc, all_fiat))
+            asset_logger.info(report_template.format(asset.plt_name, plt_crypto, plt_fiat))
+        asset_logger.info(report_template.format('ALL', all_crypto, all_fiat))
 
     def get_asset_changes(self, asset_list):
-        btc, original_btc = 0.0, 0.0
+        crypto, original_crypto = 0.0, 0.0
         fiat, original_fiat = 0.0, 0.0
         for original in self.original_asset_list:
-            original_btc += original.total_btc()
+            original_crypto += original.total_crypto()
             original_fiat += original.total_fiat()
         for asset in asset_list:
-            btc += asset.total_btc()
+            crypto += asset.total_crypto()
             fiat += asset.total_fiat()
-        return btc - original_btc, fiat - original_fiat
+        return crypto - original_crypto, fiat - original_fiat
 
     @staticmethod
-    def report_asset_changes(btc, fiat):
-        report = 'Asset Change: {:10.4f}btc, {:10.4f}cny'.format(btc, fiat)
+    def report_asset_changes(crypto, fiat):
+        report = 'Asset Change: {:10.4f}btc, {:10.4f}cny'.format(crypto, fiat)
         common.get_asset_logger().warning(report)
 
     @staticmethod
@@ -79,8 +79,8 @@ class AssetMonitor(threading.Thread):
         session.sendmail(sender, [receiver], msg.as_string())
         session.quit()
 
-    def try_notify_asset_changes(self, btc, fiat):
-        report = 'Asset Change: {:10.4f}btc, {:10.4f}cny'.format(btc, fiat)
+    def try_notify_asset_changes(self, crypto, fiat):
+        report = 'Asset Change: {:10.4f}btc, {:10.4f}cny'.format(crypto, fiat)
         now = time.time()
         # config.EMAILING_INTERVAL_SECONDS = 8
         if now - self.last_notifier_time >= config.EMAILING_INTERVAL_SECONDS:
@@ -100,55 +100,55 @@ class AssetMonitor(threading.Thread):
             pack = zip(self.plt_list, bid1_list)
             return sorted(pack, key=itemgetter(1), reverse=True)
 
-    def btc_update_handler(self, btc_change_amount, is_last):
+    def crypto_update_handler(self, crypto_change_amount, is_last):
         # only when exceeds
-        if btc_change_amount > config.BTC_DIFF_MAX:
+        if crypto_change_amount > config.BTC_DIFF_MAX:
             if is_last:  # make sure will sell
-                self.btc_exceed_counter = config.BTC_EXCEED_COUNTER + 2
+                self.crypto_exceed_counter = config.BTC_EXCEED_COUNTER + 2
             # update counter
-            if self.old_btc_change_amount < config.MINOR_DIFF:
-                self.btc_exceed_counter = 1
+            if self.old_crypto_change_amount < config.MINOR_DIFF:
+                self.crypto_exceed_counter = 1
             else:
-                self.btc_exceed_counter += 1
+                self.crypto_exceed_counter += 1
             AssetMonitor._logger.warning(
-                '[Monitor] exceed_counter={}, old_btc_changes={:<10.4f}, current={:<10.4f}'.format(
-                    self.btc_exceed_counter, self.old_btc_change_amount, btc_change_amount))
+                '[Monitor] exceed_counter={}, old_crypto_changes={:<10.4f}, current={:<10.4f}'.format(
+                    self.crypto_exceed_counter, self.old_crypto_change_amount, crypto_change_amount))
             # test whether trade is needed
-            if self.btc_exceed_counter > config.BTC_EXCEED_COUNTER:
+            if self.crypto_exceed_counter > config.BTC_EXCEED_COUNTER:
                 trade_catelog = 'sell'
             else:
                 return True  # no trade
-        elif btc_change_amount < -config.BTC_DIFF_MAX:
+        elif crypto_change_amount < -config.BTC_DIFF_MAX:
             if is_last:  # make sure we will buy
-                self.btc_exceed_counter = -(config.BTC_EXCEED_COUNTER + 2)
+                self.crypto_exceed_counter = -(config.BTC_EXCEED_COUNTER + 2)
             # update counter
             AssetMonitor._logger.warning(
-                '[Monitor] exceed_counter={}, old_btc_changes={:<10.4f}, current={:<10.4f}'.format(
-                    self.btc_exceed_counter, self.old_btc_change_amount, btc_change_amount))
-            if self.old_btc_change_amount > -config.MINOR_DIFF:
-                self.btc_exceed_counter = -1
+                '[Monitor] exceed_counter={}, old_crypto_changes={:<10.4f}, current={:<10.4f}'.format(
+                    self.crypto_exceed_counter, self.old_crypto_change_amount, crypto_change_amount))
+            if self.old_crypto_change_amount > -config.MINOR_DIFF:
+                self.crypto_exceed_counter = -1
             else:
-                self.btc_exceed_counter -= 1
+                self.crypto_exceed_counter -= 1
             # test whether trade is needed
-            if self.btc_exceed_counter < -config.BTC_EXCEED_COUNTER:
+            if self.crypto_exceed_counter < -config.BTC_EXCEED_COUNTER:
                 trade_catelog = 'buy'
             else:
                 return True  # no trade
-        else:  # -config.BTC_DIFF_MAX <= btc_change_amount <= config.BTC_DIFF_MAX
-            self.btc_exceed_counter = 0
+        else:  # -config.BTC_DIFF_MAX <= crypto_change_amount <= config.BTC_DIFF_MAX
+            self.crypto_exceed_counter = 0
             return True  # no trade
-        ### adjust trade; FIXME should guarantee no btc change when stop
-        adjust_status = self.adjust_trade(trade_catelog, btc_change_amount)
+        ### adjust trade; FIXME should guarantee no crypto change when stop
+        adjust_status = self.adjust_trade(trade_catelog, crypto_change_amount)
         ## reset after trade
-        self.old_btc_change_amount = 0.0
-        self.btc_exceed_counter = 0
+        self.old_crypto_change_amount = 0.0
+        self.crypto_exceed_counter = 0
         return adjust_status
 
-    def adjust_trade(self, trade_catelog, btc_change_amount):
+    def adjust_trade(self, trade_catelog, crypto_change_amount):
         adjust_status = True
         AssetMonitor._logger.warning(
-            '[Monitor] exceed_counter={}, amount={}'.format(self.btc_exceed_counter, btc_change_amount))
-        trade_amount = abs(btc_change_amount)
+            '[Monitor] exceed_counter={}, amount={}'.format(self.crypto_exceed_counter, crypto_change_amount))
+        trade_amount = abs(crypto_change_amount)
         plt_price_list = self._get_plt_price_list(trade_catelog)
         ### first try
         trade_plt, trade_price = plt_price_list[0]
@@ -169,21 +169,21 @@ class AssetMonitor(threading.Thread):
         return adjust_status
 
     def asset_update_handler(self, is_last):
-        # handle btc changes
+        # handle crypto changes
         common.MUTEX.acquire(True)
         asset_list = self.get_asset_list()
-        btc, fiat = self.get_asset_changes(asset_list)
-        status = self.btc_update_handler(btc, is_last)
+        crypto, fiat = self.get_asset_changes(asset_list)
+        status = self.crypto_update_handler(crypto, is_last)
         common.MUTEX.release()
         ### report
         # NOTE: this report is delayed
-        if abs(self.old_btc_change_amount - btc) > config.MINOR_DIFF or abs(
+        if abs(self.old_crypto_change_amount - crypto) > config.MINOR_DIFF or abs(
                         self.old_fiat_change_amount - fiat) > config.MINOR_DIFF:
             self.report_asset(asset_list)
-            self.report_asset_changes(btc, fiat)
-        self.try_notify_asset_changes(btc, fiat)
+            self.report_asset_changes(crypto, fiat)
+        self.try_notify_asset_changes(crypto, fiat)
         ### update old
-        self.old_btc_change_amount = btc
+        self.old_crypto_change_amount = crypto
         self.old_fiat_change_amount = fiat
         return status
 
@@ -191,7 +191,7 @@ class AssetMonitor(threading.Thread):
         # initialize asset
         self.original_asset_list = self.get_asset_list()
         self.report_asset(self.original_asset_list)
-        self.old_btc_change_amount = self.get_asset_changes(self.original_asset_list)[0]
+        self.old_crypto_change_amount = self.get_asset_changes(self.original_asset_list)[0]
         # TODO add asset log
         # update asset info
         while self.running:

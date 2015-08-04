@@ -10,10 +10,6 @@ HuoBi:
     api:    09c77932-27624ec6-ac6e34e6-e7a34
     secret: 0d73d1f4-db907569-5493b4af-44060
 
-BTCChina:
-    api:    03f9e8e7-71bb-476a-b58e-fa0b092f1f32
-    secret: d0ecaae2-f860-48d0-ad5d-ac84c499f0e1
-
 ItBit:
     api:    JNVb9RRI/GI6CikzWXstOg
     secret: R3PGdMoUf+PIR9Glu7Bokp0BU926HsBfyKnexiMy0w4
@@ -23,15 +19,11 @@ OKCoinCOM:
     api:    fe7fa03d-11da-4490-a99c-c0c4ea21776e
     secret: 3B82BE714D531E00D99A6DF3149FA78D
 
-BTC38:
-    api:    38584E0A009DBBACFA32DEDEBE68DCE5
-    secret: 9AB2E17DE79E62C3844684F83DC16222
-
 Available: [OKCoinCN, BitBays, ItBit, HuoBi]
 
 Enabled: [OKCoinCN, HuoBi]
 
 Emailing:
-    sender:   btc_hongxuchen@outlook.com
+    sender:   crypto_hongxuchen@outlook.com
     receiver: leftcopy.chx@gmail.com
     server:   localhost
