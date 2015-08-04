@@ -82,7 +82,7 @@ class OKCoinAPI(Platform):
 
     def api_ticker(self):
         payload = {
-            'symbol': 'btc' + self.symbol
+            'symbol': self.coin_type + '_' + self.symbol
         }
         res = self._setup_request('ticker', payload)
         return res
@@ -102,7 +102,7 @@ class OKCoinAPI(Platform):
     def api_depth(self, length=2):
         assert (1 <= length <= 200)
         payload = {
-            'symbol': 'btc_' + self.symbol,
+            'symbol': self.coin_type + '_' + self.symbol,
             'size': length,
             'merge': 0
         }
@@ -121,7 +121,7 @@ class OKCoinAPI(Platform):
 
     def api_trades(self, since=None):
         payload = {
-            'symbol': 'btc_' + self.symbol
+            'symbol': self.coin_type + '_' + self.symbol
         }
         if since is not None:
             payload['since'] = since
@@ -150,7 +150,7 @@ class OKCoinAPI(Platform):
 
     def api_trade(self, trade_dict):
         params = {
-            'symbol': 'btc_' + self.symbol
+            'symbol': self.coin_type + '_' + self.symbol
         }
         params.update(trade_dict)
         if 'price' in params:
@@ -185,7 +185,7 @@ class OKCoinAPI(Platform):
 
     def api_cancel_order(self, order_id):
         params = {
-            'symbol': 'btc_' + self.symbol,
+            'symbol': self.coin_type + '_' + self.symbol,
             'order_id': order_id
         }
         res = self._private_request('cancel_order', params)
@@ -200,7 +200,7 @@ class OKCoinAPI(Platform):
 
     def api_order_info(self, order_id):
         params = {
-            'symbol': 'btc_' + self.symbol,
+            'symbol': self.coin_type + '_' + self.symbol,
             'order_id': order_id
         }
         res = self._private_request('order_info', params)
@@ -223,7 +223,7 @@ class OKCoinAPI(Platform):
         funds = self.api_userinfo()['info']['funds']
         l = [
             [common.to_decimal(funds['freezed'][self.symbol]), common.to_decimal(funds['free'][self.symbol])],
-            [common.to_decimal(funds['freezed']['btc']), common.to_decimal(funds['free']['btc'])]
+            [common.to_decimal(funds['freezed'][self.coin_type]), common.to_decimal(funds['free'][self.coin_type])]
         ]
         return l
 

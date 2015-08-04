@@ -44,8 +44,7 @@ REQUEST_EXCEPTION_WAIT_SECONDS = 10
 
 MONITOR_FAIL_MAX = 2
 
-BTC_EXCEED_COUNTER = 3
-BTC_DIFF_MAX = 0.001
+COIN_EXCEED_TIMES = 3
 
 HuoBi_Precision = 2
 SLEEP_SECONDS = 0.34
@@ -58,8 +57,15 @@ MONITOR_INTERVAL_SECONDS = 3
 
 EMAILING_INTERVAL_SECONDS = 3600
 
+####################################################################
+
+exceed_max = {
+    'btc': 0.001,
+    'ltc': 0.08
+}
+
 # when Pa.ask1 + buy_diff <= Pb.bid1, buy at Pa, sell at Pb
-diff_dict = {
+btc_diff_dict = {
     'BitBays': {
         'OKCoinCN': 0.45, 'HuoBi': 0.45
     },
@@ -69,4 +75,18 @@ diff_dict = {
     'HuoBi': {
         'OKCoinCN': 0.15, 'BitBays': 0.45
     }
+}
+
+ltc_diff_dict = {
+    'OKCoinCN': {
+        'HuoBi': 0.006
+    },
+    'HuoBi': {
+        'OKCoinCN': 0.002
+    }
+}
+
+diff_dict = {
+    'btc': btc_diff_dict,
+    'ltc': ltc_diff_dict
 }

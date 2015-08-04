@@ -19,11 +19,13 @@ OKCoinCOM:
     api:    fe7fa03d-11da-4490-a99c-c0c4ea21776e
     secret: 3B82BE714D531E00D99A6DF3149FA78D
 
-Available: [OKCoinCN, BitBays, ItBit, HuoBi]
+Available: [OKCoinCN, BitBays, HuoBi]
 
 Enabled: [OKCoinCN, HuoBi]
 
+CoinType: btc
+
 Emailing:
-    sender:   crypto_hongxuchen@outlook.com
+    sender:   cc_hongxuchen@outlook.com
     receiver: leftcopy.chx@gmail.com
     server:   localhost

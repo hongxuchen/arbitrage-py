@@ -16,12 +16,13 @@ class TradeInfo(object):
         :param fiat: fiat, don't change
         """
         self.plt = plt
+        self.coin_type = self.plt.coin_type
+        self.fiat = fiat
         self.plt_name = self.plt.__class__.__name__
         assert (catelog in ['sell', 'buy'])
         self.catelog = catelog
         self.amount = amount
         self.price = price
-        self.fiat = fiat
         # initialized with an invalid number
         self.order_id = config.INVALID_ORDER_ID
 
@@ -38,8 +39,8 @@ class TradeInfo(object):
         TradeInfo._logger.debug('BEFORE trade')
         order_id = self.plt.trade(catelog, price, amount)
         TradeInfo._logger.warning(
-            'Trade in {:10s}: {:4s} {:10.4f} btc at price {:10.4f} cny, order_id={:d}'.format(
-                self.plt_name, catelog, amount, price, order_id))
+            'Trade in {:10s}: {:4s} {:10.4f} {:3s} at price {:10.4f} cny, order_id={:d}'.format(
+                self.plt_name, catelog, amount, self.coin_type, price, order_id))
         return order_id
 
     def _asset_afford_trade(self, trade_amount, trade_price):
@@ -83,7 +84,7 @@ class TradeInfo(object):
         this trade ensures that there will be no pending afterwards:
           1. meet the lower_bound limit for each platform
              if amount >= M, regular trade; if amount < M, a bidirectional trade is provided
-          2. there will be enough asset for sell(BTC) or buy(fiat/CNY)
+          2. there will be enough asset for sell(coin) or buy(fiat)
              calculate for current asset
           3. the price is higher for buy or lower for sell
              adjust_price with a certain percentage
@@ -143,8 +144,8 @@ class TradeInfo(object):
         return self.plt.order_info(self.order_id)
 
     def __repr__(self):
-        trade_info = '{:>10}: {} {:>10.4f} btc, Price {:>10.2f} {}' \
-            .format(self.plt_name, self.catelog, self.amount, self.price, self.fiat)
+        trade_info = '{:>10}: {:4s} {:>10.4f} {:3s}, Price {:>10.2f} {:3s}' \
+            .format(self.plt_name, self.catelog, self.amount, self.coin_type, self.price, self.fiat)
         if self.order_id != -1:
             order_info = '{:<d}'.format(self.order_id)
             trade_info += ',\torder_id=' + order_info

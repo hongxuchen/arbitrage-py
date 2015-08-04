@@ -15,6 +15,8 @@ from trade_info import TradeInfo
 
 class ArbitrageProducer(threading.Thread):
     _logger = common.get_logger()
+    coin_type = common.get_key_from_data('CoinType')
+    diff_dict = config.diff_dict[coin_type]
 
     ### stateless
     def __init__(self, plt_list, arbitrage_list, symbol, parent=None):
@@ -98,7 +100,7 @@ class ArbitrageProducer(threading.Thread):
         ask_a, bid_b = ask_list[i], bid_list[1 - i]
         plt_name_a, plt_name_b = get_plt_name(self.plt_list[i]), get_plt_name(self.plt_list[1 - i])
 
-        arbitrage_diff = config.diff_dict[plt_name_a][plt_name_b]
+        arbitrage_diff = ArbitrageProducer.diff_dict[plt_name_a][plt_name_b]
         if ask_a[0] + arbitrage_diff < bid_b[0]:
             ArbitrageProducer._logger.debug('[Producer] Arbitrage chance: {} {}'.format(ask_a, bid_b))
             self.arbitrage_impl(i, ask_list[i], bid_list[1 - i])

@@ -34,7 +34,6 @@ class HuoBi(Platform):
     def __init__(self):
         super(HuoBi, self).__init__(config.huobi_info)
         self.key = common.get_key_from_data('HuoBi')
-        self.coin_type = 'btc'
         self.api_private = ['cancel_order', 'get_account_info', 'buy', 'sell', 'order_info']
 
     def _real_uri(self, api_type):
@@ -154,7 +153,8 @@ class HuoBi(Platform):
         funds = self.setup_request('get_account_info')
         l = [
             [common.to_decimal(funds['frozen_cny_display']), common.to_decimal(funds['available_cny_display'])],
-            [common.to_decimal(funds['frozen_btc_display']), common.to_decimal(funds['available_btc_display'])]
+            [common.to_decimal(funds['frozen_' + self.coin_type + '_display']),
+             common.to_decimal(funds['available_' + self.coin_type + '_display'])]
         ]
         return l
 

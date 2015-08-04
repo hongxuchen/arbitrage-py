@@ -1,8 +1,10 @@
 #!/usr/bin/env python
+import common
 
 
 class Platform(object):
     def __init__(self, info):
+        self.coin_type = common.get_key_from_data('CoinType')
         self.domain = info['domain']
         self.key = None
 
@@ -58,11 +60,10 @@ class Platform(object):
         '''
         pass
 
-    # sell amount is the BTC unit
     # unused
     def sell_market(self, mo_amount):
         '''
-        :param mo_amount: btc unit
+        :param mo_amount: coin unit
         :return:
         '''
         pass
