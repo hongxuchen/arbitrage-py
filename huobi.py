@@ -51,7 +51,7 @@ class HuoBi(Platform):
         return sig
 
     # noinspection PyMethodMayBeStatic
-    def setup_request(self, api_uri, params=None, data=None):
+    def _setup_request(self, api_uri, params=None, data=None):
         def _request_impl():
             r = None
             if api_uri not in self.api_private:
@@ -92,11 +92,11 @@ class HuoBi(Platform):
 
     def api_ticker(self):
         api_uri = HuoBi.data_domain + '/' + 'ticker_' + self.coin_type + '_json.js'
-        return self.setup_request(api_uri)
+        return self._setup_request(api_uri)
 
     def api_depth(self, length):
         api_uri = HuoBi.data_domain + '/' + 'depth_' + self.coin_type + '_' + str(length) + '.js'
-        return self.setup_request(api_uri)
+        return self._setup_request(api_uri)
 
     def ask1(self):
         ticker = self.api_ticker()
@@ -119,7 +119,7 @@ class HuoBi(Platform):
             'price': str(price),
             'amount': str(amount)
         }
-        res = self.setup_request(trade_type, params)
+        res = self._setup_request(trade_type, params)
         if 'result' in res and res['result'] == u'success':
             return res['id']
         else:
@@ -130,7 +130,7 @@ class HuoBi(Platform):
             'coin_type': HuoBi.coin_type_map[self.coin_type],
             'id': order_id
         }
-        res = self.setup_request('cancel_order', params)
+        res = self._setup_request('cancel_order', params)
         if 'result' in res and res['result'] == u'success':
             return True
         else:
@@ -141,7 +141,7 @@ class HuoBi(Platform):
             'coin_type': HuoBi.coin_type_map[self.coin_type],
             'id': order_id
         }
-        res = self.setup_request('order_info', params)
+        res = self._setup_request('order_info', params)
         order_amount = common.to_decimal(res['order_amount'])
         processed = common.to_decimal(res['processed_amount'])
         remaining_amount = order_amount - processed
@@ -150,7 +150,7 @@ class HuoBi(Platform):
         return order_info
 
     def assets(self):
-        funds = self.setup_request('get_account_info')
+        funds = self._setup_request('get_account_info')
         l = [
             [common.to_decimal(funds['frozen_cny_display']), common.to_decimal(funds['available_cny_display'])],
             [common.to_decimal(funds['frozen_' + self.coin_type + '_display']),
@@ -162,13 +162,15 @@ class HuoBi(Platform):
 if __name__ == '__main__':
     common.init_logger()
     huobi = HuoBi()
-    # sell = huobi.trade('sell', 13456, 0.1)
+    huobi.coin_type = 'ltc'
+    print(huobi.ask_bid_list(1))
+    # sell = huobi.trade('buy', 1, 0.1)
     # print(sell)
-    sell = 255053206
-    order_info = huobi.order_info(sell)
-    print(order_info)
-    c1 = huobi.cancel(sell)
-    print(c1)
+    # sell = 255053206
+    # order_info = huobi.order_info(sell)
+    # print(order_info)
+    # c1 = huobi.cancel(sell)
+    # print(c1)
     # buy = huobi.trade('buy', 100, 0.1)
     # print(buy)
     # order_info = huobi.order_info(buy)
@@ -182,5 +184,5 @@ if __name__ == '__main__':
     # res = huobi.cancel(123456)
     # print(res)
     # print(huobi.assets())
-    # print(huobi.ask1(), huobi.bid1())
+    print(huobi.ask1(), huobi.bid1())
     # print(huobi.ask_bid_list(1))
