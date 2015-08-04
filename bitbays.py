@@ -16,7 +16,6 @@ from order_info import OrderInfo
 
 class BitBays(Platform):
     _logger = common.get_logger()
-    # fmt = '%Y/%m/%d %H:%M:%S'
     catalog_dict = {
         0: 'buy',
         1: 'sell'
@@ -260,21 +259,6 @@ class BitBays(Platform):
             return True
 
     # uses private
-    def cancel_all(self, catalog=2):
-        if catalog & 1 == 1:
-            BitBays._logger.info('cancelling buy orders')
-            buy = self.api_orders(0)['result']
-            if buy is not None:
-                for t in buy:
-                    self.api_cancel(t['buy'])['result']
-        if (catalog >> 1) & 1 == 1:
-            BitBays._logger.info('cancelling sell orders')
-            sell = self.api_orders(1)['result']
-            if sell is not None:
-                for t in sell:
-                    self.api_cancel(t['id'])['result']
-
-    # uses private
     def order_info(self, order_id):
         info = self.api_order_info(order_id)['result']
         amount = 0.0
@@ -301,9 +285,9 @@ class BitBays(Platform):
 if __name__ == '__main__':
     bitbays = BitBays()
     # while True:
-    # print(bitbays.ask_bid_list(2))
-    # print(bitbays.assets())
-    # print(bitbays.api_transactions(0))
+    print(bitbays.ask_bid_list(2))
+    print(bitbays.assets())
+    print(bitbays.api_transactions(0))
     # order_id = bitbays.trade('sell', 10000, 1000)
     print(bitbays.ask1())
     # print(order_id)

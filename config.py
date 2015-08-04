@@ -73,7 +73,7 @@ btc_diff_dict = {
         'BitBays': 0.45, 'HuoBi': 0.75
     },
     'HuoBi': {
-        'OKCoinCN': 0.15, 'BitBays': 0.45
+        'OKCoinCN': 0.00, 'BitBays': 0.45
     }
 }
 

@@ -5,8 +5,6 @@ from okcoin import OKCoinCN
 from bitbays import BitBays
 
 
-# it does not recognize fiat, just for amount
-
 class AssetInfo(object):
     def __init__(self, plt):
         self.plt = plt

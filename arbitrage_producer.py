@@ -110,11 +110,11 @@ class ArbitrageProducer(threading.Thread):
 
     def process_arbitrage(self):
         with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
-            self._info_list = list(executor.map(lambda plt: plt.ask_bid_list(1), self.plt_list))
-        length = len(self._info_list[0])
+            info_list = list(executor.map(lambda plt: plt.ask_bid_list(1), self.plt_list))
+        length = len(info_list[0])
 
-        ask_list = [info[length / 2 - 1] for info in self._info_list]
-        bid_list = [info[length / 2] for info in self._info_list]
+        ask_list = [info[length / 2 - 1] for info in info_list]
+        bid_list = [info[length / 2] for info in info_list]
 
         for i in range(2):
             if self.try_arbitrage(ask_list, bid_list, i):

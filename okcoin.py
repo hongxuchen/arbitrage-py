@@ -241,11 +241,15 @@ class OKCoinCOM(OKCoinAPI):
 
 
 if __name__ == '__main__':
+    common.init_logger()
     okcoin_cn = OKCoinCN()
+    okcoin_cn.coin_type = 'ltc'
     # print(okcoin_cn.ask_bid_list(2))
-    print(okcoin_cn.assets())
-    # order_id = okcoin_cn.trade('buy', 10, 10000)
+    # print(okcoin_cn.assets())
+    # order_id = okcoin_cn.trade('buy', 1, 1)
+    # order_id = okcoin_cn.trade('sell', 100, 1)
     # print(order_id)
-    # print(okcoin_cn.cancel(12345678))
-    # print(okcoin_cn.cancel(123456))
-    # res = okcoin_cn.order_info(order_id)
+    # order_info = okcoin_cn.order_info(order_id)
+    # print(order_info)
+    # okcoin_cn.cancel(order_id)
+    okcoin_cn.cancel(123456)
