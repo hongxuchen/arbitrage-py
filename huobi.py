@@ -23,7 +23,10 @@ class HuoBi(Platform):
         3: 'buy',
         4: 'sell'
     }
-    lower_bound = 0.001
+    lower_bound_dict = {
+        'btc': 0.001,
+        'ltc': 0.01
+    }
     _logger = common.get_logger()
     data_domain = config.huobi_info['data_domain']
     common_headers = {
@@ -33,6 +36,7 @@ class HuoBi(Platform):
 
     def __init__(self):
         super(HuoBi, self).__init__(config.huobi_info)
+        self.lower_bound = HuoBi.lower_bound_dict[self.coin_type]
         self.key = common.get_key_from_data('HuoBi')
         self.api_private = ['cancel_order', 'get_account_info', 'buy', 'sell', 'order_info']
 
@@ -162,8 +166,9 @@ class HuoBi(Platform):
 if __name__ == '__main__':
     common.init_logger()
     huobi = HuoBi()
-    huobi.coin_type = 'ltc'
-    print(huobi.ask_bid_list(1))
+    print(huobi.lower_bound)
+    # huobi.coin_type = 'ltc'
+    # print(huobi.ask_bid_list(1))
     # sell = huobi.trade('buy', 1, 0.1)
     # print(sell)
     # sell = 255053206
@@ -184,5 +189,5 @@ if __name__ == '__main__':
     # res = huobi.cancel(123456)
     # print(res)
     # print(huobi.assets())
-    print(huobi.ask1(), huobi.bid1())
+    # print(huobi.ask1(), huobi.bid1())
     # print(huobi.ask_bid_list(1))

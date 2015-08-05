@@ -23,12 +23,16 @@ class BitBays(Platform):
     common_headers = {
         'user-agent': common.USER_AGENT
     }
-    lower_bound = 0.001
+    # FIXME
+    lower_bound_dict = {
+        'btc': 0.001
+    }
     trade_cancel_list = ['cancel', 'trade']
 
     def __init__(self):
         super(BitBays, self).__init__(config.bitbays_info)
         self.symbol = config.bitbays_info['symbol']
+        self.lower_bound = BitBays.lower_bound_dict[self.coin_type]
         self.key = common.get_key_from_data('BitBays')
         self.api_public = ['ticker', 'trades', 'depth']
         self.api_private = ['info', 'orders', 'transactions', 'trade', 'cancel', 'order']
@@ -284,12 +288,13 @@ class BitBays(Platform):
 
 if __name__ == '__main__':
     bitbays = BitBays()
+    print(bitbays.lower_bound)
     # while True:
-    print(bitbays.ask_bid_list(2))
-    print(bitbays.assets())
-    print(bitbays.api_transactions(0))
+    # print(bitbays.ask_bid_list(2))
+    # print(bitbays.assets())
+    # print(bitbays.api_transactions(0))
     # order_id = bitbays.trade('sell', 10000, 1000)
-    print(bitbays.ask1())
+    # print(bitbays.ask1())
     # print(order_id)
     # print(bitbays.cancel(123456))
     # limit order id

@@ -14,7 +14,10 @@ from order_info import OrderInfo
 
 
 class OKCoinAPI(Platform):
-    lower_bound = 0.01
+    lower_bound_dict = {
+        'btc': 0.01,
+        'ltc': 0.1
+    }
     _logger = common.get_logger()
     trade_cancel_api_list = ['cancel_order', 'trade']
     common_headers = {
@@ -24,6 +27,7 @@ class OKCoinAPI(Platform):
 
     def __init__(self, info):
         super(OKCoinAPI, self).__init__(info)
+        self.lower_bound =  OKCoinAPI.lower_bound_dict[self.coin_type]
         self.symbol = info['symbol']
         self.api_public = ['ticker', 'depth', 'trades']
         self.api_private = ['userinfo', 'trade', 'batch_trade', 'cancel_order', 'orders', 'order_info']
@@ -243,7 +247,8 @@ class OKCoinCOM(OKCoinAPI):
 if __name__ == '__main__':
     common.init_logger()
     okcoin_cn = OKCoinCN()
-    okcoin_cn.coin_type = 'ltc'
+    # okcoin_cn.coin_type = 'ltc'
+    # print(okcoin_cn.lower_bound)
     # print(okcoin_cn.ask_bid_list(2))
     # print(okcoin_cn.assets())
     # order_id = okcoin_cn.trade('buy', 1, 1)
@@ -252,4 +257,4 @@ if __name__ == '__main__':
     # order_info = okcoin_cn.order_info(order_id)
     # print(order_info)
     # okcoin_cn.cancel(order_id)
-    okcoin_cn.cancel(123456)
+    # okcoin_cn.cancel(123456)

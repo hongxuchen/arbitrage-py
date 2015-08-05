@@ -31,7 +31,8 @@ DISPLAY_PRECISION = 6
 MINOR_DIFF = 10.0 ** (-DISPLAY_PRECISION)
 INVALID_ORDER_ID = -1
 
-ASJUST_PERCENTAGE = 0.1
+# FIXME
+ASJUST_PERCENTAGE = 0.01
 ASSET_WAIT_MAX = 1
 ASSET_FOR_TRAID_DIFF = 0.0005
 
@@ -50,8 +51,7 @@ HuoBi_Precision = 2
 SLEEP_SECONDS = 0.34
 
 # CONFIG
-## upper_bound must > lower_bound for all platforms
-UPPER_BOUND = 0.6
+# upper_bound must > lower_bound for all platforms
 PENDING_SECONDS = 5.0
 MONITOR_INTERVAL_SECONDS = 3
 
@@ -59,9 +59,16 @@ EMAILING_INTERVAL_SECONDS = 3600
 
 ####################################################################
 
+UPPER_BOUND = 0.6
+
 exceed_max = {
     'btc': 0.001,
-    'ltc': 0.08
+    'ltc': 0.01
+}
+
+upper_bound = {
+    'btc': 0.6,
+    'ltc': 30
 }
 
 # when Pa.ask1 + buy_diff <= Pb.bid1, buy at Pa, sell at Pb

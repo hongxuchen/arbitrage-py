@@ -15,6 +15,7 @@ reverse the fiat amount for futher trade. The net strategy is that we can change
 * Deal with common.py init issue
 * deployed in lab, stopping fails
 * force implementation
+* "No JSON object could be decoded"
 
 ## hosts
 - 121.199.251.136 www.okcoin.cn
