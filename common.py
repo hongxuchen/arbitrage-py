@@ -49,7 +49,6 @@ def adjust_price(trade_catelog, price):
         new_price = price * (1 - config.ASJUST_PERCENTAGE)
     return round_price(new_price)
 
-
 def is_retry_exception(exception):
     for except_type in retry_except_tuple:
         if isinstance(exception, except_type):
@@ -168,7 +167,6 @@ def get_key_from_data(field, dict_data=None):
 
 
 def send_msg(report):
-    # print('sending email')
     emailing_info = get_key_from_data('Emailing')
     sender = emailing_info['sender']
     receiver = emailing_info['receiver']
@@ -177,9 +175,12 @@ def send_msg(report):
     msg['Subject'] = 'Arbitrage Report'
     msg['From'] = sender
     msg['To'] = receiver
-    session = smtplib.SMTP(server)
-    session.sendmail(sender, [receiver], msg.as_string())
-    session.quit()
+    try:
+        session = smtplib.SMTP(server)
+        session.sendmail(sender, [receiver], msg.as_string())
+        session.quit()
+    except:
+        get_logger().warning('no mail server')
 
 
 MUTEX = threading.Lock()
