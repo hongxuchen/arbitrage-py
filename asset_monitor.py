@@ -66,28 +66,13 @@ class AssetMonitor(threading.Thread):
         report = 'Asset Change: {:10.4f}{:3s}, {:10.4f}cny'.format(coin, AssetMonitor.coin_type, fiat)
         common.get_asset_logger().warning(report)
 
-    @staticmethod
-    def send_msg(report):
-        # print('sending email')
-        emailing_info = common.get_key_from_data('Emailing')
-        sender = emailing_info['sender']
-        receiver = emailing_info['receiver']
-        server = emailing_info['server']
-        msg = MIMEText(report)
-        msg['Subject'] = 'Asset Change Report'
-        msg['From'] = sender
-        msg['To'] = receiver
-        session = smtplib.SMTP(server)
-        session.sendmail(sender, [receiver], msg.as_string())
-        session.quit()
-
     def try_notify_asset_changes(self, coin, fiat):
         report = 'Asset Change: {:10.4f}{:3s}, {:10.4f}cny'.format(coin, AssetMonitor.coin_type, fiat)
         now = time.time()
         # config.EMAILING_INTERVAL_SECONDS = 8
         if now - self.last_notifier_time >= config.EMAILING_INTERVAL_SECONDS:
             AssetMonitor._logger.warning('notifying asset changes via email')
-            self.send_msg(report)
+            common.send_msg(report)
             self.last_notifier_time = now
 
     def _get_plt_price_list(self, catelog):
@@ -139,7 +124,6 @@ class AssetMonitor(threading.Thread):
         else:  # -exceed_max <= coin_change_amount <= exceed_max
             self.coin_exceed_counter = 0
             return True  # no trade
-        ### adjust trade; FIXME should guarantee no coin change when stop
         adjust_status = self.adjust_trade(trade_catelog, coin_change_amount)
         ## reset after trade
         self.old_coin_change_amount = 0.0

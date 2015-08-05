@@ -2,6 +2,7 @@
 import base64
 import hashlib
 import hmac
+import os
 import urllib
 import json
 import time
@@ -28,19 +29,20 @@ class ItBitAPI(Platform):
         js_str = json.dumps(data, separators=(',', ':'))
         return js_str
 
+    # noinspection PyMethodMayBeStatic
     def _setup_request(self, method, base_url, params=None, data=None, headers=None):
         r = requests.request(method, base_url, params=params, data=data, headers=headers)
         code = r.status_code
         print(r.url)
         if not str(code).startswith('2'):
             print('ERROR: [{}], {}'.format(code, r.content))
-            sys.exit()
+            os._exit(1)
         try:
             jsdata = r.json()
+            return jsdata
         except Exception as e:
             print(e)
-            sys.exit(1)
-        return jsdata
+            os._exit(1)
 
     ### public APIs
 

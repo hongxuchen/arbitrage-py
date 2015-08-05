@@ -2,6 +2,7 @@
 from __future__ import print_function
 import hashlib
 import hmac
+import os
 import urllib
 import sys
 import time
@@ -23,7 +24,6 @@ class BitBays(Platform):
     common_headers = {
         'user-agent': common.USER_AGENT
     }
-    # FIXME
     lower_bound_dict = {
         'btc': 0.001
     }
@@ -76,7 +76,7 @@ class BitBays(Platform):
                                   timeout=config.TIMEOUT, verify=True)
             else:
                 BitBays._logger.critical('api_type={} not supported'.format(api_type))
-                sys.exit(1)
+                os._exit(1)
             # TODO check error
             res_data = r.json()
             # BitBays._logger.warning('bitbays response={}'.format(res_data))
@@ -94,7 +94,9 @@ class BitBays(Platform):
                         'ERROR: api_type={}, error_message={}'.format(api_type, msg))
                     if api_type not in BitBays.trade_cancel_list:
                         # mustn't fail!
-                        sys.exit(1)
+                        common.send_msg('error during request')
+                        # noinspection PyProtectedMember
+                        os._exit(1)
             return res_data
 
         try:

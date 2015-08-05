@@ -2,9 +2,11 @@
 
 from __future__ import print_function
 import decimal
+from email.mime.text import MIMEText
 import logging
 import logging.config
 import os
+import smtplib
 import threading
 import sys
 import time
@@ -57,7 +59,9 @@ def is_retry_exception(exception):
 
 def handle_exit(exception):
     get_logger().critical('Error during request:"{}", will EXIT'.format(exception))
-    sys.exit(1)
+    send_msg('error during request')
+    # noinspection PyProtectedMember
+    os._exit(1)
 
 
 def handle_retry(exception, handler):
@@ -89,7 +93,7 @@ def handle_retry(exception, handler):
     logger.critical(
         'SLEEP {}s for Exception: "{}"'.format(config.REQUEST_EXCEPTION_WAIT_SECONDS, current_exception))
     time.sleep(config.REQUEST_EXCEPTION_WAIT_SECONDS)
-    ### FIXME this makes "stop" button not work when network error
+    ### FIXME this cannot exit until connection recovers
     res = handle_retry(exception, handler)  # recursive
     return res
 
@@ -160,7 +164,22 @@ def get_key_from_data(field, dict_data=None):
         return dict_data[field]
     except:
         print('no ydata', file=sys.stderr)
-        sys.exit(1)
+        os._exit(1)
+
+
+def send_msg(report):
+    # print('sending email')
+    emailing_info = get_key_from_data('Emailing')
+    sender = emailing_info['sender']
+    receiver = emailing_info['receiver']
+    server = emailing_info['server']
+    msg = MIMEText(report)
+    msg['Subject'] = 'Arbitrage Report'
+    msg['From'] = sender
+    msg['To'] = receiver
+    session = smtplib.SMTP(server)
+    session.sendmail(sender, [receiver], msg.as_string())
+    session.quit()
 
 
 MUTEX = threading.Lock()

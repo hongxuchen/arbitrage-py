@@ -29,7 +29,6 @@ class ArbitrageInfo(object):
         TODO: ensure this trade MUST succeed
         :return:
         """
-        # FIXME use async
         ArbitrageInfo._logger.warning('Arbitrage Start')
         with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
             order_ids = executor.map(lambda t: t.regular_trade(t.catelog, t.price, t.amount), self.trade_pair)

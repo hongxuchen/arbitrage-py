@@ -3,6 +3,7 @@
 
 from __future__ import print_function
 import hashlib
+import os
 import sys
 
 import requests
@@ -63,7 +64,7 @@ class OKCoinAPI(Platform):
                                      headers=OKCoinAPI.common_headers, timeout=config.TIMEOUT, verify=True)
             else:
                 OKCoinAPI._logger.critical('api_type [{}] not supported'.format(api_type))
-                sys.exit(1)
+                os._exit(1)
             # OKCoinAPI._logger.debug(r.url)
             # TODO should consider exception
             res = r.json()
@@ -145,7 +146,9 @@ class OKCoinAPI(Platform):
             OKCoinAPI._logger.critical(
                 'ERROR: api_type={}, response_data={}'.format(api_type, response_data))
             if api_type not in OKCoinAPI.trade_cancel_api_list:
-                sys.exit(1)
+                common.send_msg('error during request')
+                # noinspection PyProtectedMember
+                os._exit(1)
         return response_data
 
     def api_userinfo(self):
@@ -216,12 +219,13 @@ class OKCoinAPI(Platform):
             info = response['orders'][0]
             catalog = info['type']
             remaining_amount = info['amount'] - info['deal_amount']
+            order_info = OrderInfo(catalog, remaining_amount)
+            return order_info
         except Exception as e:
             OKCoinAPI._logger.critical('ERROR: exception="{}", response={}'.format(e, response))
-            # FIXME
-            sys.exit(1)
-        order_info = OrderInfo(catalog, remaining_amount)
-        return order_info
+            common.send_msg('okcoin order error')
+            # noinspection PyProtectedMember
+            os._exit(1)
 
     def assets(self):
         funds = self.api_userinfo()['info']['funds']

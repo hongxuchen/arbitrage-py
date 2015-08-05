@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import hashlib
+import os
 import sys
 import urllib
 import time
@@ -42,7 +43,7 @@ class HuoBi(Platform):
 
     def _real_uri(self, api_type):
         print('not used, exit')
-        sys.exit(1)
+        os._exit(1)
 
     @staticmethod
     def _sign(params):
