@@ -23,7 +23,7 @@ Available: [OKCoinCN, BitBays, HuoBi]
 
 Enabled: [OKCoinCN, HuoBi]
 
-CoinType: ltc
+CoinType: btc
 
 Emailing:
     sender:   cc_hongxuchen@outlook.com
