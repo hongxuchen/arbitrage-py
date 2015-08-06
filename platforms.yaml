@@ -21,7 +21,7 @@ OKCoinCOM:
 
 Available: [OKCoinCN, BitBays, HuoBi]
 
-Enabled: [OKCoinCN, HuoBi]
+Enabled: [BitBays, HuoBi]
 
 CoinType: btc
 
