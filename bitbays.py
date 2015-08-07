@@ -37,7 +37,6 @@ class BitBays(Platform):
         self.api_public = ['ticker', 'trades', 'depth']
         self.api_private = ['info', 'orders', 'transactions', 'trade', 'cancel', 'order']
         self._counter = int(time.time() * 1000)
-        self._orders_info = {}
 
     def _nonce(self):
         self._counter += 1

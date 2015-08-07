@@ -19,6 +19,12 @@ bitbays_info = {
     'symbol': 'cny'
 }
 
+chbtc_info = {
+    'domain': 'https://trade.chbtc.com/api/',
+    'data_domain': 'http://api.chbtc.com/data/',
+    'symbol': 'cny'
+}
+
 itbit_info = {
     'domain': 'https://beta-api.itbit.com/v1/',
     'symbol': 'XBTUSD'
@@ -32,7 +38,7 @@ MINOR_DIFF = 10.0 ** (-DISPLAY_PRECISION)
 INVALID_ORDER_ID = -1
 
 # FIXME
-ASJUST_PERCENTAGE = 0.095
+ADJUST_PERCENTAGE = 0.0095
 ASSET_WAIT_MAX = 1
 ASSET_FOR_TRAID_DIFF = 0.0005
 
@@ -48,7 +54,8 @@ MONITOR_FAIL_MAX = 2
 COIN_EXCEED_TIMES = 3
 
 HuoBi_Precision = 2
-SLEEP_SECONDS = 0.34
+# SLEEP_SECONDS = 0.34
+SLEEP_SECONDS = 0.01
 
 # CONFIG
 # upper_bound must > lower_bound for all platforms

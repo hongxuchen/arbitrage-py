@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from chbtc import CHBTC
 from huobi import HuoBi
 from itbit import ItBitAPI
 from okcoin import OKCoinCN
@@ -13,7 +14,8 @@ select_plt_dict = {
     'OKCoinCN': OKCoinCN,
     'BitBays': BitBays,
     'ItBit': ItBitAPI,
-    'HuoBi': HuoBi
+    'HuoBi': HuoBi,
+    'CHBTC': CHBTC
 }
 
 

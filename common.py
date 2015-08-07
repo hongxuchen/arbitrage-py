@@ -44,10 +44,11 @@ def round_price(price, precision=config.HuoBi_Precision):
 def adjust_price(trade_catelog, price):
     assert (trade_catelog in ['buy', 'sell'])
     if trade_catelog == 'buy':
-        new_price = price * (1 + config.ASJUST_PERCENTAGE)
+        new_price = price * (1 + config.ADJUST_PERCENTAGE)
     else:  # sell
-        new_price = price * (1 - config.ASJUST_PERCENTAGE)
+        new_price = price * (1 - config.ADJUST_PERCENTAGE)
     return round_price(new_price)
+
 
 def is_retry_exception(exception):
     for except_type in retry_except_tuple:
@@ -139,18 +140,17 @@ class HuoBiIgnoreError(Exception):
         super(HuoBiIgnoreError, self).__init__(msg)
 
 
+class CHBTCExitError(Exception):
+    def __init__(self, msg):
+        super(CHBTCExitError, self).__init__(msg)
+
+
+class CHBTCRetryError(Exception):
+    def __init__(self, msg):
+        super(CHBTCRetryError, self).__init__(msg)
+
+
 plt_yaml = os.path.join(os.path.dirname(__file__), 'platforms.yaml')
-
-
-def get_key(field, fname=plt_yaml):
-    with open(fname) as yfile:
-        ydata = yaml.load(yfile)
-    try:
-        return ydata[field]
-    except:
-        print('no ydata', file=sys.stderr)
-        return None
-
 
 with open(plt_yaml) as yfile:
     ydata = yaml.load(yfile)
@@ -186,8 +186,8 @@ def send_msg(report):
 MUTEX = threading.Lock()
 retry_except_tuple = (
     req_except.ConnectionError, req_except.Timeout, req_except.HTTPError, InvalidNonceError, NULLResponseError,
-    HuoBiError)
-exit_except_tuple = (req_except.URLRequired, req_except.TooManyRedirects, HuoBiExitError)
+    HuoBiError, CHBTCRetryError)
+exit_except_tuple = (req_except.URLRequired, req_except.TooManyRedirects, HuoBiExitError, CHBTCExitError)
 USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.130 Safari/537.36'
 
 if __name__ == '__main__':

@@ -28,7 +28,7 @@ class OKCoinAPI(Platform):
 
     def __init__(self, info):
         super(OKCoinAPI, self).__init__(info)
-        self.lower_bound =  OKCoinAPI.lower_bound_dict[self.coin_type]
+        self.lower_bound = OKCoinAPI.lower_bound_dict[self.coin_type]
         self.symbol = info['symbol']
         self.api_public = ['ticker', 'depth', 'trades']
         self.api_private = ['userinfo', 'trade', 'batch_trade', 'cancel_order', 'orders', 'order_info']
@@ -186,7 +186,7 @@ class OKCoinAPI(Platform):
         return self.trade('buy_market', mo_amount, None)
 
     def sell_market(self, mo_amount):
-        assert (mo_amount >= OKCoinAPI.lower_bound)
+        assert (mo_amount >= self.lower_bound)
         OKCoinAPI._logger.debug('OKCoinAPI.sell_market with amount {}'.format(mo_amount))
         return self.trade('sell_market', None, mo_amount)
 

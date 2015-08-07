@@ -19,7 +19,11 @@ OKCoinCOM:
     api:    fe7fa03d-11da-4490-a99c-c0c4ea21776e
     secret: 3B82BE714D531E00D99A6DF3149FA78D
 
-Available: [OKCoinCN, BitBays, HuoBi]
+CHBTC:
+    api:    47b01fbe-0558-455c-bc49-b73be097a656
+    secret: 026690b4-7696-4440-8e78-bc797a061b35
+
+Available: [OKCoinCN, BitBays, HuoBi, CHBTC]
 
 Enabled: [BitBays, HuoBi]
 
