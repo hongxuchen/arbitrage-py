@@ -93,10 +93,13 @@ btc_diff_dict = {
 
 ltc_diff_dict = {
     'OKCoinCN': {
-        'HuoBi': 0.006
+        'HuoBi': 0.06, 'CHBTC': 0.05
     },
     'HuoBi': {
-        'OKCoinCN': 0.002
+        'CHBTC': 0.05, 'OKCoinCN': 0.02
+    },
+    'CHBTC': {
+        'HuoBi': 0.05, 'OKCoinCN': 0.02
     }
 }
 
