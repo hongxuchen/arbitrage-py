@@ -25,6 +25,10 @@ reverse the fiat amount for futher trade. The net strategy is that we can change
   WARNING 2015-08-08 20:22:53      139871624259392       arbitrage_driver.py:  46 - stopping producer
 ```
 
+```
+CHBTC Error: code=2001, msg=人民币账户余额不足 # no ltc
+```
+
 ## hosts
 - 121.199.251.136 www.okcoin.cn
 - 119.28.48.217   okcoin.cn

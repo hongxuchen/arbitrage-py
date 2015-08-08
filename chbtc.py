@@ -11,13 +11,14 @@ import requests
 
 import common
 import config
+from order_info import OrderInfo
 from plt_api import Platform
 
 
 class CHBTC(Platform):
     lower_bound_dict = {
         'btc': 0,
-        'ltc': 0
+        'ltc': 0.001
     }
     trade_type_map = {
         'buy': 1,
@@ -77,7 +78,6 @@ class CHBTC(Platform):
                 return common.handle_retry(e, _request_impl)
             else:
                 common.handle_exit(e)
-
 
     def _private_requests(self, param_dict):
         api_type = param_dict['method']
@@ -197,7 +197,10 @@ class CHBTC(Platform):
 
     def trade(self, trade_type, price, amount):
         res = self.api_trade(trade_type, price, amount)
-        return res
+        if res['code'] == 1000:
+            return int(res['id'])
+        else:
+            return config.INVALID_ORDER_ID
 
     def api_cancel(self, order_id):
         param_dict = OrderedDict()
@@ -210,7 +213,10 @@ class CHBTC(Platform):
 
     def cancel(self, order_id):
         res = self.api_cancel(order_id)
-        return res
+        if res['code'] == 1000:
+            return True
+        else:
+            return False
 
     def api_order_info(self, order_id):
         param_dict = OrderedDict()
@@ -223,21 +229,32 @@ class CHBTC(Platform):
 
     def order_info(self, order_id):
         res = self.api_order_info(order_id)
-        return res
+        remaining_amount = res['total_amount'] - res['trade_amount']
+        catalog_type = res['type']
+        if catalog_type == 1:
+            catalog = 'buy'
+        else:  # catalog_type == 0
+            catalog = 'sell'
+        order_info = OrderInfo(catalog, remaining_amount)
+        return order_info
 
 
 if __name__ == '__main__':
     common.init_logger()
     chbtc = CHBTC()
-    # res = chbtc.trade('buy', '1', '234')
-    # print(res)
+    order_id = chbtc.trade('sell', 10, 0.001)
+    print(order_id)
+    order_info = chbtc.order_info(order_id)
+    print(order_info)
+    res = chbtc.cancel(order_id)
+    print(res)
     # order_id = 1233456
     # res = chbtc.order_info(order_id)
     # print(res)
     # res = chbtc.cancel(123456)
     # print(res)
-    res = chbtc.assets()
-    print(res)
+    # res = chbtc.assets()
+    # print(res)
     # print(chbtc.api_depth())
-    print(chbtc.ask_bid_list(1))
+    # print(chbtc.ask_bid_list(1))
     # print(chbtc.api_trades())
