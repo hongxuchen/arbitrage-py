@@ -81,7 +81,7 @@ upper_bound = {
 # when Pa.ask1 + buy_diff <= Pb.bid1, buy at Pa, sell at Pb
 btc_diff_dict = {
     'BitBays': {
-        'OKCoinCN': 0.45, 'HuoBi': 0.45
+        'OKCoinCN': 0.45, 'HuoBi': 0.15
     },
     'OKCoinCN': {
         'BitBays': 0.45, 'HuoBi': 0.75

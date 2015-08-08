@@ -1,12 +1,13 @@
 #!/usr/bin/env python
+
 from chbtc import CHBTC
 from huobi import HuoBi
 from itbit import ItBitAPI
 from okcoin import OKCoinCN
+from bitbays import BitBays
 import arbitrage_consumer
 import arbitrage_producer
 import asset_monitor
-from bitbays import BitBays
 import common
 import config
 
@@ -42,10 +43,13 @@ class ArbitrageDriver():
 
     def stop_trade(self):
         self.running = False
+        common.get_logger().warning('stopping producer')
         self.producer.running = False
         self.producer.join()
+        common.get_logger().warning('stopping consumer')
         self.consumer.running = False
         self.consumer.join()
+        common.get_logger().warning('stopping monitor')
         self.monitor.running = False
         self.monitor.join()
 
