@@ -189,6 +189,6 @@ if __name__ == '__main__':
     # print(res)
     # res = huobi.cancel(123456)
     # print(res)
-    # print(huobi.assets())
+    print(huobi.assets())
     # print(huobi.ask1(), huobi.bid1())
     # print(huobi.ask_bid_list(1))

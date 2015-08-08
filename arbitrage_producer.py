@@ -63,7 +63,7 @@ class ArbitrageProducer(threading.Thread):
         def amount_refine():
             plt_a_buy_amount = asset_info_a.afford_buy_amount(ask_a_adjust_price) - config.ASSET_FOR_TRAID_DIFF
             plt_b_sell_amount = asset_info_b.afford_sell_amount() - config.ASSET_FOR_TRAID_DIFF
-            amount = min(config.UPPER_BOUND, ask_a_amount, bid_b_amount, plt_a_buy_amount, plt_b_sell_amount)
+            amount = min(config.upper_bound[ArbitrageProducer.coin_type], ask_a_amount, bid_b_amount, plt_a_buy_amount, plt_b_sell_amount)
             amount = math.floor(amount * (10 ** config.TRADE_PRECISION)) / (10 ** config.TRADE_PRECISION)
             amount = max(self.min_amount, amount)
             return amount

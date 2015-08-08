@@ -27,7 +27,7 @@ Available: [OKCoinCN, BitBays, HuoBi, CHBTC]
 
 Enabled: [OKCoinCN, CHBTC]
 
-CoinType: ltc
+CoinType: btc
 
 Emailing:
     sender:   cc_hongxuchen@outlook.com

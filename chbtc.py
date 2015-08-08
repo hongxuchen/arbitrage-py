@@ -17,7 +17,7 @@ from plt_api import Platform
 
 class CHBTC(Platform):
     lower_bound_dict = {
-        'btc': 0,
+        'btc': 0.001,
         'ltc': 0.001
     }
     trade_type_map = {
@@ -34,6 +34,7 @@ class CHBTC(Platform):
     def __init__(self):
         super(CHBTC, self).__init__(config.chbtc_info)
         self.symbol = config.bitbays_info['symbol']
+        self.lower_bound = CHBTC.lower_bound_dict[self.coin_type]
         self.key = common.get_key_from_data('CHBTC')
         self.api_public = ['ticker', 'depth', 'trades']
         self.api_private = ['order', 'cancelOrder', 'getOrder', 'getOrdersNew', 'getOrdersIgnoreTradeType',
@@ -242,12 +243,22 @@ class CHBTC(Platform):
 if __name__ == '__main__':
     common.init_logger()
     chbtc = CHBTC()
-    order_id = chbtc.trade('sell', 10, 0.001)
+    order_id = chbtc.trade('buy', 2000, 0.001)
     print(order_id)
     order_info = chbtc.order_info(order_id)
     print(order_info)
-    res = chbtc.cancel(order_id)
-    print(res)
+    cancel = chbtc.cancel(order_id)
+    print(cancel)
+    order_id = chbtc.trade('sell', 1000, 0.001)
+    print(order_id)
+    order_info = chbtc.order_info(order_id)
+    print(order_info)
+    cancel = chbtc.cancel(order_id)
+    print(cancel)
+    # order_info = chbtc.order_info(order_id)
+    # print(order_info)
+    # res = chbtc.cancel(order_id)
+    # print(res)
     # order_id = 1233456
     # res = chbtc.order_info(order_id)
     # print(res)

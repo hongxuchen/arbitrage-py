@@ -66,34 +66,35 @@ EMAILING_INTERVAL_SECONDS = 3600
 
 ####################################################################
 
-UPPER_BOUND = 0.6
-
 exceed_max = {
     'btc': 0.001,
     'ltc': 0.01
 }
 
 upper_bound = {
-    'btc': 0.6,
+    'btc': 0.025,
     'ltc': 30
 }
 
 # when Pa.ask1 + buy_diff <= Pb.bid1, buy at Pa, sell at Pb
 btc_diff_dict = {
     'BitBays': {
-        'OKCoinCN': 0.45, 'HuoBi': 0.15
+        'CHBTC': 0.45, 'HuoBi': 0.15, 'OKCoinCN': 0.45
+    },
+    'CHBTC': {
+        'BitBays': 0.45, 'HuoBi': 0.75, 'OKCoinCN': 0.45
     },
     'OKCoinCN': {
-        'BitBays': 0.45, 'HuoBi': 0.75
+        'BitBays': 0.45, 'CHBTC': 0.45, 'HuoBi': 0.75
     },
     'HuoBi': {
-        'OKCoinCN': 0.00, 'BitBays': 0.45
+        'BitBays': 0.45, 'CHBTC': 0.00, 'OKCoinCN': 0.00
     }
 }
 
 ltc_diff_dict = {
     'OKCoinCN': {
-        'HuoBi': 0.06, 'CHBTC': 0.05
+        'CHBTC': 0.05, 'HuoBi': 0.06
     },
     'HuoBi': {
         'CHBTC': 0.05, 'OKCoinCN': 0.02
