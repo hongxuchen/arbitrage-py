@@ -29,8 +29,8 @@ class ArbitrageProducer(threading.Thread):
 
     def run(self):
         while self.running:
-            ArbitrageProducer._logger.debug('[Producer] run')
             time.sleep(config.SLEEP_SECONDS)
+            ArbitrageProducer._logger.debug('[P] Producer')
             self.process_arbitrage()
 
     def arbitrage_impl(self, i, ask_a, bid_b):
@@ -46,10 +46,9 @@ class ArbitrageProducer(threading.Thread):
         bid_b_price, bid_b_amount = bid_b[0], bid_b[1]
 
         ## lock here
-        common.MUTEX.acquire(True)
-        ArbitrageProducer._logger.info('[Producer] acquire lock')
         with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
             asset_info = executor.map(lambda plt: AssetInfo(plt), self.plt_list)
+        ArbitrageProducer._logger.info('[P] asset_info got')
         asset_info_list = list(asset_info)
         asset_info_a = asset_info_list[i]
         asset_info_b = asset_info_list[1 - i]
@@ -70,10 +69,11 @@ class ArbitrageProducer(threading.Thread):
 
         amount = amount_refine()
 
+        ArbitrageProducer._logger.info('[P] amount got')
+
         # case 1: no trade
         if amount - self.min_amount < config.MINOR_DIFF:
-            ArbitrageProducer._logger.info('[Producer] insufficient amount, release lock')
-            common.MUTEX.release()
+            ArbitrageProducer._logger.info('[P]arbitrage cancelled, insufficient amount')
             return False
 
         # case 2: trade
@@ -82,10 +82,10 @@ class ArbitrageProducer(threading.Thread):
         # (buy, sell)
         trade_pair = (buy_trade, sell_trade)
         now = time.time()
+        ArbitrageProducer._logger.info('[P] trade_pair got')
         arbitrage_info = ArbitrageInfo(trade_pair, now)
         arbitrage_info.process_trade()
-        ArbitrageProducer._logger.info('[Producer] arbitrage done, release lock')
-        common.MUTEX.release()
+        ArbitrageProducer._logger.info('[P]arbitrage done,')
         self.arbitrage_queue.append(arbitrage_info)
         return True
 
@@ -104,8 +104,11 @@ class ArbitrageProducer(threading.Thread):
 
         arbitrage_diff = ArbitrageProducer.diff_dict[plt_name_a][plt_name_b]
         if ask_a[0] + arbitrage_diff < bid_b[0]:
-            ArbitrageProducer._logger.debug('[Producer] Arbitrage chance: {} {}'.format(ask_a, bid_b))
-            self.arbitrage_impl(i, ask_list[i], bid_list[1 - i])
+            ArbitrageProducer._logger.debug('[P] Arbitrage chance: {} {}'.format(ask_a, bid_b))
+            with common.MUTEX:
+                ArbitrageProducer._logger.info('[P] LOCK acquired')
+                self.arbitrage_impl(i, ask_list[i], bid_list[1 - i])
+            ArbitrageProducer._logger.info('[P] LOCK released')
             return True
         else:
             return False
@@ -113,6 +116,7 @@ class ArbitrageProducer(threading.Thread):
     def process_arbitrage(self):
         with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
             info_list = list(executor.map(lambda plt: plt.ask_bid_list(1), self.plt_list))
+        ArbitrageProducer._logger.debug('[P] ask_bid_list got')
         length = len(info_list[0])
 
         ask_list = [info[length / 2 - 1] for info in info_list]

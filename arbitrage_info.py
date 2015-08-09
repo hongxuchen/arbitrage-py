@@ -40,6 +40,29 @@ class ArbitrageInfo(object):
                 os._exit(1)
             trade.set_order_id(order_id)
 
+    def seconds_since_arbitrage(self):
+        return time.time() - self.time
+
+    def __repr__(self):
+        t1 = self.trade_pair[0]
+        t2 = self.trade_pair[1]
+        a1 = t1.amount
+        a2 = t2.amount
+        assert abs(a1 - a2) < config.MINOR_DIFF
+        trade_amount = a1
+        if t1.catelog == 'buy':
+            buy_trade = t1
+            sell_trade = t2
+        else:  # sell
+            buy_trade = t2
+            sell_trade = t1
+        return 'Amount={:<10.3f}; {:10s} buys at {:10.4f} {:3s}; {:10s} sells at {:10.4f} {:3s}'.format(
+            trade_amount,
+            buy_trade.plt_name, buy_trade.price, buy_trade.fiat,
+            sell_trade.plt_name, sell_trade.price, sell_trade.fiat)
+
+    ############################################################################################################
+
     @staticmethod
     def normalize_trade_pair_strategy1(trade_pair):
         """
@@ -125,39 +148,20 @@ class ArbitrageInfo(object):
         trade_price = t1.price
         # not really care about the EXACT price
         new_t1 = TradeInfo(trade_plt, trade_catelog, trade_price, trade_amount)
-        common.MUTEX.acquire(True)  # blocking
-        ArbitrageInfo._logger.info('[Consumer] acquire lock')
-        t1_adjust_status = new_t1.adjust_trade()
-        if t1_adjust_status is False:
-            trade_plt = t2.plt
-            trade_price = t2.price
-            new_t2 = TradeInfo(trade_plt, trade_catelog, trade_price, trade_amount)
-            # TODO more code review here
-            t2_adjust_status = new_t2.adjust_trade()
-            # should be rather rare case
-            if t2_adjust_status is False:
-                ArbitrageInfo._logger.critical('FAILED adjust for [{}, {}]'.format(t1.plt_name, t2.plt_name))
-                # TODO may need to use monitor here
-        ArbitrageInfo._logger.info('[Consumer] adjust done, release lock')
-        common.MUTEX.release()
-
-    def __repr__(self):
-        t1 = self.trade_pair[0]
-        t2 = self.trade_pair[1]
-        a1 = t1.amount
-        a2 = t2.amount
-        assert abs(a1 - a2) < config.MINOR_DIFF
-        trade_amount = a1
-        if t1.catelog == 'buy':
-            buy_trade = t1
-            sell_trade = t2
-        else:  # sell
-            buy_trade = t2
-            sell_trade = t1
-        return 'Amount={:<10.3f}; {:10s} buys at {:10.4f} {:3s}; {:10s} sells at {:10.4f} {:3s}'.format(
-            trade_amount,
-            buy_trade.plt_name, buy_trade.price, buy_trade.fiat,
-            sell_trade.plt_name, sell_trade.price, sell_trade.fiat)
+        with common.MUTEX:
+            ArbitrageInfo._logger.info('[C] LOCK acquired')
+            t1_adjust_status = new_t1.adjust_trade()
+            if t1_adjust_status is False:
+                trade_plt = t2.plt
+                trade_price = t2.price
+                new_t2 = TradeInfo(trade_plt, trade_catelog, trade_price, trade_amount)
+                # TODO more code review here
+                t2_adjust_status = new_t2.adjust_trade()
+                # should be rather rare case
+                if t2_adjust_status is False:
+                    ArbitrageInfo._logger.critical('FAILED adjust for [{}, {}]'.format(t1.plt_name, t2.plt_name))
+                    # TODO may need to use monitor here
+            ArbitrageInfo._logger.info('[C] LOCK released, adjust done')
 
 
 if __name__ == '__main__':

@@ -98,7 +98,7 @@ class AssetMonitor(threading.Thread):
             else:
                 self.coin_exceed_counter += 1
             AssetMonitor._logger.warning(
-                '[Monitor] exceed_counter={}, old_coin_changes={:<10.4f}, current={:<10.4f}'.format(
+                '[M] exceed_counter={}, old_coin_changes={:<10.4f}, current={:<10.4f}'.format(
                     self.coin_exceed_counter, self.old_coin_change_amount, coin_change_amount))
             # test whether trade is needed
             if self.coin_exceed_counter > config.COIN_EXCEED_TIMES:
@@ -110,7 +110,7 @@ class AssetMonitor(threading.Thread):
                 self.coin_exceed_counter = -(config.COIN_EXCEED_TIMES + 2)
             # update counter
             AssetMonitor._logger.warning(
-                '[Monitor] exceed_counter={}, old_coin_changes={:<10.4f}, current={:<10.4f}'.format(
+                '[M] exceed_counter={}, old_coin_changes={:<10.4f}, current={:<10.4f}'.format(
                     self.coin_exceed_counter, self.old_coin_change_amount, coin_change_amount))
             if self.old_coin_change_amount > -config.MINOR_DIFF:
                 self.coin_exceed_counter = -1
@@ -133,34 +133,35 @@ class AssetMonitor(threading.Thread):
     def adjust_trade(self, trade_catelog, coin_change_amount):
         adjust_status = True
         AssetMonitor._logger.warning(
-            '[Monitor] exceed_counter={}, amount={}'.format(self.coin_exceed_counter, coin_change_amount))
+            '[M] exceed_counter={}, amount={}'.format(self.coin_exceed_counter, coin_change_amount))
         trade_amount = abs(coin_change_amount)
         plt_price_list = self._get_plt_price_list(trade_catelog)
         ### first try
         trade_plt, trade_price = plt_price_list[0]
         monitor_t1 = TradeInfo(trade_plt, trade_catelog, trade_price, trade_amount)
-        AssetMonitor._logger.warning('[Monitor] adjust at {}'.format(monitor_t1.plt_name))
+        AssetMonitor._logger.warning('[M] adjust at {}'.format(monitor_t1.plt_name))
         t1_res = monitor_t1.adjust_trade()
         if t1_res is False:
-            AssetMonitor._logger.warning('[Monitor] FAILED adjust at {}'.format(monitor_t1.plt_name))
+            AssetMonitor._logger.warning('[M] FAILED adjust at {}'.format(monitor_t1.plt_name))
             # second try
             trade_plt, trade_price = plt_price_list[1]
             monitor_t2 = TradeInfo(trade_plt, trade_catelog, trade_price, trade_amount)
-            AssetMonitor._logger.warning('[Monitor] adjust at {}'.format(monitor_t2.plt_name))
+            AssetMonitor._logger.warning('[M] adjust at {}'.format(monitor_t2.plt_name))
             t2_res = monitor_t2.adjust_trade()
             if t2_res is False:
                 AssetMonitor._logger.critical(
-                    '[Monitor] FAILED adjust for [{}, {}]'.format(monitor_t1.plt_name, monitor_t2.plt_name))
+                    '[M] FAILED adjust for [{}, {}]'.format(monitor_t1.plt_name, monitor_t2.plt_name))
                 adjust_status = False  # only when both False
         return adjust_status
 
     def asset_update_handler(self, is_last):
         # handle coin changes
-        common.MUTEX.acquire(True)
-        asset_list = self.get_asset_list()
-        coin, fiat = self.get_asset_changes(asset_list)
-        status = self.coin_update_handler(coin, is_last)
-        common.MUTEX.release()
+        with common.MUTEX:
+            AssetMonitor._logger.info('[M] LOCK acquired')
+            asset_list = self.get_asset_list()
+            coin, fiat = self.get_asset_changes(asset_list)
+            status = self.coin_update_handler(coin, is_last)
+        AssetMonitor._logger.info('[M] LOCK released')
         ### report
         # NOTE: this report is delayed
         if abs(self.old_coin_change_amount - coin) > config.MINOR_DIFF or abs(
@@ -181,8 +182,8 @@ class AssetMonitor(threading.Thread):
         # TODO add asset log
         # update asset info
         while self.running:
-            AssetMonitor._logger.warning('[Monitor] run')
             time.sleep(config.MONITOR_INTERVAL_SECONDS)
+            AssetMonitor._logger.debug('[M] Monitor')
             adjust_status = self.asset_update_handler(False)  # TODO: return value not used here
             if adjust_status is False:
                 self.failed_counter += 1

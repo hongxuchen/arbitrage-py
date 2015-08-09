@@ -17,6 +17,7 @@ reverse the fiat amount for futher trade. The net strategy is that we can change
 * force implementation
 * "No JSON object could be decoded"
 * should use Queue: when request is slow
+* Producer cannot release lock
 
 # cases
 
