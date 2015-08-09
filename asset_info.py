@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import config
 
 from okcoin import OKCoinCN
 from bitbays import BitBays

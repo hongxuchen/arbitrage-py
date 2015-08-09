@@ -1,7 +1,6 @@
 #!/usr/bin/env python
-from email.mime.text import MIMEText
+
 from operator import itemgetter
-import smtplib
 import threading
 import time
 

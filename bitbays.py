@@ -4,7 +4,6 @@ import hashlib
 import hmac
 import os
 import urllib
-import sys
 import time
 
 import requests

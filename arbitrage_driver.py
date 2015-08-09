@@ -9,7 +9,6 @@ import arbitrage_consumer
 import arbitrage_producer
 import asset_monitor
 import common
-import config
 
 select_plt_dict = {
     'OKCoinCN': OKCoinCN,

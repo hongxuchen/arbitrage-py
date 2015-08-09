@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+
 import base64
 import hashlib
 import hmac
@@ -6,7 +7,6 @@ import os
 import urllib
 import json
 import time
-import sys
 
 import requests
 

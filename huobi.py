@@ -1,7 +1,7 @@
 #!/usr/bin/env python
+
 import hashlib
 import os
-import sys
 import urllib
 import time
 

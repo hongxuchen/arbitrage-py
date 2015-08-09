@@ -33,7 +33,6 @@ class ArbitrageProducer(threading.Thread):
             self.process_arbitrage()
         self.adjuster_queue.put(common.SIGNAL)
 
-
     @staticmethod
     def process_trade(trade_pair):
         """

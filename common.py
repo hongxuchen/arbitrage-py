@@ -12,6 +12,7 @@ import sys
 import time
 
 import requests
+
 import requests.exceptions as req_except
 
 import yaml
