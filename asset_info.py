@@ -11,23 +11,8 @@ class AssetInfo(object):
         self.coin_type = self.plt.coin_type
         self.plt_name = self.plt.__class__.__name__
         self.asset_raw_list = plt.assets()
-        assert (len(self.asset_raw_list) == 2)
         [self.fiat_pending, self.fiat_avail] = self.asset_raw_list[0]
         [self.coin_pending, self.coin_avail] = self.asset_raw_list[1]
-
-    def has_pending_fiat(self):
-        """
-        global
-        :return:
-        """
-        return self.fiat_pending > config.MINOR_DIFF
-
-    def has_pending_coin(self):
-        """
-        global
-        :return:
-        """
-        return self.coin_pending > config.MINOR_DIFF
 
     def afford_buy_amount(self, price):
         return self.fiat_avail / price

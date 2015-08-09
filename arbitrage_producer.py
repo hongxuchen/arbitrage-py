@@ -19,10 +19,10 @@ class ArbitrageProducer(threading.Thread):
     diff_dict = config.diff_dict[coin_type]
 
     ### stateless
-    def __init__(self, plt_list, arbitrage_list, symbol, parent=None):
+    def __init__(self, plt_list, arbitrage_queue, symbol, parent=None):
         super(ArbitrageProducer, self).__init__(parent)
         self.plt_list = plt_list
-        self.arbitrage_queue = arbitrage_list
+        self.arbitrage_queue = arbitrage_queue
         self.symbol = symbol
         self.running = False
         self.min_amount = max(plt_list[0].lower_bound, plt_list[1].lower_bound)
@@ -51,19 +51,19 @@ class ArbitrageProducer(threading.Thread):
         with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
             asset_info = executor.map(lambda plt: AssetInfo(plt), self.plt_list)
         asset_info_list = list(asset_info)
-        # asset_info_list = [AssetInfo(plt) for plt in self.plt_list]
         asset_info_a = asset_info_list[i]
         asset_info_b = asset_info_list[1 - i]
 
         # ask_a_price < bid_b_price
         price_diff = bid_b_price - ask_a_price
-        ask_a_adjust_price = common.round_price(ask_a_price + price_diff / 3)
-        bid_b_adjust_price = common.round_price(bid_b_price - price_diff / 3)
+        ask_a_adjust_price = common.round_price(ask_a_price + price_diff / config.PRICE_ROUND)
+        bid_b_adjust_price = common.round_price(bid_b_price - price_diff / config.PRICE_ROUND)
 
         def amount_refine():
             plt_a_buy_amount = asset_info_a.afford_buy_amount(ask_a_adjust_price) - config.ASSET_FOR_TRAID_DIFF
             plt_b_sell_amount = asset_info_b.afford_sell_amount() - config.ASSET_FOR_TRAID_DIFF
-            amount = min(config.upper_bound[ArbitrageProducer.coin_type], ask_a_amount, bid_b_amount, plt_a_buy_amount, plt_b_sell_amount)
+            amount = min(config.upper_bound[ArbitrageProducer.coin_type], ask_a_amount, bid_b_amount, plt_a_buy_amount,
+                         plt_b_sell_amount)
             amount = math.floor(amount * (10 ** config.TRADE_PRECISION)) / (10 ** config.TRADE_PRECISION)
             amount = max(self.min_amount, amount)
             return amount

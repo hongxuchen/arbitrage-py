@@ -10,7 +10,7 @@ import smtplib
 import threading
 import sys
 import time
-
+import ipgetter
 import requests
 import requests.exceptions as req_except
 import yaml
@@ -171,6 +171,8 @@ def send_msg(report):
     sender = emailing_info['sender']
     receiver = emailing_info['receiver']
     server = emailing_info['server']
+    ip_str = ipgetter.myip()
+    report = str(ip_str) + '\n' + report
     msg = MIMEText(report)
     msg['Subject'] = 'Arbitrage Report'
     msg['From'] = sender

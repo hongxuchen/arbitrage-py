@@ -16,6 +16,7 @@ reverse the fiat amount for futher trade. The net strategy is that we can change
 * deployed in lab, stopping fails
 * force implementation
 * "No JSON object could be decoded"
+* should use Queue: when request is slow
 
 # cases
 

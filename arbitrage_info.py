@@ -14,14 +14,14 @@ from trade_info import TradeInfo
 class ArbitrageInfo(object):
     _logger = common.get_logger()
 
-    def __init__(self, trade_pair, time):
+    def __init__(self, trade_pair, current_time):
         """
         :param trade_pair: a TradeInfo pair, (buy, sell)
-        :param time:
+        :param current_time
         :return:
         """
         self.trade_pair = trade_pair
-        self.time = time
+        self.time = current_time
 
     def process_trade(self):
         """
@@ -35,9 +35,6 @@ class ArbitrageInfo(object):
         for trade, order_id in zip(self.trade_pair, order_ids):
             assert (order_id != config.INVALID_ORDER_ID)
             trade.set_order_id(order_id)
-            # for trade in self.trade_pair:
-            #     order_id = trade.regular_trade(trade.catelog, trade.price, trade.amount)
-            #     trade.set_order_id(order_id)
 
     @staticmethod
     def normalize_trade_pair_strategy1(trade_pair):
@@ -77,9 +74,6 @@ class ArbitrageInfo(object):
                 return t1, t2
             else:
                 return t2, t1
-
-    def seconds_since_trade(self):
-        return time.time() - self.time
 
     @staticmethod
     def _get_remaining(trade):
@@ -154,7 +148,6 @@ class ArbitrageInfo(object):
             buy_trade = t1
             sell_trade = t2
         else:  # sell
-            assert t2.catelog == 'buy'
             buy_trade = t2
             sell_trade = t1
         return 'Amount={:<10.3f}; {:10s} buys at {:10.4f} {:3s}; {:10s} sells at {:10.4f} {:3s}'.format(

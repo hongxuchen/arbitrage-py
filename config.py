@@ -55,7 +55,7 @@ COIN_EXCEED_TIMES = 3
 
 HuoBi_Precision = 2
 # SLEEP_SECONDS = 0.34
-SLEEP_SECONDS = 0.01
+SLEEP_SECONDS = 0.4
 
 # CONFIG
 # upper_bound must > lower_bound for all platforms
@@ -63,6 +63,8 @@ PENDING_SECONDS = 5.0
 MONITOR_INTERVAL_SECONDS = 3
 
 EMAILING_INTERVAL_SECONDS = 3600
+
+PRICE_ROUND = 2.0
 
 ####################################################################
 

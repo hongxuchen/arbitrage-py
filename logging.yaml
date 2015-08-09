@@ -17,7 +17,7 @@ handlers:
     tracker_file:
         class: logging.FileHandler
         formatter: fileFormatter
-        level: INFO
+        level: DEBUG
         filename: tracker.LOG
     asset_file:
         class: logging.FileHandler
