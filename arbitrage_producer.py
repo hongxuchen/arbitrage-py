@@ -9,7 +9,7 @@ import concurrent.futures
 from asset_info import AssetInfo
 import common
 import config
-from arbitrage_info import ArbitrageInfo
+from arbitrage_adjuster import Adjuster
 from trade_info import TradeInfo
 
 
@@ -19,10 +19,10 @@ class ArbitrageProducer(threading.Thread):
     diff_dict = config.diff_dict[coin_type]
 
     ### stateless
-    def __init__(self, plt_list, arbitrage_queue):
+    def __init__(self, plt_list, adjuster_queue):
         super(ArbitrageProducer, self).__init__()
         self.plt_list = plt_list
-        self.arbitrage_queue = arbitrage_queue
+        self.adjuster_queue = adjuster_queue
         self.running = False
         self.min_amount = max(plt_list[0].lower_bound, plt_list[1].lower_bound)
 
@@ -31,7 +31,25 @@ class ArbitrageProducer(threading.Thread):
             time.sleep(config.SLEEP_SECONDS)
             ArbitrageProducer._logger.debug('[P] Producer')
             self.process_arbitrage()
-        self.arbitrage_queue.put(common.SIGNAL)
+        self.adjuster_queue.put(common.SIGNAL)
+
+
+    @staticmethod
+    def process_trade(trade_pair):
+        """
+        inital trading, this guarantees that the asset is enough
+        TODO: ensure this trade MUST succeed
+        :return:
+        """
+        Adjuster._logger.warning('Arbitrage Start')
+        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+            order_ids = executor.map(lambda t: t.regular_trade(t.catelog, t.price, t.amount), trade_pair)
+        for trade, order_id in zip(trade_pair, order_ids):
+            if order_id == config.INVALID_ORDER_ID:
+                Adjuster._logger.critical('order_id not exists, EXIT')
+                # noinspection PyProtectedMember
+                os._exit(1)
+            trade.set_order_id(order_id)
 
     def arbitrage_impl(self, i, ask_a, bid_b):
         """
@@ -83,10 +101,10 @@ class ArbitrageProducer(threading.Thread):
         trade_pair = (buy_trade, sell_trade)
         now = time.time()
         ArbitrageProducer._logger.info('[P] trade_pair got')
-        arbitrage_info = ArbitrageInfo(trade_pair, now)
-        arbitrage_info.process_trade()
-        ArbitrageProducer._logger.info('[P]arbitrage done,')
-        self.arbitrage_queue.put(arbitrage_info)
+        ArbitrageProducer.process_trade(trade_pair)
+        ArbitrageProducer._logger.info('[P] arbitrage done')
+        adjuster = Adjuster(trade_pair, now)
+        self.adjuster_queue.put(adjuster)
         return True
 
     def try_arbitrage(self, ask_list, bid_list, i):

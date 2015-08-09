@@ -12,7 +12,7 @@ from okcoin import OKCoinCN
 from trade_info import TradeInfo
 
 
-class ArbitrageInfo(object):
+class Adjuster(object):
     _logger = common.get_logger()
 
     def __init__(self, trade_pair, current_time):
@@ -23,22 +23,6 @@ class ArbitrageInfo(object):
         """
         self.trade_pair = trade_pair
         self.time = current_time
-
-    def process_trade(self):
-        """
-        inital trading, this guarantees that the asset is enough
-        TODO: ensure this trade MUST succeed
-        :return:
-        """
-        ArbitrageInfo._logger.warning('Arbitrage Start')
-        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
-            order_ids = executor.map(lambda t: t.regular_trade(t.catelog, t.price, t.amount), self.trade_pair)
-        for trade, order_id in zip(self.trade_pair, order_ids):
-            if order_id == config.INVALID_ORDER_ID:
-                ArbitrageInfo._logger.critical('order_id not exists, EXIT')
-                # noinspection PyProtectedMember
-                os._exit(1)
-            trade.set_order_id(order_id)
 
     def seconds_since_arbitrage(self):
         return time.time() - self.time
@@ -124,7 +108,7 @@ class ArbitrageInfo(object):
         amount = remaining_list[0] - remaining_list[1]
         # A1: buy remaining, A2: sell remaining
         # if A < 0, bought more, should sell; if A >= 0, sold more, should buy
-        ArbitrageInfo._logger.warning(
+        Adjuster._logger.warning(
             'A1={:<10.4f}, A2={:<10.4f}, A={:<10.4f}'.format(remaining_list[0], remaining_list[1], amount))
         if amount < -config.MINOR_DIFF:
             trade_catelog = 'sell'
@@ -149,7 +133,7 @@ class ArbitrageInfo(object):
         # not really care about the EXACT price
         new_t1 = TradeInfo(trade_plt, trade_catelog, trade_price, trade_amount)
         with common.MUTEX:
-            ArbitrageInfo._logger.info('[C] LOCK acquired')
+            Adjuster._logger.info('[C] LOCK acquired')
             t1_adjust_status = new_t1.adjust_trade()
             if t1_adjust_status is False:
                 trade_plt = t2.plt
@@ -159,9 +143,9 @@ class ArbitrageInfo(object):
                 t2_adjust_status = new_t2.adjust_trade()
                 # should be rather rare case
                 if t2_adjust_status is False:
-                    ArbitrageInfo._logger.critical('FAILED adjust for [{}, {}]'.format(t1.plt_name, t2.plt_name))
+                    Adjuster._logger.critical('FAILED adjust for [{}, {}]'.format(t1.plt_name, t2.plt_name))
                     # TODO may need to use monitor here
-            ArbitrageInfo._logger.info('[C] LOCK released, adjust done')
+            Adjuster._logger.info('[C] LOCK released, adjust done')
 
 
 if __name__ == '__main__':
@@ -171,5 +155,5 @@ if __name__ == '__main__':
     bb_trade = TradeInfo(bitbays, 'sell', 10000, 0.01)
     trade_pair = ok_trade, bb_trade
     now = time.time()
-    arbitrage = ArbitrageInfo(trade_pair, now)
+    arbitrage = Adjuster(trade_pair, now)
     print(arbitrage)

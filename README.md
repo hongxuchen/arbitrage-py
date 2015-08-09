@@ -16,16 +16,9 @@ reverse the fiat amount for futher trade. The net strategy is that we can change
 * deployed in lab, stopping fails
 * force implementation
 * "No JSON object could be decoded"
-* should use Queue: when request is slow
 * Producer cannot release lock
 
 # cases
-
-```
-     INFO 2015-08-08 14:57:57      139871572018944     arbitrage_producer.py:  50 - [Producer] acquire lock
-  WARNING 2015-08-08 20:22:52      139871624259392       arbitrage_driver.py:  64 - stop trade
-  WARNING 2015-08-08 20:22:53      139871624259392       arbitrage_driver.py:  46 - stopping producer
-```
 
 ```
 CHBTC Error: code=2001, msg=人民币账户余额不足 # no ltc

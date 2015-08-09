@@ -30,9 +30,9 @@ class ArbitrageDriver():
         common.init_logger()
         enabled_plt = common.get_key_from_data('Enabled')
         self.plt_list = [select_plt_dict[plt]() for plt in enabled_plt]
-        self.arbitrage_queue = queue.Queue()
-        self.producer = arbitrage_producer.ArbitrageProducer(self.plt_list, self.arbitrage_queue)
-        self.consumer = arbitrage_consumer.ArbitrageConsumer(self.arbitrage_queue)
+        self.adjuster_queue = queue.Queue()
+        self.producer = arbitrage_producer.ArbitrageProducer(self.plt_list, self.adjuster_queue)
+        self.consumer = arbitrage_consumer.ArbitrageConsumer(self.adjuster_queue)
         self.monitor = asset_monitor.AssetMonitor(self.plt_list)
         self.running = False
 
