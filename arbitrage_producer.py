@@ -69,12 +69,14 @@ class ArbitrageProducer(threading.Thread):
             return amount
 
         amount = amount_refine()
+
+        # case 1: no trade
         if amount - self.min_amount < config.MINOR_DIFF:
             ArbitrageProducer._logger.info('[Producer] insufficient amount, release lock')
             common.MUTEX.release()
             return False
-        ArbitrageProducer._logger.debug(asset_info_a)
-        ArbitrageProducer._logger.debug(asset_info_b)
+
+        # case 2: trade
         buy_trade = TradeInfo(plt_a, 'buy', ask_a_adjust_price, amount)  # buy at plt_a
         sell_trade = TradeInfo(plt_b, 'sell', bid_b_adjust_price, amount)  # sell at plt_b
         # (buy, sell)

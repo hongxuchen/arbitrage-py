@@ -74,7 +74,7 @@ exceed_max = {
 }
 
 upper_bound = {
-    'btc': 0.025,
+    'btc': 0.6,
     'ltc': 30
 }
 
