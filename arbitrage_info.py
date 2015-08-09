@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from __future__ import print_function
+import os
 import time
 
 import concurrent.futures
@@ -33,7 +34,10 @@ class ArbitrageInfo(object):
         with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
             order_ids = executor.map(lambda t: t.regular_trade(t.catelog, t.price, t.amount), self.trade_pair)
         for trade, order_id in zip(self.trade_pair, order_ids):
-            assert (order_id != config.INVALID_ORDER_ID)
+            if order_id == config.INVALID_ORDER_ID:
+                ArbitrageInfo._logger.critical('order_id not exists, EXIT')
+                # noinspection PyProtectedMember
+                os._exit(1)
             trade.set_order_id(order_id)
 
     @staticmethod
