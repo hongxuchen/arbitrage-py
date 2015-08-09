@@ -19,11 +19,10 @@ class ArbitrageProducer(threading.Thread):
     diff_dict = config.diff_dict[coin_type]
 
     ### stateless
-    def __init__(self, plt_list, arbitrage_queue, symbol, parent=None):
-        super(ArbitrageProducer, self).__init__(parent)
+    def __init__(self, plt_list, arbitrage_queue):
+        super(ArbitrageProducer, self).__init__()
         self.plt_list = plt_list
         self.arbitrage_queue = arbitrage_queue
-        self.symbol = symbol
         self.running = False
         self.min_amount = max(plt_list[0].lower_bound, plt_list[1].lower_bound)
 
@@ -32,6 +31,7 @@ class ArbitrageProducer(threading.Thread):
             time.sleep(config.SLEEP_SECONDS)
             ArbitrageProducer._logger.debug('[P] Producer')
             self.process_arbitrage()
+        self.arbitrage_queue.put(common.SIGNAL)
 
     def arbitrage_impl(self, i, ask_a, bid_b):
         """
@@ -86,7 +86,7 @@ class ArbitrageProducer(threading.Thread):
         arbitrage_info = ArbitrageInfo(trade_pair, now)
         arbitrage_info.process_trade()
         ArbitrageProducer._logger.info('[P]arbitrage done,')
-        self.arbitrage_queue.append(arbitrage_info)
+        self.arbitrage_queue.put(arbitrage_info)
         return True
 
     def try_arbitrage(self, ask_list, bid_list, i):

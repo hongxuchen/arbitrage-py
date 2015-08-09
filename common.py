@@ -10,11 +10,13 @@ import smtplib
 import threading
 import sys
 import time
-import ipgetter
+
 import requests
 import requests.exceptions as req_except
+
 import yaml
 
+import ipgetter
 import config
 
 
@@ -186,6 +188,7 @@ def send_msg(report):
 
 
 MUTEX = threading.Lock()
+SIGNAL = None
 retry_except_tuple = (
     req_except.ConnectionError, req_except.Timeout, req_except.HTTPError, InvalidNonceError, NULLResponseError,
     HuoBiError, CHBTCRetryError)

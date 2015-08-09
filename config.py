@@ -30,8 +30,6 @@ itbit_info = {
     'symbol': 'XBTUSD'
 }
 
-fiat = 'cny'
-
 TRADE_PRECISION = 3
 DISPLAY_PRECISION = 6
 MINOR_DIFF = 10.0 ** (-DISPLAY_PRECISION)
