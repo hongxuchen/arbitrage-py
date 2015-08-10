@@ -29,7 +29,6 @@ class TradeInfo(object):
     def set_order_id(self, order_id):
         self.order_id = order_id
 
-    # TODO refactor
     def regular_trade(self, catelog, price, amount):
         """
         regular trade, may cause pending
@@ -51,7 +50,6 @@ class TradeInfo(object):
         """
         waited_asset_times = 0
         ### NOTE: since we lock the trade, only 1 request needed
-        ### TODO: verify correctness of above declaration
         asset_info = AssetInfo(self.plt)
         if self.catelog == 'sell':
             asset_amount = asset_info.afford_sell_amount()
@@ -103,7 +101,7 @@ class TradeInfo(object):
             trade_catelog = self.catelog
             trade_price = common.adjust_price(trade_catelog, self.price)
             afford_info = self._asset_afford_trade(trade_amount, trade_price)
-            # TODO: check whether running in different threads
+            # TODO: check whether needing to run in different threads
             if afford_info:
                 TradeInfo._logger.warning('{} bi-directional adjust_trade'.format(self.plt_name))
                 # trade1, must succeed

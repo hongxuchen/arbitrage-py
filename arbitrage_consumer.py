@@ -18,7 +18,7 @@ class ArbitrageConsumer(threading.Thread):
         self.adjuster_queue = adjuster_queue
 
     def consume(self, adjuster):
-        ArbitrageConsumer._logger.debug('[C] Consumer')
+        ArbitrageConsumer._logger.debug('[C] Consuming')
         seconds = adjuster.seconds_since_arbitrage()
         if seconds < config.PENDING_SECONDS:
             sleep_seconds = config.PENDING_SECONDS - seconds

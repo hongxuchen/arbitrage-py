@@ -40,12 +40,10 @@ class Adjuster(object):
         else:  # sell
             buy_trade = t2
             sell_trade = t1
-        return 'Amount={:<10.3f}; {:10s} buys at {:10.4f} {:3s}; {:10s} sells at {:10.4f} {:3s}'.format(
+        return 'Amount={:<10.3f}; {:10s} bought at {:10.4f} {:3s}; {:10s} sold at {:10.4f} {:3s}'.format(
             trade_amount,
             buy_trade.plt_name, buy_trade.price, buy_trade.fiat,
             sell_trade.plt_name, sell_trade.price, sell_trade.fiat)
-
-    ############################################################################################################
 
     @staticmethod
     def normalize_trade_pair_strategy1(trade_pair):
@@ -109,7 +107,7 @@ class Adjuster(object):
         # A1: buy remaining, A2: sell remaining
         # if A < 0, bought more, should sell; if A >= 0, sold more, should buy
         Adjuster._logger.warning(
-            'A1={:<10.4f}, A2={:<10.4f}, A={:<10.4f}'.format(remaining_list[0], remaining_list[1], amount))
+            '[C] A1={:<10.4f}, A2={:<10.4f}, A={:<10.4f}'.format(remaining_list[0], remaining_list[1], amount))
         if amount < -config.MINOR_DIFF:
             trade_catelog = 'sell'
         elif amount > config.MINOR_DIFF:
@@ -126,7 +124,6 @@ class Adjuster(object):
             return
         trade_catelog, trade_amount = adjust_res[0], adjust_res[1]
         # t1, t2 = self.normalize_trade_pair_strategy1(self.trade_pair)
-        # TODO see whether error
         t1, t2 = self.normalize_trade_pair_strategy2(self.trade_pair, trade_catelog)
         trade_plt = t1.plt
         trade_price = t1.price
@@ -139,7 +136,6 @@ class Adjuster(object):
                 trade_plt = t2.plt
                 trade_price = t2.price
                 new_t2 = TradeInfo(trade_plt, trade_catelog, trade_price, trade_amount)
-                # TODO more code review here
                 t2_adjust_status = new_t2.adjust_trade()
                 # should be rather rare case
                 if t2_adjust_status is False:

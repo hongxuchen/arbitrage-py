@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import os
 
 import time
 import math
@@ -40,12 +41,12 @@ class ArbitrageProducer(threading.Thread):
         TODO: ensure this trade MUST succeed
         :return:
         """
-        Adjuster._logger.warning('Arbitrage Start')
+        ArbitrageProducer._logger.warning('Arbitrage Start')
         with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
             order_ids = executor.map(lambda t: t.regular_trade(t.catelog, t.price, t.amount), trade_pair)
         for trade, order_id in zip(trade_pair, order_ids):
             if order_id == config.INVALID_ORDER_ID:
-                Adjuster._logger.critical('order_id not exists, EXIT')
+                ArbitrageProducer._logger.critical('order_id not exists, EXIT')
                 # noinspection PyProtectedMember
                 os._exit(1)
             trade.set_order_id(order_id)

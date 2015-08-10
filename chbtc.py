@@ -124,7 +124,7 @@ class CHBTC(Platform):
             slist[index] = chr(ord(slist[index]) ^ value)
         return "".join(slist)
 
-    ## TODO
+    ## TODO use hashlib
     def __digest(self, aValue):
         value = struct.pack("%ds" % len(aValue), aValue)
         h = sha.new()

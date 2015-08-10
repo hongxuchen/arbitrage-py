@@ -57,7 +57,6 @@ class OKCoinAPI(Platform):
                 r = requests.request('get', self._real_uri(api_type), params=params, headers=OKCoinAPI.common_headers,
                                      timeout=config.TIMEOUT, verify=True)
             elif api_type in self.api_private:
-                # TODO data => js string?
                 r = requests.request('post', self._real_uri(api_type), data=data, params=params,
                                      headers=OKCoinAPI.common_headers, timeout=config.TIMEOUT, verify=True)
             else:

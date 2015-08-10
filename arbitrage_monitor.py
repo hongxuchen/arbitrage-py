@@ -14,13 +14,13 @@ from okcoin import OKCoinCN
 from trade_info import TradeInfo
 
 
-class AssetMonitor(threading.Thread):
+class ArbitrageMonitor(threading.Thread):
     _logger = common.get_logger()
     coin_type = common.get_key_from_data('CoinType')
     exceed_max = config.exceed_max[coin_type]
 
     def __init__(self, plt_list):
-        super(AssetMonitor, self).__init__()
+        super(ArbitrageMonitor, self).__init__()
         self.plt_list = plt_list
         self.original_asset_list = []
         self.running = False
@@ -39,7 +39,7 @@ class AssetMonitor(threading.Thread):
     @staticmethod
     def report_asset(asset_list):
         asset_logger = common.get_asset_logger()
-        report_template = '{:10s} ' + AssetMonitor.coin_type + '={:<10.4f}, cny={:<10.4f}'
+        report_template = '{:10s} ' + ArbitrageMonitor.coin_type + '={:<10.4f}, cny={:<10.4f}'
         all_coin = 0.0
         all_fiat = 0.0
         for asset in asset_list:
@@ -62,15 +62,15 @@ class AssetMonitor(threading.Thread):
 
     @staticmethod
     def report_asset_changes(coin, fiat):
-        report = 'Asset Change: {:10.4f}{:3s}, {:10.4f}cny'.format(coin, AssetMonitor.coin_type, fiat)
+        report = 'Asset Change: {:10.4f}{:3s}, {:10.4f}cny'.format(coin, ArbitrageMonitor.coin_type, fiat)
         common.get_asset_logger().warning(report)
 
     def try_notify_asset_changes(self, coin, fiat):
-        report = 'Asset Change: {:10.4f}{:3s}, {:10.4f}cny'.format(coin, AssetMonitor.coin_type, fiat)
+        report = 'Asset Change: {:10.4f}{:3s}, {:10.4f}cny'.format(coin, ArbitrageMonitor.coin_type, fiat)
         now = time.time()
         # config.EMAILING_INTERVAL_SECONDS = 8
         if now - self.last_notifier_time >= config.EMAILING_INTERVAL_SECONDS:
-            AssetMonitor._logger.warning('notifying asset changes via email')
+            ArbitrageMonitor._logger.warning('notifying asset changes via email')
             common.send_msg(report)
             self.last_notifier_time = now
 
@@ -88,7 +88,7 @@ class AssetMonitor(threading.Thread):
 
     def coin_update_handler(self, coin_change_amount, is_last):
         # only when exceeds
-        if coin_change_amount > AssetMonitor.exceed_max:
+        if coin_change_amount > ArbitrageMonitor.exceed_max:
             if is_last:  # make sure will sell
                 self.coin_exceed_counter = config.COIN_EXCEED_TIMES + 2
             # update counter
@@ -96,7 +96,7 @@ class AssetMonitor(threading.Thread):
                 self.coin_exceed_counter = 1
             else:
                 self.coin_exceed_counter += 1
-            AssetMonitor._logger.warning(
+            ArbitrageMonitor._logger.warning(
                 '[M] exceed_counter={}, old_coin_changes={:<10.4f}, current={:<10.4f}'.format(
                     self.coin_exceed_counter, self.old_coin_change_amount, coin_change_amount))
             # test whether trade is needed
@@ -104,11 +104,11 @@ class AssetMonitor(threading.Thread):
                 trade_catelog = 'sell'
             else:
                 return True  # no trade
-        elif coin_change_amount < -AssetMonitor.exceed_max:
+        elif coin_change_amount < -ArbitrageMonitor.exceed_max:
             if is_last:  # make sure we will buy
                 self.coin_exceed_counter = -(config.COIN_EXCEED_TIMES + 2)
             # update counter
-            AssetMonitor._logger.warning(
+            ArbitrageMonitor._logger.warning(
                 '[M] exceed_counter={}, old_coin_changes={:<10.4f}, current={:<10.4f}'.format(
                     self.coin_exceed_counter, self.old_coin_change_amount, coin_change_amount))
             if self.old_coin_change_amount > -config.MINOR_DIFF:
@@ -131,24 +131,24 @@ class AssetMonitor(threading.Thread):
 
     def adjust_trade(self, trade_catelog, coin_change_amount):
         adjust_status = True
-        AssetMonitor._logger.warning(
+        ArbitrageMonitor._logger.warning(
             '[M] exceed_counter={}, amount={}'.format(self.coin_exceed_counter, coin_change_amount))
         trade_amount = abs(coin_change_amount)
         plt_price_list = self._get_plt_price_list(trade_catelog)
         ### first try
         trade_plt, trade_price = plt_price_list[0]
         monitor_t1 = TradeInfo(trade_plt, trade_catelog, trade_price, trade_amount)
-        AssetMonitor._logger.warning('[M] adjust at {}'.format(monitor_t1.plt_name))
+        ArbitrageMonitor._logger.warning('[M] adjust at {}'.format(monitor_t1.plt_name))
         t1_res = monitor_t1.adjust_trade()
         if t1_res is False:
-            AssetMonitor._logger.warning('[M] FAILED adjust at {}'.format(monitor_t1.plt_name))
+            ArbitrageMonitor._logger.warning('[M] FAILED adjust at {}'.format(monitor_t1.plt_name))
             # second try
             trade_plt, trade_price = plt_price_list[1]
             monitor_t2 = TradeInfo(trade_plt, trade_catelog, trade_price, trade_amount)
-            AssetMonitor._logger.warning('[M] adjust at {}'.format(monitor_t2.plt_name))
+            ArbitrageMonitor._logger.warning('[M] adjust at {}'.format(monitor_t2.plt_name))
             t2_res = monitor_t2.adjust_trade()
             if t2_res is False:
-                AssetMonitor._logger.critical(
+                ArbitrageMonitor._logger.critical(
                     '[M] FAILED adjust for [{}, {}]'.format(monitor_t1.plt_name, monitor_t2.plt_name))
                 adjust_status = False  # only when both False
         return adjust_status
@@ -156,11 +156,11 @@ class AssetMonitor(threading.Thread):
     def asset_update_handler(self, is_last):
         # handle coin changes
         with common.MUTEX:
-            AssetMonitor._logger.info('[M] LOCK acquired')
+            ArbitrageMonitor._logger.info('[M] LOCK acquired')
             asset_list = self.get_asset_list()
             coin, fiat = self.get_asset_changes(asset_list)
             status = self.coin_update_handler(coin, is_last)
-        AssetMonitor._logger.info('[M] LOCK released')
+        ArbitrageMonitor._logger.info('[M] LOCK released')
         ### report
         # NOTE: this report is delayed
         if abs(self.old_coin_change_amount - coin) > config.MINOR_DIFF or abs(
@@ -178,11 +178,10 @@ class AssetMonitor(threading.Thread):
         self.original_asset_list = self.get_asset_list()
         self.report_asset(self.original_asset_list)
         self.old_coin_change_amount = self.get_asset_changes(self.original_asset_list)[0]
-        # TODO add asset log
         # update asset info
         while self.running:
             time.sleep(config.MONITOR_INTERVAL_SECONDS)
-            AssetMonitor._logger.debug('[M] Monitor')
+            ArbitrageMonitor._logger.debug('[M] Monitor')
             adjust_status = self.asset_update_handler(False)  # TODO: return value not used here
             if adjust_status is False:
                 self.failed_counter += 1
@@ -194,11 +193,11 @@ class AssetMonitor(threading.Thread):
         last_adjust_status = self.asset_update_handler(True)
         if last_adjust_status is False:
             fail_warning = 'last adjust failed, do it yourself!'
-            AssetMonitor._logger.warning(fail_warning)
+            ArbitrageMonitor._logger.warning(fail_warning)
 
 
 if __name__ == '__main__':
     okcoin_cn = OKCoinCN()
     bitbays = BitBays()
     plt_list = [okcoin_cn, bitbays]
-    monitor = AssetMonitor(plt_list)
+    monitor = ArbitrageMonitor(plt_list)

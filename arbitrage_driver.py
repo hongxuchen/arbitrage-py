@@ -7,7 +7,7 @@ from okcoin import OKCoinCN
 from bitbays import BitBays
 import arbitrage_consumer
 import arbitrage_producer
-import asset_monitor
+import arbitrage_monitor
 import common
 
 select_plt_dict = {
@@ -32,7 +32,7 @@ class ArbitrageDriver():
         self.adjuster_queue = queue.Queue()
         self.producer = arbitrage_producer.ArbitrageProducer(self.plt_list, self.adjuster_queue)
         self.consumer = arbitrage_consumer.ArbitrageConsumer(self.adjuster_queue)
-        self.monitor = asset_monitor.AssetMonitor(self.plt_list)
+        self.monitor = arbitrage_monitor.ArbitrageMonitor(self.plt_list)
         self.running = False
 
     def start_trade(self):
