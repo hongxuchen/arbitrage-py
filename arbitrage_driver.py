@@ -52,6 +52,7 @@ class Driver(object):
         self.monitor.join()
 
     def main_run(self):
+        common.get_logger().info('=' * 80)
         common.get_logger().warning('[D] start trade')
         driver.start_trade()
         while True:

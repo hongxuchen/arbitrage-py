@@ -92,7 +92,7 @@ def handle_retry(exception, handler):
                 logger.error('Exception during retrying:"{}", will RETRY'.format(current_exception))
                 continue
             else:
-                return handle_exit(e)  # fail, exit
+                handle_exit(e)  # fail, exit
     logger.critical(
         'SLEEP {}s for Exception: "{}"'.format(config.REQUEST_EXCEPTION_WAIT_SECONDS, current_exception))
     time.sleep(config.REQUEST_EXCEPTION_WAIT_SECONDS)

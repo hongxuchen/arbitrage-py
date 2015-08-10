@@ -85,18 +85,18 @@ class Producer(threading.Thread):
             amount = max(self.min_amount, amount)
             return amount
 
-        amount = amount_refine()
+        final_amount = amount_refine()
 
         Producer._logger.debug('[P] amount obtained')
 
         # case 1: no trade
-        if amount - self.min_amount < config.MINOR_DIFF:
+        if final_amount - self.min_amount < config.MINOR_DIFF:
             Producer._logger.info('[P] arbitrage cancelled, insufficient amount')
             return False
 
         # case 2: trade
-        buy_trade = Trader(plt_a, 'buy', ask_a_adjust_price, amount)  # buy at plt_a
-        sell_trade = Trader(plt_b, 'sell', bid_b_adjust_price, amount)  # sell at plt_b
+        buy_trade = Trader(plt_a, 'buy', ask_a_adjust_price, final_amount)  # buy at plt_a
+        sell_trade = Trader(plt_b, 'sell', bid_b_adjust_price, final_amount)  # sell at plt_b
         # (buy, sell)
         trade_pair = (buy_trade, sell_trade)
         now = time.time()
