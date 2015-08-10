@@ -41,7 +41,7 @@ class ArbitrageProducer(threading.Thread):
         TODO: ensure this trade MUST succeed
         :return:
         """
-        ArbitrageProducer._logger.warning('Arbitrage Start')
+        ArbitrageProducer._logger.warning('[P] Arbitrage Start')
         with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
             order_ids = executor.map(lambda t: t.regular_trade(t.catelog, t.price, t.amount), trade_pair)
         for trade, order_id in zip(trade_pair, order_ids):
@@ -91,7 +91,7 @@ class ArbitrageProducer(threading.Thread):
 
         # case 1: no trade
         if amount - self.min_amount < config.MINOR_DIFF:
-            ArbitrageProducer._logger.info('[P]arbitrage cancelled, insufficient amount')
+            ArbitrageProducer._logger.info('[P] arbitrage cancelled, insufficient amount')
             return False
 
         # case 2: trade

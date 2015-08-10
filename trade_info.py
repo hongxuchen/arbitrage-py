@@ -35,7 +35,7 @@ class TradeInfo(object):
         NOTE: only platform is guaranteed to be unchanged
         :return: order_id
         """
-        TradeInfo._logger.debug('BEFORE trade')
+        # TradeInfo._logger.debug('BEFORE trade')
         order_id = self.plt.trade(catelog, price, amount)
         TradeInfo._logger.warning(
             'Trade in {:10s}: {:4s} {:10.4f} {:3s} at price {:10.4f} cny, order_id={:d}'.format(
@@ -62,9 +62,7 @@ class TradeInfo(object):
             asset_amount = asset_info.afford_buy_amount(trade_price)
             if asset_amount >= trade_amount:
                 return True
-            # asset_amount not enough
-            else:
-                ################################################
+            else:  # asset_amount not enough
                 waited_asset_times += 1
                 if waited_asset_times > config.ASSET_WAIT_MAX:
                     TradeInfo._logger.critical(
@@ -72,8 +70,8 @@ class TradeInfo(object):
                             self.plt_name, self.catelog, config.ASSET_WAIT_MAX))
                     # TODO should avoid further "not afford"
                     return False
-                ################################################
                 # adjust to "nearer price"
+                # FIXME this conflicts with the currently adjusted arbitrage prices
                 trade_price -= (trade_price - self.price) / (config.ASSET_WAIT_MAX + 1)
 
     # noinspection PyPep8Naming

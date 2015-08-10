@@ -9,9 +9,6 @@ class Platform(object):
         self.domain = info['domain']
         self.key = None
 
-    def _real_uri(self, api_type):
-        pass
-
     def ask1(self):
         '''
         :return: ask1 price

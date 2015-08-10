@@ -146,8 +146,8 @@ class CHBTC(Platform):
 
         m = hashlib.md5()
         m.update(k_opad)
-        subStr = dg[0:16]
-        m.update(subStr)
+        sub_str = dg[0:16]
+        m.update(sub_str)
         dg = m.hexdigest()
         return dg
 

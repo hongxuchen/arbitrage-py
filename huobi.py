@@ -41,10 +41,6 @@ class HuoBi(Platform):
         self.key = common.get_key_from_data('HuoBi')
         self.api_private = ['cancel_order', 'get_account_info', 'buy', 'sell', 'order_info']
 
-    def _real_uri(self, api_type):
-        print('not used, exit')
-        os._exit(1)
-
     @staticmethod
     def _sign(params):
         params = sorted(params.iteritems(), key=lambda d: d[0], reverse=False)
