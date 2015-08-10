@@ -18,6 +18,7 @@ class Consumer(threading.Thread):
         super(Consumer, self).__init__()
         self.adjuster_queue = adjuster_queue
 
+    # noinspection PyMethodMayBeStatic
     def consume(self, adjuster):
         Consumer._logger.debug('[C] Consuming')
         seconds = adjuster.seconds_since_arbitrage()

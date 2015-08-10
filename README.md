@@ -24,6 +24,10 @@ reverse the fiat amount for futher trade. The net strategy is that we can change
 CHBTC Error: code=2001, msg=人民币账户余额不足 # no ltc
 ```
 
+```
+HuoBi Error: code=37, msg=该委托已在队列中，不能取消或修
+```
+
 ## hosts
 - 121.199.251.136 www.okcoin.cn
 - 119.28.48.217   okcoin.cn
