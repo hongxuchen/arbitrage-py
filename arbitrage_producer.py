@@ -66,7 +66,7 @@ class Producer(threading.Thread):
         ## lock here
         with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
             asset_info = executor.map(lambda plt: AssetInfo(plt), self.plt_list)
-        # ArbitrageProducer._logger.debug('[P] asset_info got')
+        Producer._logger.debug('[P] asset_info obtained')
         asset_info_list = list(asset_info)
         asset_info_a = asset_info_list[i]
         asset_info_b = asset_info_list[1 - i]
@@ -87,7 +87,7 @@ class Producer(threading.Thread):
 
         amount = amount_refine()
 
-        # ArbitrageProducer._logger.debug('[P] amount got')
+        Producer._logger.debug('[P] amount obtained')
 
         # case 1: no trade
         if amount - self.min_amount < config.MINOR_DIFF:
@@ -100,7 +100,7 @@ class Producer(threading.Thread):
         # (buy, sell)
         trade_pair = (buy_trade, sell_trade)
         now = time.time()
-        # ArbitrageProducer._logger.debug('[P] trade_pair got')
+        Producer._logger.debug('[P] trade_pair obtained')
         Producer.process_trade(trade_pair)
         Producer._logger.info('[P] arbitrage done')
         adjuster = Adjuster(trade_pair, now)
@@ -134,7 +134,7 @@ class Producer(threading.Thread):
     def process_arbitrage(self):
         with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
             info_list = list(executor.map(lambda plt: plt.ask_bid_list(1), self.plt_list))
-        # ArbitrageProducer._logger.debug('[P] ask_bid_list got')
+        Producer._logger.debug('[P] ask_bid_list obtained')
         length = len(info_list[0])
 
         ask_list = [info[length / 2 - 1] for info in info_list]

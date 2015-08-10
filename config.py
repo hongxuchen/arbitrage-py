@@ -64,6 +64,8 @@ EMAILING_INTERVAL_SECONDS = 3600
 
 PRICE_ROUND = 2.0
 
+MUTEX_TIMEOUTS = 3.0
+
 ####################################################################
 
 exceed_max = {
