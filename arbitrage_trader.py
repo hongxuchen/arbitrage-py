@@ -4,7 +4,7 @@ import common
 import config
 
 
-class TradeInfo(object):
+class Trader(object):
     _logger = common.get_logger()
 
     def __init__(self, plt, catelog, price, amount, fiat='cny'):
@@ -37,7 +37,7 @@ class TradeInfo(object):
         """
         # TradeInfo._logger.debug('BEFORE trade')
         order_id = self.plt.trade(catelog, price, amount)
-        TradeInfo._logger.warning(
+        Trader._logger.warning(
             'Trade in {:10s}: {:4s} {:10.4f} {:3s} at price {:10.4f} cny, order_id={:d}'.format(
                 self.plt_name, catelog, amount, self.coin_type, price, order_id))
         return order_id
@@ -65,7 +65,7 @@ class TradeInfo(object):
             else:  # asset_amount not enough
                 waited_asset_times += 1
                 if waited_asset_times > config.ASSET_WAIT_MAX:
-                    TradeInfo._logger.critical(
+                    Trader._logger.critical(
                         '{}: not afford to "{}" after waiting > {} times'.format(
                             self.plt_name, self.catelog, config.ASSET_WAIT_MAX))
                     # TODO should avoid further "not afford"
@@ -101,7 +101,7 @@ class TradeInfo(object):
             afford_info = self._asset_afford_trade(trade_amount, trade_price)
             # TODO: check whether needing to run in different threads
             if afford_info:
-                TradeInfo._logger.warning('{} bi-directional adjust_trade'.format(self.plt_name))
+                Trader._logger.warning('{} bi-directional adjust_trade'.format(self.plt_name))
                 # trade1, must succeed
                 self.regular_trade(trade_catelog, trade_price, trade_amount)
                 # trade2, must succeed in principle
@@ -112,7 +112,7 @@ class TradeInfo(object):
                 # TODO: may fail, should handle
                 order_id = self.regular_trade(reverse_catelog, reverse_price, reverse_amount)
                 if order_id == config.INVALID_ORDER_ID:
-                    TradeInfo._logger.critical(
+                    Trader._logger.critical(
                         'Failed reverse at {} during bi-directional trade, to be adjusted by monitor'.format(
                             self.plt_name))
                     return False
@@ -124,7 +124,7 @@ class TradeInfo(object):
             trade_amount = self.amount
             afford_info = self._asset_afford_trade(trade_amount, trade_price)
             if afford_info:
-                TradeInfo._logger.warning('{} single adjust_trade'.format(self.plt_name))
+                Trader._logger.warning('{} single adjust_trade'.format(self.plt_name))
                 # trade must succeed
                 self.regular_trade(trade_catelog, trade_price, trade_amount)
                 return True
@@ -133,7 +133,7 @@ class TradeInfo(object):
     # do nothing if order invalid
     def cancel(self):
         if self.order_id != -1:
-            TradeInfo._logger.warning('{:10s} cancel order_id={}'.format(self.plt_name, self.order_id))
+            Trader._logger.warning('{:10s} cancel order_id={}'.format(self.plt_name, self.order_id))
             return self.plt.cancel(self.order_id)
 
     def get_order_info(self):

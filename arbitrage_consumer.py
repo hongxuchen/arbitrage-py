@@ -10,19 +10,19 @@ import config
 from okcoin import OKCoinCN
 
 
-class ArbitrageConsumer(threading.Thread):
+class Consumer(threading.Thread):
     _logger = common.get_logger()
 
     def __init__(self, adjuster_queue):
-        super(ArbitrageConsumer, self).__init__()
+        super(Consumer, self).__init__()
         self.adjuster_queue = adjuster_queue
 
     def consume(self, adjuster):
-        ArbitrageConsumer._logger.debug('[C] Consuming')
+        Consumer._logger.debug('[C] Consuming')
         seconds = adjuster.seconds_since_arbitrage()
         if seconds < config.PENDING_SECONDS:
             sleep_seconds = config.PENDING_SECONDS - seconds
-            ArbitrageConsumer._logger.info('[C] sleep for {:.3f}s'.format(sleep_seconds))
+            Consumer._logger.info('[C] sleep for {:.3f}s'.format(sleep_seconds))
             time.sleep(sleep_seconds)
         adjuster.adjust_pending()
 
@@ -30,7 +30,7 @@ class ArbitrageConsumer(threading.Thread):
         while True:
             arbitrage = self.adjuster_queue.get()
             if arbitrage is common.SIGNAL:
-                ArbitrageConsumer._logger.debug('[C] Signal')
+                Consumer._logger.debug('[C] Signal')
                 break
             self.consume(arbitrage)
 

@@ -24,15 +24,15 @@ except ImportError:
     import queue
 
 
-class ArbitrageDriver():
+class Driver(object):
     def __init__(self):
         common.init_logger()
         enabled_plt = common.get_key_from_data('Enabled')
         self.plt_list = [select_plt_dict[plt]() for plt in enabled_plt]
         self.adjuster_queue = queue.Queue()
-        self.producer = arbitrage_producer.ArbitrageProducer(self.plt_list, self.adjuster_queue)
-        self.consumer = arbitrage_consumer.ArbitrageConsumer(self.adjuster_queue)
-        self.monitor = arbitrage_monitor.ArbitrageMonitor(self.plt_list)
+        self.producer = arbitrage_producer.Producer(self.plt_list, self.adjuster_queue)
+        self.consumer = arbitrage_consumer.Consumer(self.adjuster_queue)
+        self.monitor = arbitrage_monitor.Monitor(self.plt_list)
         self.running = False
 
     def start_trade(self):
@@ -64,5 +64,5 @@ class ArbitrageDriver():
 
 
 if __name__ == '__main__':
-    driver = ArbitrageDriver()
+    driver = Driver()
     driver.main_run()

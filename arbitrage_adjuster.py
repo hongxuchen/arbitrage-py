@@ -9,7 +9,7 @@ from bitbays import BitBays
 import common
 import config
 from okcoin import OKCoinCN
-from trade_info import TradeInfo
+from arbitrage_trader import Trader
 
 
 class Adjuster(object):
@@ -128,14 +128,14 @@ class Adjuster(object):
         trade_plt = t1.plt
         trade_price = t1.price
         # not really care about the EXACT price
-        new_t1 = TradeInfo(trade_plt, trade_catelog, trade_price, trade_amount)
+        new_t1 = Trader(trade_plt, trade_catelog, trade_price, trade_amount)
         with common.MUTEX:
             Adjuster._logger.info('[C] LOCK acquired')
             t1_adjust_status = new_t1.adjust_trade()
             if t1_adjust_status is False:
                 trade_plt = t2.plt
                 trade_price = t2.price
-                new_t2 = TradeInfo(trade_plt, trade_catelog, trade_price, trade_amount)
+                new_t2 = Trader(trade_plt, trade_catelog, trade_price, trade_amount)
                 t2_adjust_status = new_t2.adjust_trade()
                 # should be rather rare case
                 if t2_adjust_status is False:
@@ -147,8 +147,8 @@ class Adjuster(object):
 if __name__ == '__main__':
     okcoin = OKCoinCN()
     bitbays = BitBays()
-    ok_trade = TradeInfo(okcoin, 'buy', 10, 0.01)
-    bb_trade = TradeInfo(bitbays, 'sell', 10000, 0.01)
+    ok_trade = Trader(okcoin, 'buy', 10, 0.01)
+    bb_trade = Trader(bitbays, 'sell', 10000, 0.01)
     trade_pair = ok_trade, bb_trade
     now = time.time()
     arbitrage = Adjuster(trade_pair, now)
