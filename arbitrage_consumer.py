@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from __future__ import print_function
+from Queue import Empty
 import threading
 import time
 
@@ -28,11 +29,14 @@ class Consumer(threading.Thread):
 
     def run(self):
         while True:
-            arbitrage = self.adjuster_queue.get()
-            if arbitrage is common.SIGNAL:
-                Consumer._logger.debug('[C] Signal')
-                break
-            self.consume(arbitrage)
+            try:
+                arbitrage = self.adjuster_queue.get(timeout=config.CONSUMER_TIMEOUTS)
+                if arbitrage is common.SIGNAL:
+                    Consumer._logger.debug('[C] Signal')
+                    break
+                self.consume(arbitrage)
+            except Empty:
+                pass
 
 
 if __name__ == '__main__':
