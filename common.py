@@ -32,9 +32,9 @@ def to_decimal(value_str, precision=config.DISPLAY_PRECISION):
     return round(float(value_str), precision)
 
 
-def reverse_catelog(original_catelog):
-    assert (original_catelog in ['buy', 'sell'])
-    if original_catelog == 'buy':
+def reverse_catalog(original_catalog):
+    assert (original_catalog in ['buy', 'sell'])
+    if original_catalog == 'buy':
         return 'sell'
     else:  # sell
         return 'buy'
@@ -44,9 +44,9 @@ def round_price(price, precision=config.HuoBi_Precision):
     return round(price, precision)
 
 
-def adjust_price(trade_catelog, price):
-    assert (trade_catelog in ['buy', 'sell'])
-    if trade_catelog == 'buy':
+def adjust_price(trade_catalog, price):
+    assert (trade_catalog in ['buy', 'sell'])
+    if trade_catalog == 'buy':
         new_price = price * (1 + config.ADJUST_PERCENTAGE)
     else:  # sell
         new_price = price * (1 - config.ADJUST_PERCENTAGE)

@@ -74,8 +74,8 @@ class Monitor(threading.Thread):
             common.send_msg(report)
             self.last_notifier_time = now
 
-    def _get_plt_price_list(self, catelog):
-        if catelog == 'buy':
+    def _get_plt_price_list(self, catalog):
+        if catalog == 'buy':
             with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
                 ask1_list = list(executor.map(lambda plt: plt.ask1(), self.plt_list))
             pack = zip(self.plt_list, ask1_list)
@@ -101,7 +101,7 @@ class Monitor(threading.Thread):
                     self.coin_exceed_counter, self.old_coin_change_amount, coin_change_amount))
             # test whether trade is needed
             if self.coin_exceed_counter > config.COIN_EXCEED_TIMES:
-                trade_catelog = 'sell'
+                trade_catalog = 'sell'
             else:
                 return True  # no trade
         elif coin_change_amount < -Monitor.exceed_max:
@@ -117,34 +117,34 @@ class Monitor(threading.Thread):
                 self.coin_exceed_counter -= 1
             # test whether trade is needed
             if self.coin_exceed_counter < -config.COIN_EXCEED_TIMES:
-                trade_catelog = 'buy'
+                trade_catalog = 'buy'
             else:
                 return True  # no trade
         else:  # -exceed_max <= coin_change_amount <= exceed_max
             self.coin_exceed_counter = 0
             return True  # no trade
-        adjust_status = self.adjust_trade(trade_catelog, coin_change_amount)
+        adjust_status = self.adjust_trade(trade_catalog, coin_change_amount)
         ## reset after trade
         self.old_coin_change_amount = 0.0
         self.coin_exceed_counter = 0
         return adjust_status
 
-    def adjust_trade(self, trade_catelog, coin_change_amount):
+    def adjust_trade(self, trade_catalog, coin_change_amount):
         adjust_status = True
         Monitor._logger.warning(
             '[M] exceed_counter={}, amount={}'.format(self.coin_exceed_counter, coin_change_amount))
         trade_amount = abs(coin_change_amount)
-        plt_price_list = self._get_plt_price_list(trade_catelog)
+        plt_price_list = self._get_plt_price_list(trade_catalog)
         ### first try
         trade_plt, trade_price = plt_price_list[0]
-        monitor_t1 = Trader(trade_plt, trade_catelog, trade_price, trade_amount)
+        monitor_t1 = Trader(trade_plt, trade_catalog, trade_price, trade_amount)
         Monitor._logger.warning('[M] adjust at {}'.format(monitor_t1.plt_name))
         t1_res = monitor_t1.adjust_trade()
         if t1_res is False:
             Monitor._logger.warning('[M] FAILED adjust at {}'.format(monitor_t1.plt_name))
             # second try
             trade_plt, trade_price = plt_price_list[1]
-            monitor_t2 = Trader(trade_plt, trade_catelog, trade_price, trade_amount)
+            monitor_t2 = Trader(trade_plt, trade_catalog, trade_price, trade_amount)
             Monitor._logger.warning('[M] adjust at {}'.format(monitor_t2.plt_name))
             t2_res = monitor_t2.adjust_trade()
             if t2_res is False:

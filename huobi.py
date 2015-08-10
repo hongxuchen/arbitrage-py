@@ -18,7 +18,7 @@ class HuoBi(Platform):
         'btc': 1,
         'ltc': 2
     }
-    catelog_map = {
+    catalog_map = {
         1: 'buy',
         2: 'sell',
         3: 'buy',
@@ -146,8 +146,8 @@ class HuoBi(Platform):
         order_amount = common.to_decimal(res['order_amount'])
         processed = common.to_decimal(res['processed_amount'])
         remaining_amount = order_amount - processed
-        catelog = HuoBi.catelog_map[res['type']]
-        order_info = OrderInfo(catelog, remaining_amount)
+        catalog = HuoBi.catalog_map[res['type']]
+        order_info = OrderInfo(catalog, remaining_amount)
         return order_info
 
     def assets(self):

@@ -43,7 +43,7 @@ class Producer(threading.Thread):
         """
         Producer._logger.warning('[P] Arbitrage Start')
         with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
-            order_ids = executor.map(lambda t: t.regular_trade(t.catelog, t.price, t.amount), trade_pair)
+            order_ids = executor.map(lambda t: t.regular_trade(t.catalog, t.price, t.amount), trade_pair)
         for trade, order_id in zip(trade_pair, order_ids):
             if order_id == config.INVALID_ORDER_ID:
                 Producer._logger.critical('order_id not exists, EXIT')

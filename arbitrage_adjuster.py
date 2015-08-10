@@ -34,7 +34,7 @@ class Adjuster(object):
         a2 = t2.amount
         assert abs(a1 - a2) < config.MINOR_DIFF
         trade_amount = a1
-        if t1.catelog == 'buy':
+        if t1.catalog == 'buy':
             buy_trade = t1
             sell_trade = t2
         else:  # sell
@@ -60,7 +60,7 @@ class Adjuster(object):
             return t2, t1
 
     @staticmethod
-    def normalize_trade_pair_strategy2(trade_pair, catelog):
+    def normalize_trade_pair_strategy2(trade_pair, catalog):
         """
         This strategy requires to request each plt once
         :return: trade pair, first is preferred
@@ -69,7 +69,7 @@ class Adjuster(object):
         t2 = trade_pair[1]
         p1 = t1.plt
         p2 = t2.plt
-        if catelog == 'buy':  # buy lower
+        if catalog == 'buy':  # buy lower
             p1_ask = p1.ask1()
             p2_ask = p2.ask1()
             if p1_ask < p2_ask:
@@ -99,7 +99,7 @@ class Adjuster(object):
         """
         if finding pending, cancel order ASAP; cancel failure means no pending!
         since trade_pair is of (buy, sell), this returns the *buy* amount
-        :return: None if adjust not needed; otherwise (catelog, amount)
+        :return: None if adjust not needed; otherwise (catalog, amount)
         """
         with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
             remaining_list = list(executor.map(self._get_remaining, self.trade_pair))
@@ -109,33 +109,33 @@ class Adjuster(object):
         Adjuster._logger.warning(
             '[C] A1={:<10.4f}, A2={:<10.4f}, A={:<10.4f}'.format(remaining_list[0], remaining_list[1], amount))
         if amount < -config.MINOR_DIFF:
-            trade_catelog = 'sell'
+            trade_catalog = 'sell'
         elif amount > config.MINOR_DIFF:
-            trade_catelog = 'buy'
+            trade_catalog = 'buy'
         else:
             return None
         trade_amount = abs(amount)
-        return trade_catelog, trade_amount
+        return trade_catalog, trade_amount
 
     # noinspection PyPep8Naming
     def adjust_pending(self):
         adjust_res = self.get_adjust_info()
         if adjust_res is None:
             return
-        trade_catelog, trade_amount = adjust_res[0], adjust_res[1]
+        trade_catalog, trade_amount = adjust_res[0], adjust_res[1]
         # t1, t2 = self.normalize_trade_pair_strategy1(self.trade_pair)
-        t1, t2 = self.normalize_trade_pair_strategy2(self.trade_pair, trade_catelog)
+        t1, t2 = self.normalize_trade_pair_strategy2(self.trade_pair, trade_catalog)
         trade_plt = t1.plt
         trade_price = t1.price
         # not really care about the EXACT price
-        new_t1 = Trader(trade_plt, trade_catelog, trade_price, trade_amount)
+        new_t1 = Trader(trade_plt, trade_catalog, trade_price, trade_amount)
         with common.MUTEX:
-            Adjuster._logger.info('[C] LOCK acquired')
+            Adjuster._logger.info('[C] LOCK acquired, adjust trading')
             t1_adjust_status = new_t1.adjust_trade()
             if t1_adjust_status is False:
                 trade_plt = t2.plt
                 trade_price = t2.price
-                new_t2 = Trader(trade_plt, trade_catelog, trade_price, trade_amount)
+                new_t2 = Trader(trade_plt, trade_catalog, trade_price, trade_amount)
                 t2_adjust_status = new_t2.adjust_trade()
                 # should be rather rare case
                 if t2_adjust_status is False:

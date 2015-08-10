@@ -43,11 +43,11 @@ class Driver(object):
         self.monitor.start()
 
     def stop_trade(self):
-        common.get_logger().warning('[D] stopping Producer-Consumer')
+        common.get_logger().info('[D] stopping Producer-Consumer')
         self.producer.running = False
         self.producer.join()
         self.consumer.join()
-        common.get_logger().warning('[D] stopping monitor')
+        common.get_logger().info('[D] stopping monitor')
         self.monitor.running = False
         self.monitor.join()
 
