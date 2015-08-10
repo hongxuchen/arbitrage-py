@@ -149,7 +149,7 @@ if __name__ == '__main__':
     bitbays = BitBays()
     ok_trade = Trader(okcoin, 'buy', 10, 0.01)
     bb_trade = Trader(bitbays, 'sell', 10000, 0.01)
-    trade_pair = ok_trade, bb_trade
+    t_pair = ok_trade, bb_trade
     now = time.time()
-    arbitrage = Adjuster(trade_pair, now)
+    arbitrage = Adjuster(t_pair, now)
     print(arbitrage)

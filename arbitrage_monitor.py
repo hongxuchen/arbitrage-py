@@ -62,11 +62,11 @@ class Monitor(threading.Thread):
 
     @staticmethod
     def report_asset_changes(coin, fiat):
-        report = 'Asset Change: {:10.4f}{:3s}, {:10.4f}cny'.format(coin, Monitor.coin_type, fiat)
+        report = '[M] Asset Change: {:10.4f}{:3s}, {:10.4f}cny'.format(coin, Monitor.coin_type, fiat)
         common.get_asset_logger().warning(report)
 
     def try_notify_asset_changes(self, coin, fiat):
-        report = '[M] Asset Change: {:10.4f}{:3s}, {:10.4f}cny'.format(coin, Monitor.coin_type, fiat)
+        report = 'Asset Change: {:10.4f}{:3s}, {:10.4f}cny'.format(coin, Monitor.coin_type, fiat)
         now = time.time()
         # config.EMAILING_INTERVAL_SECONDS = 8
         if now - self.last_notifier_time >= config.EMAILING_INTERVAL_SECONDS:
