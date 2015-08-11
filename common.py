@@ -101,8 +101,11 @@ def handle_retry(exception, handler):
     retry_counter = 0
     while retry_counter < config.RETRY_MAX:
         retry_counter += 1
-        try:
+        if retry_counter % 10 == 0:
+            time.sleep(config.RETRY_SLEEP_SECONDS)
+        else:
             time.sleep(config.RETRY_SECONDS)
+        try:
             logger.warning('retry_counter={:<2}'.format(retry_counter))
             res = handler()  # real handle function
             # logger.warning('res={}'.format(res))
@@ -115,16 +118,8 @@ def handle_retry(exception, handler):
                 continue
             else:
                 handle_exit(e)  # fail, exit
-    logger.critical(
-        'SLEEP {}s for Exception: "{}"'.format(config.REQUEST_EXCEPTION_WAIT_SECONDS, current_exception))
-    time.sleep(config.REQUEST_EXCEPTION_WAIT_SECONDS)
-    sleep_recorder()
-    if sleep_recorder.counter > config.SLEEP_MAX:
-        reset_sleep_recorder()
-        handle_exit(current_exception)
-    res = handle_retry(exception, handler)  # recursive
-    reset_sleep_recorder()
-    return res
+    logger.critical('Request Exception "{}" after retrying {} times'.format(current_exception, config.RETRY_MAX))
+    handle_exit(current_exception)
 
 
 logging_yaml = os.path.join(os.path.dirname(__file__), 'logging.yaml')
