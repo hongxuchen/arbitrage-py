@@ -24,6 +24,11 @@ handlers:
         formatter: fileFormatter
         level: INFO
         filename: asset.LOG
+    debug_file:
+        class: logging.FileHandler
+        formatter: fileFormatter
+        level: DEBUG
+        filename: debug.LOG
 
 loggers:
     logger:
@@ -33,6 +38,10 @@ loggers:
     asset_logger:
         level: DEBUG
         handlers: [asset_file]
+        propagate: yes
+    debug_logger:
+        level: DEBUG
+        handlers: [debug_file]
         propagate: yes
 
 root:

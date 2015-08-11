@@ -20,6 +20,19 @@ import yaml
 import ipgetter
 import config
 
+def synchronized(lock):
+    """ Synchronization decorator. """
+
+    def wrap(f):
+        def newFunction(*args, **kw):
+            lock.acquire()
+            try:
+                return f(*args, **kw)
+            finally:
+                lock.release()
+        return newFunction
+    return wrap
+
 
 def get_usd_cny_rate():
     r = requests.get(
@@ -66,7 +79,8 @@ def handle_exit(exception):
     # noinspection PyProtectedMember
     os._exit(1)
 
-
+my_rlock = threading.RLock()
+@synchronized(my_rlock)
 def handle_retry(exception, handler):
     """
     # NOTE: this handling may be blocked OR not blocked
@@ -84,6 +98,7 @@ def handle_retry(exception, handler):
             time.sleep(config.RETRY_SECONDS)
             logger.warning('retry_counter={:<2}'.format(retry_counter))
             res = handler()  # real handle function
+            logger.warning('res={}'.format(res))
             return res  # succeed
         except Exception as e:  # all request exceptions
             if is_retry_exception(e):
