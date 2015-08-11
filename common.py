@@ -56,6 +56,7 @@ def round_price(price, precision=config.HuoBi_Precision):
 
 
 def adjust_price(trade_catalog, price):
+    get_logger.info('trade_catalog={}, price={}'.format(trade_catalog, price))
     assert (trade_catalog in ['buy', 'sell'])
     if trade_catalog == 'buy':
         new_price = price * (1 + config.ADJUST_PERCENTAGE)
