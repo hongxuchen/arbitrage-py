@@ -19,11 +19,21 @@ reverse the fiat amount for futher trade. The net strategy is that we can change
 * Producer cannot release lock
 * considering using RLock
 * HuoBi error handling; HuoBi Retry
+* should NOT always retry
 
 # cases
 
 ```
 CHBTC Error: code=2001, msg=人民币账户余额不足 # no ltc
+```
+```
+  WARNING 2015-08-11 18:44:32     arbitrage_producer.py:  44 - [P] Arbitrage Start
+  WARNING 2015-08-11 18:44:34       arbitrage_trader.py:  42 - Trade in BitBays   : sell     0.0900 btc at price  1679.5400 cny, order_id=73580581
+    ERROR 2015-08-11 18:44:38                 common.py:  92 - RETRY for Exception: "HTTPSConnectionPool(host='api.huobi.com', port=443): Read timed out."
+  WARNING 2015-08-11 18:44:38                 common.py:  98 - retry_counter=1
+    ERROR 2015-08-11 18:44:40                  huobi.py:  77 - HuoBi Error: code=2, msg=没有足够的人民币
+  WARNING 2015-08-11 18:44:40       arbitrage_trader.py:  42 - Trade in HuoBi     : buy      0.0900 btc at price  1679.5400 cny, order_id=-1
+ CRITICAL 2015-08-11 18:44:40     arbitrage_producer.py:  49 - order_id not exists, EXIT
 ```
 
 ```

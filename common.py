@@ -56,7 +56,7 @@ def round_price(price, precision=config.HuoBi_Precision):
 
 
 def adjust_price(trade_catalog, price):
-    get_logger.info('trade_catalog={}, price={}'.format(trade_catalog, price))
+    get_logger().info('trade_catalog={}, price={}'.format(trade_catalog, price))
     assert (trade_catalog in ['buy', 'sell'])
     if trade_catalog == 'buy':
         new_price = price * (1 + config.ADJUST_PERCENTAGE)
@@ -74,9 +74,17 @@ def is_retry_exception(exception):
 
 def handle_exit(exception):
     get_logger().critical('Error during request:"{}", will EXIT'.format(exception))
-    send_msg('error during request')
+    send_msg('error during request: {}'.format(exception))
     # noinspection PyProtectedMember
     os._exit(1)
+
+def sleep_recorder():
+    sleep_recorder.counter += 1
+
+def reset_sleep_recorder():
+    sleep_recorder.counter = 0
+
+reset_sleep_recorder()
 
 # my_rlock = threading.RLock()
 # @synchronized(my_rlock)
@@ -110,8 +118,12 @@ def handle_retry(exception, handler):
     logger.critical(
         'SLEEP {}s for Exception: "{}"'.format(config.REQUEST_EXCEPTION_WAIT_SECONDS, current_exception))
     time.sleep(config.REQUEST_EXCEPTION_WAIT_SECONDS)
-    ### FIXME this cannot exit until connection recovers
+    sleep_recorder()
+    if sleep_recorder.counter > config.SLEEP_MAX:
+        reset_sleep_recorder()
+        handle_exit(current_exception)
     res = handle_retry(exception, handler)  # recursive
+    reset_sleep_recorder()
     return res
 
 
