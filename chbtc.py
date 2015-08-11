@@ -49,13 +49,13 @@ class CHBTC(Platform):
                     uri = CHBTC.data_domain + api_type
                 else:
                     uri = CHBTC.data_domain + 'ltc/' + api_type
-                r = requests.get(uri, headers=CHBTC.common_headers)
+                r = requests.get(uri, headers=CHBTC.common_headers, timeout=config.TIMEOUT)
             elif api_type in self.api_private:
                 base_uri = self.domain + api_type + '?'
                 param_str = self._signed_param(params)
                 request_str = base_uri + param_str
                 # print(request_str)
-                r = requests.get(request_str)
+                r = requests.get(request_str, timeout=config.TIMEOUT)
             else:
                 os._exit(1)
             res_data = r.json()

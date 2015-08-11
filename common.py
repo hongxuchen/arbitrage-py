@@ -79,8 +79,8 @@ def handle_exit(exception):
     # noinspection PyProtectedMember
     os._exit(1)
 
-my_rlock = threading.RLock()
-@synchronized(my_rlock)
+# my_rlock = threading.RLock()
+# @synchronized(my_rlock)
 def handle_retry(exception, handler):
     """
     # NOTE: this handling may be blocked OR not blocked
