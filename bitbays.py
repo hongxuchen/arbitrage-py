@@ -70,8 +70,7 @@ class BitBays(Platform):
             elif api_type in self.api_private:
                 params['nonce'] = self._nonce()
                 headers = self._post_param(params)
-                r = requests.post(self._real_uri(api_type), data=params, headers=headers,
-                                  timeout=config.TIMEOUT, verify=True)
+                r = requests.post(self._real_uri(api_type), data=params, headers=headers, timeout=config.TIMEOUT)
             else:
                 BitBays._logger.critical('api_type={} not supported'.format(api_type))
                 os._exit(1)

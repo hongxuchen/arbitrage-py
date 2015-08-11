@@ -56,8 +56,7 @@ class HuoBi(Platform):
         def _request_impl():
             r = None
             if api_uri not in self.api_private:
-                r = requests.get(api_uri, params=params, headers=HuoBi.common_headers, timeout=config.TIMEOUT,
-                                 verify=True)
+                r = requests.get(api_uri, params=params, headers=HuoBi.common_headers, timeout=config.TIMEOUT)
             else:
                 timestamp = long(time.time())
                 param_dict = {

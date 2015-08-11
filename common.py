@@ -35,9 +35,7 @@ def synchronized(lock):
 
 
 def get_usd_cny_rate():
-    r = requests.get(
-        "http://finance.yahoo.com/d/quotes.csv?e=.csv&f=sl1d1t1&s=USDCNY=X",
-        timeout=5)
+    r = requests.get("http://finance.yahoo.com/d/quotes.csv?e=.csv&f=sl1d1t1&s=USDCNY=X", timeout=config.TIMEOUT)
     return decimal.Decimal(r.text.split(",")[1])
 
 
@@ -98,7 +96,7 @@ def handle_retry(exception, handler):
             time.sleep(config.RETRY_SECONDS)
             logger.warning('retry_counter={:<2}'.format(retry_counter))
             res = handler()  # real handle function
-            logger.warning('res={}'.format(res))
+            # logger.warning('res={}'.format(res))
             return res  # succeed
         except Exception as e:  # all request exceptions
             if is_retry_exception(e):
