@@ -111,32 +111,35 @@ class CHBTC(Platform):
     def api_trades(self):
         return self._setup_requests('trades')
 
-    def __fill(self, value, lenght, fillByte):
-        if len(value) >= lenght:
+    @staticmethod
+    def __fill(value, length, fill_byte):
+        if len(value) >= length:
             return value
         else:
-            fillSize = lenght - len(value)
-        return value + chr(fillByte) * fillSize
+            fill_size = length - len(value)
+            return value + chr(fill_byte) * fill_size
 
-    def __doXOr(self, s, value):
+    @staticmethod
+    def __do_xor(s, value):
         slist = list(s)
         for index in xrange(len(slist)):
             slist[index] = chr(ord(slist[index]) ^ value)
         return "".join(slist)
 
     ## TODO use hashlib
-    def __digest(self, aValue):
-        value = struct.pack("%ds" % len(aValue), aValue)
+    @staticmethod
+    def __digest(a_val):
+        value = struct.pack("%ds" % len(a_val), a_val)
         h = sha.new()
         h.update(value)
         dg = h.hexdigest()
         return dg
 
-    def __hmacSign(self, aValue, aKey):
-        keyb = struct.pack("%ds" % len(aKey), aKey)
-        value = struct.pack("%ds" % len(aValue), aValue)
-        k_ipad = self.__doXOr(keyb, 0x36)
-        k_opad = self.__doXOr(keyb, 0x5c)
+    def __hmac_sign(self, a_value, a_key):
+        keyb = struct.pack("%ds" % len(a_key), a_key)
+        value = struct.pack("%ds" % len(a_value), a_value)
+        k_ipad = self.__do_xor(keyb, 0x36)
+        k_opad = self.__do_xor(keyb, 0x5c)
         k_ipad = self.__fill(k_ipad, 64, 54)
         k_opad = self.__fill(k_opad, 64, 92)
         m = hashlib.md5()
@@ -152,12 +155,10 @@ class CHBTC(Platform):
         return dg
 
     def _signed_param(self, param_dict):
-        # accesskey_str = 'accesskey=' + self.key['api']
-        # del param_dict['method']
         param_list = [l[0] + '=' + str(l[1]) for l in param_dict.items()]
         message_str = '&'.join(param_list)
         sha_secret = self.__digest(self.key['secret'])
-        sig = self.__hmacSign(message_str, sha_secret)
+        sig = self.__hmac_sign(message_str, sha_secret)
         sign_str = 'sign=' + sig
         now = int(time.time() * 1000)
         req_time_str = 'reqTime=' + str(now)
@@ -174,13 +175,13 @@ class CHBTC(Platform):
 
     def assets(self):
         user_info = self.api_getaccountinfo()['result']
-        fronzen, avail = user_info['frozen'], user_info['balance']
+        frozen, avail = user_info['frozen'], user_info['balance']
         l = [
             [
-                common.to_decimal(fronzen[self.symbol.upper()]['amount']),
+                common.to_decimal(frozen[self.symbol.upper()]['amount']),
                 common.to_decimal(avail[self.symbol.upper()]['amount'])],
             [
-                common.to_decimal(fronzen[self.coin_type.upper()]['amount']),
+                common.to_decimal(frozen[self.coin_type.upper()]['amount']),
                 common.to_decimal((avail[self.coin_type.upper()])['amount'])
             ]
         ]
@@ -245,7 +246,7 @@ if __name__ == '__main__':
     common.init_logger()
     chbtc = CHBTC()
     ask1 = chbtc.ask1()
-    print(type(ask1))
+    print(chbtc.assets())
     # order_id = chbtc.trade('buy', 2000, 0.001)
     # print(order_id)
     # order_info = chbtc.order_info(order_id)

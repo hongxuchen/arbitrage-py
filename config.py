@@ -51,10 +51,6 @@ MONITOR_FAIL_MAX = 2
 
 COIN_EXCEED_TIMES = 3
 
-HuoBi_Precision = 2
-# SLEEP_SECONDS = 0.34
-SLEEP_SECONDS = 0.4
-
 # CONFIG
 # upper_bound must > lower_bound for all platforms
 PENDING_SECONDS = 4.0
@@ -67,6 +63,9 @@ PRICE_ROUND = 2.0
 MUTEX_TIMEOUTS = 3.0
 
 ####################################################################
+
+HuoBi_Precision = 2
+SLEEP_SECONDS = 0.4
 
 exceed_max = {
     'btc': 0.001,
