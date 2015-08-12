@@ -81,8 +81,8 @@ class Producer(threading.Thread):
             plt_b_sell_amount = asset_info_b.afford_sell_amount() - config.ASSET_FOR_TRAID_DIFF
             amount = min(config.upper_bound[Producer.coin_type], ask_a_amount, bid_b_amount, plt_a_buy_amount,
                          plt_b_sell_amount)
-            amount = math.floor(amount * (10 ** config.TRADE_PRECISION)) / (10 ** config.TRADE_PRECISION)
             amount = max(self.min_amount, amount)
+            amount = common.adjust_amount(amount)
             return amount
 
         final_amount = amount_refine()

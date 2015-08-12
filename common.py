@@ -10,14 +10,13 @@ import smtplib
 import threading
 import sys
 import time
-
+import math
 import requests
-
 import requests.exceptions as req_except
 
 import yaml
-
 import ipgetter
+
 import config
 
 
@@ -66,6 +65,10 @@ def adjust_price(trade_catalog, price):
     else:  # sell
         new_price = price * (1 - config.ADJUST_PERCENTAGE)
     return round_price(new_price)
+
+
+def adjust_amount(trade_amount, precision=config.TRADE_PRECISION):
+    return math.floor(trade_amount * (10 ** precision)) / (10 ** precision)
 
 
 def is_retry_exception(exception):

@@ -123,7 +123,7 @@ class Monitor(threading.Thread):
         else:  # -exceed_max <= coin_change_amount <= exceed_max
             self.coin_exceed_counter = 0
             return True  # no trade
-        trade_amount = common.to_decimal(coin_change_amount)
+        trade_amount = common.adjust_amount(coin_change_amount)
         adjust_status = self.adjust_trade(trade_catalog, trade_amount)
         ## reset after trade
         self.old_coin_change_amount = 0.0

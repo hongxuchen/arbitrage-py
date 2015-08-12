@@ -2,6 +2,7 @@
 
 from __future__ import print_function
 import time
+import math
 
 import concurrent.futures
 
@@ -114,7 +115,7 @@ class Adjuster(object):
             trade_catalog = 'buy'
         else:
             return None
-        trade_amount = abs(amount)
+        trade_amount = common.adjust_amount(abs(amount))
         return trade_catalog, trade_amount
 
     # noinspection PyPep8Naming
