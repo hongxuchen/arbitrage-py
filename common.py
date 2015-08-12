@@ -20,17 +20,20 @@ import yaml
 import ipgetter
 import config
 
+
 def synchronized(lock):
     """ Synchronization decorator. """
 
     def wrap(f):
-        def newFunction(*args, **kw):
+        def new_func(*args, **kw):
             lock.acquire()
             try:
                 return f(*args, **kw)
             finally:
                 lock.release()
-        return newFunction
+
+        return new_func
+
     return wrap
 
 
@@ -78,13 +81,6 @@ def handle_exit(exception):
     # noinspection PyProtectedMember
     os._exit(1)
 
-def sleep_recorder():
-    sleep_recorder.counter += 1
-
-def reset_sleep_recorder():
-    sleep_recorder.counter = 0
-
-reset_sleep_recorder()
 
 # my_rlock = threading.RLock()
 # @synchronized(my_rlock)

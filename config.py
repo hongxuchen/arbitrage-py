@@ -46,7 +46,6 @@ TIMEOUT = 3.0
 RETRY_MAX = 80
 RETRY_SECONDS = 0.012
 RETRY_SLEEP_SECONDS = 10
-SLEEP_MAX = 10
 
 MONITOR_FAIL_MAX = 2
 
@@ -87,10 +86,10 @@ btc_diff_dict = {
         'CHBTC': 0.45, 'HuoBi': 0.45, 'OKCoinCN': 0.45
     },
     'CHBTC': {
-        'BitBays': 0.45, 'HuoBi': 0.75, 'OKCoinCN': 0.45
+        'BitBays': 0.45, 'HuoBi': 0.75, 'OKCoinCN': 0.75
     },
     'OKCoinCN': {
-        'BitBays': 0.45, 'CHBTC': 0.45, 'HuoBi': 0.75
+        'BitBays': 0.45, 'CHBTC': 0.75, 'HuoBi': 0.75
     },
     'HuoBi': {
         'BitBays': 0.45, 'CHBTC': 0.00, 'OKCoinCN': 0.00
