@@ -91,11 +91,11 @@ class CHBTC(Platform):
 
     def ask1(self):
         ticker = self.api_ticker()
-        return ticker['ticker']['sell']
+        return common.to_decimal(ticker['ticker']['sell'])
 
     def bid1(self):
         ticker = self.api_ticker()
-        return ticker['ticker']['buy']
+        return common.to_decimal(ticker['ticker']['buy'])
 
     def api_depth(self):
         depth = self._setup_requests('depth')
@@ -244,18 +244,20 @@ class CHBTC(Platform):
 if __name__ == '__main__':
     common.init_logger()
     chbtc = CHBTC()
-    order_id = chbtc.trade('buy', 2000, 0.001)
-    print(order_id)
-    order_info = chbtc.order_info(order_id)
-    print(order_info)
-    cancel = chbtc.cancel(order_id)
-    print(cancel)
-    order_id = chbtc.trade('sell', 1000, 0.001)
-    print(order_id)
-    order_info = chbtc.order_info(order_id)
-    print(order_info)
-    cancel = chbtc.cancel(order_id)
-    print(cancel)
+    ask1 = chbtc.ask1()
+    print(type(ask1))
+    # order_id = chbtc.trade('buy', 2000, 0.001)
+    # print(order_id)
+    # order_info = chbtc.order_info(order_id)
+    # print(order_info)
+    # cancel = chbtc.cancel(order_id)
+    # print(cancel)
+    # order_id = chbtc.trade('sell', 1000, 0.001)
+    # print(order_id)
+    # order_info = chbtc.order_info(order_id)
+    # print(order_info)
+    # cancel = chbtc.cancel(order_id)
+    # print(cancel)
     # order_info = chbtc.order_info(order_id)
     # print(order_info)
     # res = chbtc.cancel(order_id)
