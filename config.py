@@ -30,7 +30,6 @@ itbit_info = {
     'symbol': 'XBTUSD'
 }
 
-TRADE_PRECISION = 3
 DISPLAY_PRECISION = 6
 MINOR_DIFF = 10.0 ** (-DISPLAY_PRECISION)
 INVALID_ORDER_ID = -1
@@ -64,13 +63,14 @@ MUTEX_TIMEOUTS = 3.0
 
 ####################################################################
 
-HuoBi_Precision = 2
-SLEEP_SECONDS = 0.4
-
 exceed_max = {
     'btc': 0.001,
     'ltc': 0.01
 }
+
+HuoBi_Price_Precision = 2
+TRADE_PRECISION = 4
+SLEEP_SECONDS = 0.4
 
 upper_bound = {
     'btc': 0.6,

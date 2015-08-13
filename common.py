@@ -8,7 +8,6 @@ import logging.config
 import os
 import smtplib
 import threading
-import sys
 import time
 import math
 import requests
@@ -53,7 +52,7 @@ def reverse_catalog(original_catalog):
         return 'buy'
 
 
-def round_price(price, precision=config.HuoBi_Precision):
+def round_price(price, precision=config.HuoBi_Price_Precision):
     return round(price, precision)
 
 
