@@ -34,6 +34,15 @@ class Producer(threading.Thread):
         self.adjuster_queue.put(common.SIGNAL)
 
     @staticmethod
+    def _handle_failed_order(trade_pair):
+        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+            assets = list(executor.map(lambda t: AssetInfo(t.plt), trade_pair))
+        asset_str = '[asset info]\n' + '\n'.join(assets)
+        trade_str = '[trade_info]\n' + '\n'.join(trade_pair)
+        err_msg = 'msg: Found non-existent Order ID Error\n' + asset_str + '\n' + trade_str
+        common.handle_exit(err_msg)
+
+    @staticmethod
     def process_trade(trade_pair):
         """
         inital trading, this guarantees that the asset is enough
@@ -45,9 +54,7 @@ class Producer(threading.Thread):
             order_ids = executor.map(lambda t: t.regular_trade(t.catalog, t.price, t.amount), trade_pair)
         for trade, order_id in zip(trade_pair, order_ids):
             if order_id == config.INVALID_ORDER_ID:
-                # FIXME add info
-                err_msg = 'msg: [Producer] order_id not exists'
-                common.handle_exit(err_msg)
+                Producer._handle_failed_order(trade_pair)
             trade.set_order_id(order_id)
 
     def arbitrage_impl(self, i, ask_a, bid_b):
