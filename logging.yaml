@@ -1,49 +1,40 @@
 version: 1
 
 formatters:
-    fileFormatter:
-        format: '%(levelname)9s %(asctime)s %(thread)20d %(filename)25s: %(lineno)3s - %(message)s'
-        datefmt: '%Y-%m-%d %H:%M:%S'
-    consoleFormatter:
-        format: '%(levelname)9s %(asctime)s %(filename)25s: %(lineno)3s - %(message)s'
-        datefmt: '%Y-%m-%d %H:%M:%S'
+  fileFormatter:
+    format: '%(levelname)9s %(asctime)s %(thread)20d %(filename)25s: %(lineno)3s - %(message)s'
+    datefmt: '%Y-%m-%d %H:%M:%S'
+  consoleFormatter:
+    format: '%(levelname)9s %(asctime)s %(filename)25s: %(lineno)3s - %(message)s'
+    datefmt: '%Y-%m-%d %H:%M:%S'
 
 handlers:
-    console:
-        class: logging.StreamHandler
-        formatter: consoleFormatter
-        level: WARNING
-        stream: ext://sys.stdout
-    tracker_file:
-        class: logging.FileHandler
-        formatter: fileFormatter
-        level: DEBUG
-        filename: tracker.LOG
-    asset_file:
-        class: logging.FileHandler
-        formatter: fileFormatter
-        level: INFO
-        filename: asset.LOG
-    debug_file:
-        class: logging.FileHandler
-        formatter: fileFormatter
-        level: DEBUG
-        filename: debug.LOG
+  console:
+    class: logging.StreamHandler
+    formatter: consoleFormatter
+    level: WARNING
+    stream: ext://sys.stdout
+  tracker_file:
+    class: logging.FileHandler
+    formatter: fileFormatter
+    level: DEBUG
+    filename: tracker.LOG
+  asset_file:
+    class: logging.FileHandler
+    formatter: fileFormatter
+    level: INFO
+    filename: asset.LOG
 
 loggers:
-    logger:
-        level: DEBUG
-        handlers: [tracker_file]
-        propagate: yes
-    asset_logger:
-        level: DEBUG
-        handlers: [asset_file]
-        propagate: yes
-    debug_logger:
-        level: DEBUG
-        handlers: [debug_file]
-        propagate: yes
+  logger:
+    level: INFO
+    handlers: [tracker_file]
+    propagate: yes
+  asset_logger:
+    level: DEBUG
+    handlers: [asset_file]
+    propagate: yes
 
 root:
-    level: DEBUG
-    handlers: [console]
+  level: DEBUG
+  handlers: [console]

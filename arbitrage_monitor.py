@@ -159,7 +159,7 @@ class Monitor(threading.Thread):
         with common.MUTEX:
             Monitor._logger.info('[M] LOCK acquired')
             asset_list = self.get_asset_list()
-            Monitor._logger.info('[M] asset_list obtained')
+            Monitor._logger.debug('[M] asset_list obtained')
             coin, fiat = self.get_asset_changes(asset_list)
             status = self.coin_update_handler(coin, is_last)
         Monitor._logger.info('[M] LOCK released')

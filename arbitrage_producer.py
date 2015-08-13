@@ -29,7 +29,7 @@ class Producer(threading.Thread):
     def run(self):
         while self.running:
             time.sleep(config.SLEEP_SECONDS)
-            Producer._logger.debug('[P] Producer')
+            Producer._logger.info('[P] Producer')
             self.process_arbitrage()
         self.adjuster_queue.put(common.SIGNAL)
 
