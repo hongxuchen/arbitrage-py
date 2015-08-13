@@ -37,8 +37,12 @@ class Producer(threading.Thread):
     def _handle_failed_order(trade_pair):
         with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
             assets = list(executor.map(lambda t: AssetInfo(t.plt), trade_pair))
-        asset_str = '[asset info]\n' + '\n'.join(assets)
-        trade_str = '[trade_info]\n' + '\n'.join(trade_pair)
+        asset_str = '[asset info]\n'
+        for asset in assets:
+            asset_str += str(asset) + '\n'
+        trade_str = '[trade info]\n'
+        for trader in trade_pair:
+            trade_str += str(trader) + '\n'
         err_msg = 'msg: Found non-existent Order ID Error\n' + asset_str + '\n' + trade_str
         common.handle_exit(err_msg)
 
