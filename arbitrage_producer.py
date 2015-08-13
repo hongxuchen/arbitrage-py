@@ -2,7 +2,6 @@
 import os
 
 import time
-import math
 import threading
 
 import concurrent.futures
@@ -46,9 +45,9 @@ class Producer(threading.Thread):
             order_ids = executor.map(lambda t: t.regular_trade(t.catalog, t.price, t.amount), trade_pair)
         for trade, order_id in zip(trade_pair, order_ids):
             if order_id == config.INVALID_ORDER_ID:
-                Producer._logger.critical('order_id not exists, EXIT')
-                # noinspection PyProtectedMember
-                os._exit(1)
+                # FIXME add info
+                err_msg = 'msg: [Producer] order_id not exists'
+                common.handle_exit(err_msg)
             trade.set_order_id(order_id)
 
     def arbitrage_impl(self, i, ask_a, bid_b):

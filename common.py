@@ -78,9 +78,9 @@ def is_retry_exception(exception):
     return False
 
 
-def handle_exit(exception):
-    get_logger().critical('Error during request:"{}", will EXIT'.format(exception))
-    send_msg('error during request: {}'.format(exception))
+def handle_exit(error):
+    get_logger().critical('Error during request:"{}", will EXIT'.format(error))
+    send_msg('error during request: {}'.format(error))
     # noinspection PyProtectedMember
     os._exit(1)
 
@@ -185,8 +185,8 @@ def get_key_from_data(field, dict_data=None):
     try:
         return dict_data[field]
     except:
-        print('no ydata', file=sys.stderr)
-        os._exit(1)
+        err_msg = 'msg: no ydata for field={}'.format(field)
+        handle_exit(err_msg)
 
 
 def send_msg(report):

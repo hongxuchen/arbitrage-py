@@ -60,8 +60,8 @@ class OKCoinAPI(Platform):
                 r = requests.request('post', self._real_uri(api_type), data=data, params=params,
                                      headers=OKCoinAPI.common_headers, timeout=config.TIMEOUT, verify=True)
             else:
-                OKCoinAPI._logger.critical('api_type [{}] not supported'.format(api_type))
-                os._exit(1)
+                err_msg = 'msg: OKCoin api_type [{}] not supported'.format(api_type)
+                common.handle_exit(err_msg)
             # OKCoinAPI._logger.debug(r.url)
             # TODO should consider exception
             res = r.json()
@@ -143,9 +143,8 @@ class OKCoinAPI(Platform):
             OKCoinAPI._logger.critical(
                 'ERROR: api_type={}, response_data={}'.format(api_type, response_data))
             if api_type not in OKCoinAPI.trade_cancel_api_list:
-                common.send_msg('error during request')
-                # noinspection PyProtectedMember
-                os._exit(1)
+                err_msg = 'msg: OKCoin Error during request api_type={}'.format(api_type)
+                common.handle_exit(err_msg)
         return response_data
 
     def api_userinfo(self):
@@ -220,9 +219,8 @@ class OKCoinAPI(Platform):
             return order_info
         except Exception as e:
             OKCoinAPI._logger.critical('ERROR: exception="{}", response={}'.format(e, response))
-            common.send_msg('okcoin order error')
-            # noinspection PyProtectedMember
-            os._exit(1)
+            err_msg = 'msg: OKCoin order_info error: response={}'.format(response)
+            common.handle_exit(err_msg)
 
     def assets(self):
         funds = self.api_userinfo()['info']['funds']

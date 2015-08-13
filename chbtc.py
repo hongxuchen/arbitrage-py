@@ -57,7 +57,7 @@ class CHBTC(Platform):
                 # print(request_str)
                 r = requests.get(request_str, timeout=config.TIMEOUT)
             else:
-                os._exit(1)
+                common.handle_exit('msg: CHBTC api_type={} not supported'.format(api_type))
             res_data = r.json()
             if 'code' in res_data:
                 code = res_data['code']
@@ -246,7 +246,8 @@ if __name__ == '__main__':
     common.init_logger()
     chbtc = CHBTC()
     ask1 = chbtc.ask1()
-    print(chbtc.assets())
+    print(chbtc.ask_bid_list(2))
+    print(chbtc.ask1(), chbtc.bid1())
     # order_id = chbtc.trade('buy', 2000, 0.001)
     # print(order_id)
     # order_info = chbtc.order_info(order_id)

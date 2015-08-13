@@ -72,8 +72,8 @@ class BitBays(Platform):
                 headers = self._post_param(params)
                 r = requests.post(self._real_uri(api_type), data=params, headers=headers, timeout=config.TIMEOUT)
             else:
-                BitBays._logger.critical('api_type={} not supported'.format(api_type))
-                os._exit(1)
+                err_msg = 'msg: BitBays api_type={} not supported'.format(api_type)
+                common.handle_exit(err_msg)
             # TODO check error
             res_data = r.json()
             # BitBays._logger.warning('bitbays response={}'.format(res_data))
@@ -90,10 +90,8 @@ class BitBays(Platform):
                     BitBays._logger.critical(
                         'ERROR: api_type={}, error_message={}'.format(api_type, msg))
                     if api_type not in BitBays.trade_cancel_list:
-                        # mustn't fail!
-                        common.send_msg('error during request')
-                        # noinspection PyProtectedMember
-                        os._exit(1)
+                        err_msg = 'msg: BitBays Error during request when api_type={}'.format(api_type)
+                        common.handle_exit(err_msg)
             return res_data
 
         try:

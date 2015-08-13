@@ -35,14 +35,14 @@ class ItBitAPI(Platform):
         code = r.status_code
         print(r.url)
         if not str(code).startswith('2'):
-            print('ERROR: [{}], {}'.format(code, r.content))
-            os._exit(1)
+            err_msg = 'msg: ItBit retcode ERROR: [{}], {}'.format(code, r.content)
+            common.handle_exit(err_msg)
+
         try:
             jsdata = r.json()
             return jsdata
         except Exception as e:
-            print(e)
-            os._exit(1)
+            common.handle_exit(e)
 
     ### public APIs
 
