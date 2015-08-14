@@ -70,7 +70,7 @@ class OKCoinAPI(Platform):
                     raise common.NULLResponseError(
                         'NULLResponseError: Response is empty/{} for api_type={}'.format(api_type))
                 return res
-            except Exception as ee:
+            except ValueError as ee:
                 err_msg = 'msg: OKCoin parse json error "{}" for api_type={}, response={}'.format(ee, api_type, r)
                 common.handle_exit(err_msg)
 

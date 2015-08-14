@@ -82,7 +82,7 @@ class HuoBi(Platform):
             try:
                 res_data = r.json()
                 return res_data
-            except Exception as ee:
+            except ValueError as ee:
                 err_msg = 'msg: HuoBi parse json error "{}" for api_uri={}, response={}'.format(ee, api_uri, r)
                 common.handle_exit(err_msg)
 

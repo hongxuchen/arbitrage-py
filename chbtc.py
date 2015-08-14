@@ -55,6 +55,8 @@ class CHBTC(Platform):
                 param_str = self._signed_param(params)
                 request_str = base_uri + param_str
                 r = requests.get(request_str, timeout=config.TIMEOUT)
+                if r.status_code != requests.codes.ok:
+                    raise common.CHBTCRetryError('CHBTCRetryError: response status_code={}'.format(r.status_code))
             else:
                 common.handle_exit('msg: CHBTC api_type={} not supported'.format(api_type))
             try:
@@ -72,7 +74,7 @@ class CHBTC(Platform):
                         raise common.CHBTCRetryError(
                             'CHBTCRetryError: code={}, msg={}'.format(code, res_data['message']))
                 return res_data
-            except Exception as ee:
+            except ValueError as ee:
                 err_msg = 'msg: CHBTC parse json error "{}" for api_type={}, response={}'.format(ee, api_type, r)
                 common.handle_exit(err_msg)
 
@@ -249,9 +251,10 @@ class CHBTC(Platform):
 if __name__ == '__main__':
     common.init_logger()
     chbtc = CHBTC()
-    ask1 = chbtc.ask1()
-    print(chbtc.ask_bid_list(2))
-    print(chbtc.ask1(), chbtc.bid1())
+    # ask1 = chbtc.ask1()
+    # print(chbtc.ask_bid_list(2))
+    # print(chbtc.ask1(), chbtc.bid1())
+    print(chbtc.assets())
     # order_id = chbtc.trade('buy', 2000, 0.001)
     # print(order_id)
     # order_info = chbtc.order_info(order_id)

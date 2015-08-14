@@ -94,7 +94,7 @@ class BitBays(Platform):
                             err_msg = 'msg: BitBays Error during request when api_type={}'.format(api_type)
                             common.handle_exit(err_msg)
                 return res_data
-            except Exception as ee:
+            except ValueError as ee:
                 err_msg = 'msg: BitBays parse json error "{}" for api_type={}, response={}'.format(ee, api_type, r)
                 common.handle_exit(err_msg)
 
