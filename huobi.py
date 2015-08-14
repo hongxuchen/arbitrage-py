@@ -79,7 +79,12 @@ class HuoBi(Platform):
                         raise common.HuoBiExitError('HuoBiExitError: code={}'.format(code))
                     elif code in [1]:
                         raise common.HuoBiError('HuoBiError: code={}'.format(code))
-            return r.json()
+            try:
+                res_data = r.json()
+                return res_data
+            except Exception as ee:
+                err_msg = 'msg: HuoBi parse json error "{}" for api_uri={}, response={}'.format(ee, api_uri, r)
+                common.handle_exit(err_msg)
 
         try:
             result = _request_impl()

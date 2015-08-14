@@ -54,23 +54,27 @@ class CHBTC(Platform):
                 base_uri = self.domain + api_type + '?'
                 param_str = self._signed_param(params)
                 request_str = base_uri + param_str
-                # print(request_str)
                 r = requests.get(request_str, timeout=config.TIMEOUT)
             else:
                 common.handle_exit('msg: CHBTC api_type={} not supported'.format(api_type))
-            res_data = r.json()
-            if 'code' in res_data:
-                code = res_data['code']
-                if code == 1000:
-                    return res_data
-                CHBTC._logger.error(u'CHBTC Error: code={}, msg={}'.format(code, res_data['message']))
-                if code in [1001, 1002, 1003, 3002, 3003, 3004, 3005, 3006, 4001, 4002]:
-                    raise common.CHBTCExitError('CHBTCExitError: code={}, msg={}'.format(code, res_data['message']))
-                elif code in [2001, 2002, 2003, 3001]:
-                    CHBTC._logger.warning('ignore error, code={}'.format(code))
-                else:
-                    raise common.CHBTCRetryError('CHBTCRetryError: code={}, msg={}'.format(code, res_data['message']))
-            return res_data
+            try:
+                res_data = r.json()
+                if 'code' in res_data:
+                    code = res_data['code']
+                    if code == 1000:
+                        return res_data
+                    CHBTC._logger.error(u'CHBTC Error: code={}, msg={}'.format(code, res_data['message']))
+                    if code in [1001, 1002, 1003, 3002, 3003, 3004, 3005, 3006, 4001, 4002]:
+                        raise common.CHBTCExitError('CHBTCExitError: code={}, msg={}'.format(code, res_data['message']))
+                    elif code in [2001, 2002, 2003, 3001]:
+                        CHBTC._logger.warning('ignore error, code={}'.format(code))
+                    else:
+                        raise common.CHBTCRetryError(
+                            'CHBTCRetryError: code={}, msg={}'.format(code, res_data['message']))
+                return res_data
+            except Exception as ee:
+                err_msg = 'msg: CHBTC parse json error "{}" for api_type={}, response={}'.format(ee, api_type, r)
+                common.handle_exit(err_msg)
 
         try:
             res = _request_impl()
