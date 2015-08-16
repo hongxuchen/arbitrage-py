@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 
 import hashlib
-import os
 import urllib
 import time
-
 import requests
 
 import common
@@ -167,7 +165,14 @@ class HuoBi(Platform):
 if __name__ == '__main__':
     common.init_logger()
     huobi = HuoBi()
-    print(huobi.lower_bound)
+    # print(huobi.assets())
+    # trade_id = huobi.trade('buy', 100, 900)
+    # print(trade_id)
+    trade_id = huobi.trade('sell', 99990, 0.12)
+    print(trade_id)
+    # asset_info = AssetInfo(huobi)
+    # print(asset_info.afford_sell_amount())
+    # print(huobi.lower_bound)
     # huobi.coin_type = 'ltc'
     # print(huobi.ask_bid_list(1))
     # sell = huobi.trade('buy', 1, 0.1)

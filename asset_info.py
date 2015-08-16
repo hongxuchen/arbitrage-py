@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
-from okcoin import OKCoinCN
-from bitbays import BitBays
+from huobi import HuoBi
 
 
 class AssetInfo(object):
@@ -33,11 +32,17 @@ class AssetInfo(object):
 
 
 if __name__ == '__main__':
-    okc = OKCoinCN()
-    info1 = AssetInfo(okc)
-    print(info1)
-    bb = BitBays()
-    info2 = AssetInfo(bb)
-    print(info2)
-    print(info1.total_coin() + info2.total_coin())
-    print(info1.total_fiat() + info2.total_fiat())
+    # okc = OKCoinCN()
+    # info1 = AssetInfo(okc)
+    # print(info1)
+    # bb = BitBays()
+    # info2 = AssetInfo(bb)
+    # print(info2)
+    # print(info1.total_coin() + info2.total_coin())
+    # print(info1.total_fiat() + info2.total_fiat())
+    huobi = HuoBi()
+    while True:
+        asset_info = AssetInfo(huobi)
+        print(asset_info)
+        print(asset_info.afford_sell_amount())
+        print(asset_info.afford_buy_amount(12))

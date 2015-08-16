@@ -2,7 +2,6 @@
 from __future__ import print_function
 import hashlib
 import hmac
-import os
 import urllib
 import time
 
