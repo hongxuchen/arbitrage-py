@@ -44,7 +44,7 @@ class Producer(threading.Thread):
         for trader in trade_pair:
             trade_str += str(trader) + '\n'
         err_msg = 'msg: Found non-existent Order ID Error\n' + asset_str + '\n' + trade_str
-        common.handle_exit(err_msg)
+        common.send_msg(err_msg)
 
     @staticmethod
     def process_trade(trade_pair):
@@ -73,7 +73,6 @@ class Producer(threading.Thread):
         ask_a_price, ask_a_amount = ask_a[0], ask_a[1]
         bid_b_price, bid_b_amount = bid_b[0], bid_b[1]
 
-        ## lock here
         with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
             asset_info = executor.map(lambda plt: AssetInfo(plt), self.plt_list)
         Producer._logger.debug('[P] asset_info obtained')
@@ -89,7 +88,8 @@ class Producer(threading.Thread):
         def amount_refine():
             plt_a_buy_amount = asset_info_a.afford_buy_amount(ask_a_adjust_price) - config.ASSET_FOR_TRAID_DIFF
             plt_b_sell_amount = asset_info_b.afford_sell_amount() - config.ASSET_FOR_TRAID_DIFF
-            amount = min(config.upper_bound[Producer.coin_type], ask_a_amount, bid_b_amount, plt_a_buy_amount, plt_b_sell_amount)
+            amount = min(config.upper_bound[Producer.coin_type], ask_a_amount, bid_b_amount, plt_a_buy_amount,
+                         plt_b_sell_amount)
             amount = max(self.min_amount, amount)
             amount = common.adjust_amount(amount)
             return amount
@@ -110,6 +110,7 @@ class Producer(threading.Thread):
         trade_pair = (buy_trade, sell_trade)
         now = time.time()
         Producer._logger.debug('[P] trade_pair obtained')
+        # trade, and get order_id
         Producer.process_trade(trade_pair)
         Producer._logger.info('[P] arbitrage done')
         adjuster = Adjuster(trade_pair, now)

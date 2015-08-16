@@ -2,6 +2,7 @@
 from asset_info import AssetInfo
 import common
 import config
+from order_info import OrderInfo
 
 
 class Trader(object):
@@ -132,12 +133,16 @@ class Trader(object):
 
     # do nothing if order invalid
     def cancel(self):
-        if self.order_id != -1:
+        if self.order_id != config.INVALID_ORDER_ID:
             Trader._logger.warning('{:10s} cancel order_id={}'.format(self.plt_name, self.order_id))
             return self.plt.cancel(self.order_id)
 
     def get_order_info(self):
-        return self.plt.order_info(self.order_id)
+        # if order failed, copy catalog, remaining is self.amount
+        if self.order_id == config.INVALID_ORDER_ID:
+            return OrderInfo(self.catalog, self.amount)
+        else:
+            return self.plt.order_info(self.order_id)
 
     def __repr__(self):
         trade_info = '{:>10}: {:4s} {:>10.4f} {:3s}, Price {:>10.2f} {:3s}' \

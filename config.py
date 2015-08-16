@@ -73,7 +73,7 @@ TRADE_PRECISION = 4
 SLEEP_SECONDS = 0.4
 
 upper_bound = {
-    'btc': 0.6,
+    'btc': 0.8,
     'ltc': 30
 }
 
