@@ -91,6 +91,7 @@ class HuoBi(Platform):
             if common.is_retry_exception(e):
                 return common.handle_retry(e, _request_impl)
             else:
+                HuoBi._logger.critical("ERROR, EXCEPTION TYPE: {}".format(type(e)))
                 common.handle_exit(e)
 
     def api_ticker(self):

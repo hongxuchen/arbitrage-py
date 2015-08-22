@@ -10,8 +10,11 @@ import smtplib
 import threading
 import time
 import math
+import traceback
+import sys
 import requests
 import requests.exceptions as req_except
+import urllib3.exceptions as urllib3_except
 
 import yaml
 import ipgetter
@@ -80,6 +83,7 @@ def is_retry_exception(exception):
 def handle_exit(error):
     get_logger().critical('Error during request:"{}", will EXIT'.format(error))
     send_msg('error during request: {}'.format(error))
+    traceback.print_exc(file=sys.stdout)
     # noinspection PyProtectedMember
     os._exit(1)
 
@@ -114,8 +118,11 @@ def handle_retry(exception, handler):
                 continue
             else:
                 handle_exit(e)  # fail, exit
-    logger.critical('Request Exception "{}" after retrying {} times'.format(current_exception, config.RETRY_MAX))
-    handle_exit(current_exception)
+    msg = 'Request Exception "{}" after retrying {} times'.format(current_exception, config.RETRY_MAX)
+    logger.critical(msg)
+    send_msg(msg)
+    time.sleep(config.RETRY_SLEEP_SECONDS)
+    return handle_retry(current_exception, handler)
 
 
 logging_yaml = os.path.join(os.path.dirname(__file__), 'logging.yaml')
@@ -209,7 +216,7 @@ MUTEX = threading.Lock()
 SIGNAL = None
 retry_except_tuple = (
     req_except.ConnectionError, req_except.Timeout, req_except.HTTPError, InvalidNonceError, NULLResponseError,
-    HuoBiError, CHBTCRetryError)
+    HuoBiError, CHBTCRetryError, urllib3_except.TimeoutError, urllib3_except.HTTPError, urllib3_except.ConnectionError)
 exit_except_tuple = (req_except.URLRequired, req_except.TooManyRedirects, HuoBiExitError, CHBTCExitError)
 USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.130 Safari/537.36'
 

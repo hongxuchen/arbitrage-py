@@ -10,25 +10,13 @@ reverse the fiat amount for futher trade. The net strategy is that we can change
     - request time
     - failed frequency
     - ask/bid diff times w.r.t. certain amount
+    - profits per day
 * order/cancel frequently for one platform; when completed, reverse trade on another platform
 * Deal with common.py init issue
 * force implementation
-* "No JSON object could be decoded"
+* Monitor gets starvation
 
 # cases
-
-```
-CHBTC Error: code=2001, msg=人民币账户余额不足 # no ltc
-```
-```
-  WARNING 2015-08-11 18:44:32     arbitrage_producer.py:  44 - [P] Arbitrage Start
-  WARNING 2015-08-11 18:44:34       arbitrage_trader.py:  42 - Trade in BitBays   : sell     0.0900 btc at price  1679.5400 cny, order_id=73580581
-    ERROR 2015-08-11 18:44:38                 common.py:  92 - RETRY for Exception: "HTTPSConnectionPool(host='api.huobi.com', port=443): Read timed out."
-  WARNING 2015-08-11 18:44:38                 common.py:  98 - retry_counter=1
-    ERROR 2015-08-11 18:44:40                  huobi.py:  77 - HuoBi Error: code=2, msg=没有足够的人民币
-  WARNING 2015-08-11 18:44:40       arbitrage_trader.py:  42 - Trade in HuoBi     : buy      0.0900 btc at price  1679.5400 cny, order_id=-1
- CRITICAL 2015-08-11 18:44:40     arbitrage_producer.py:  49 - order_id not exists, EXIT
-```
 
 ```
 CHBTC/OKCoinCN
