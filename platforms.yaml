@@ -31,6 +31,7 @@ Enabled: [HuoBi, BitBays]
 CoinType: btc
 
 Emailing:
-    sender:   cc_hongxuchen@outlook.com
-    receiver: leftcopy.chx@gmail.com
-    server:   localhost
+    username: leftcopy.chx@gmail.com
+    password: 19890806chenhx
+    receiver: hongxuchen@outlook.com
+    server:   smtp.gmail.com

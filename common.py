@@ -195,7 +195,9 @@ def get_key_from_data(field, dict_data=None):
 
 def send_msg(report):
     emailing_info = get_key_from_data('Emailing')
-    sender = emailing_info['sender']
+    username = emailing_info['username']
+    password = emailing_info['password']
+    sender = username
     receiver = emailing_info['receiver']
     server = emailing_info['server']
     ip_str = ipgetter.myip()
@@ -205,11 +207,14 @@ def send_msg(report):
     msg['From'] = sender
     msg['To'] = receiver
     try:
-        session = smtplib.SMTP(server)
+        session = smtplib.SMTP(server, 587)
+        session.starttls()
+        session.login(sender, password)
         session.sendmail(sender, [receiver], msg.as_string())
+        get_logger().warning("sending mail done")
         session.quit()
     except:
-        get_logger().warning('no mail server')
+        get_logger().warning('sending mail error')
 
 
 MUTEX = threading.Lock()
@@ -222,9 +227,4 @@ USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Ge
 
 if __name__ == '__main__':
     init_logger()
-    logger = get_logger()
-    logger.debug('debug')
-    logger.info('info')
-    logger.warning('warning')
-    logger.error('error')
-    logger.critical('critical')
+    send_msg("HELLOWORLD")

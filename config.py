@@ -68,12 +68,13 @@ exceed_max = {
     'ltc': 0.01
 }
 
+amount_percent = 1.0
 HuoBi_Price_Precision = 2
 TRADE_PRECISION = 4
-SLEEP_SECONDS = 0.4
+SLEEP_SECONDS = 0.1
 
 upper_bound = {
-    'btc': 0.8,
+    'btc': 1.0,
     'ltc': 30
 }
 
