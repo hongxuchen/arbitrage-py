@@ -217,7 +217,7 @@ def send_msg(report):
         session.sendmail(sender, [receiver], msg.as_string())
         get_logger().warning("sending mail done")
         session.quit()
-    except Exception:
+    except:
         traceback.print_exc(file=sys.stderr)
 
 
