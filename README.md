@@ -16,8 +16,6 @@ reverse the fiat amount for futher trade. The net strategy is that we can change
 * force implementation
 * Monitor gets starvation
 
-# cases
-
 ## hosts
 121.199.251.136 www.okcoin.cn
 119.28.48.217   okcoin.cn

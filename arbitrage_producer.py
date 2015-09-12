@@ -135,7 +135,7 @@ class Producer(threading.Thread):
 
         arbitrage_diff = Producer.diff_dict[plt_name_a][plt_name_b]
         if ask_a[0] + arbitrage_diff < bid_b[0]:
-            Producer._logger.info('[P] Arbitrage chance: {} {}'.format(ask_a, bid_b))
+            Producer._logger.debug('[P] Arbitrage chance: {} {}'.format(ask_a, bid_b))
             with common.MUTEX:
                 Producer._logger.info('[P] LOCK acquired')
                 self.arbitrage_impl(i, ask_list[i], bid_list[1 - i])

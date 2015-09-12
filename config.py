@@ -71,7 +71,7 @@ exceed_max = {
 amount_percent = 1.0
 HuoBi_Price_Precision = 2
 TRADE_PRECISION = 4
-SLEEP_SECONDS = 0.1
+SLEEP_SECONDS = 0.4
 
 upper_bound = {
     'btc': 1.0,
@@ -83,7 +83,7 @@ upper_bound = {
 # we should make btc_diff_dict[Pa][Pb] < diff_dict[Pb][Pa] so that (buy at Pa, sell at Pb) will be easier
 btc_diff_dict = {
     'BitBays': {
-        'CHBTC': 0.45, 'HuoBi': 0.45, 'OKCoinCN': 0.45
+        'CHBTC': 0.45, 'HuoBi': 0.6, 'OKCoinCN': 0.45
     },
     'CHBTC': {
         'BitBays': 0.45, 'HuoBi': 0.75, 'OKCoinCN': 0.75
@@ -92,7 +92,7 @@ btc_diff_dict = {
         'BitBays': 0.45, 'CHBTC': 0.75, 'HuoBi': 0.75
     },
     'HuoBi': {
-        'BitBays': 0.45, 'CHBTC': 0.00, 'OKCoinCN': 0.00
+        'BitBays': 0.6, 'CHBTC': 0.00, 'OKCoinCN': 0.00
     }
 }
 

@@ -29,7 +29,7 @@ class OKCoinAPI(Platform):
         self.lower_bound = OKCoinAPI.lower_bound_dict[self.coin_type]
         self.symbol = info['symbol']
         self.api_public = ['ticker', 'depth', 'trades']
-        self.api_private = ['userinfo', 'trade', 'batch_trade', 'cancel_order', 'orders', 'order_info']
+        self.api_private = ['userinfo', 'trade', 'batch_trade', 'cancel_order', 'orders', 'order_info', 'orders_info']
 
     def _real_uri(self, api_type):
         path = '/' + api_type + '.do'
@@ -233,6 +233,18 @@ class OKCoinAPI(Platform):
         ]
         return l
 
+    def api_orders_info(self, order_id_list):
+        assert (len(order_id_list) <= 50)
+        params = {
+            'symbol': self.coin_type + '_' + self.symbol,
+            'order_id': ','.join(order_id_list)
+        }
+        res = self._private_request('orders_info', params)
+        return res
+
+    def orders_info(self, order_id_list):
+        info = self.api_orders_info(order_id_list)
+
 
 class OKCoinCN(OKCoinAPI):
     def __init__(self):
@@ -249,6 +261,7 @@ class OKCoinCOM(OKCoinAPI):
 if __name__ == '__main__':
     common.init_logger()
     okcoin_cn = OKCoinCN()
+    orders_info = okcoin_cn.orders_info()
     # okcoin_cn.coin_type = 'ltc'
     # print(okcoin_cn.lower_bound)
     # print(okcoin_cn.ask_bid_list(2))
