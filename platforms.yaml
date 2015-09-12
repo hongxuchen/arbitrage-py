@@ -33,5 +33,8 @@ CoinType: btc
 Emailing:
     username: leftcopy.chx@gmail.com
     password: 19890806chenhx
-    receiver: hongxuchen@outlook.com
     server:   smtp.gmail.com
+#    username: "chenhx.666@163.com"
+#    password: "V2BAZRB2chenhx"
+#    server: "smtp.163.com"
+    receiver: leftcopy.chx@gmail.com

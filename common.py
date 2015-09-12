@@ -197,7 +197,10 @@ def send_msg(report):
     emailing_info = get_key_from_data('Emailing')
     username = emailing_info['username']
     password = emailing_info['password']
-    sender = username
+    try:
+        sender = emailing_info['sender']
+    except KeyError:
+        sender = username
     receiver = emailing_info['receiver']
     server = emailing_info['server']
     ip_str = ipgetter.myip()
@@ -207,14 +210,15 @@ def send_msg(report):
     msg['From'] = sender
     msg['To'] = receiver
     try:
-        session = smtplib.SMTP(server, 587)
+        session = smtplib.SMTP(server)
+        # session.set_debuglevel(1)
         session.starttls()
-        session.login(sender, password)
+        session.login(username, password)
         session.sendmail(sender, [receiver], msg.as_string())
         get_logger().warning("sending mail done")
         session.quit()
-    except:
-        get_logger().warning('sending mail error')
+    except Exception:
+        traceback.print_exc(file=sys.stderr)
 
 
 MUTEX = threading.Lock()
