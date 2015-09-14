@@ -25,7 +25,6 @@ CHBTC:
 
 Available: [OKCoinCN, BitBays, HuoBi, CHBTC]
 
-# Enabled: [OKCoinCN, CHBTC]
 Enabled: [HuoBi, BitBays]
 
 CoinType: btc

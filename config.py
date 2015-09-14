@@ -48,7 +48,7 @@ RETRY_SLEEP_SECONDS = 10
 
 MONITOR_FAIL_MAX = 2
 
-COIN_EXCEED_TIMES = 3
+COIN_EXCEED_TIMES = 2
 
 # CONFIG
 # upper_bound must > lower_bound for all platforms
@@ -83,7 +83,7 @@ upper_bound = {
 # we should make btc_diff_dict[Pa][Pb] < diff_dict[Pb][Pa] so that (buy at Pa, sell at Pb) will be easier
 btc_diff_dict = {
     'BitBays': {
-        'CHBTC': 0.45, 'HuoBi': 0.6, 'OKCoinCN': 0.45
+        'CHBTC': 0.45, 'HuoBi': 0.48, 'OKCoinCN': 0.45
     },
     'CHBTC': {
         'BitBays': 0.45, 'HuoBi': 0.75, 'OKCoinCN': 0.75
@@ -92,7 +92,7 @@ btc_diff_dict = {
         'BitBays': 0.45, 'CHBTC': 0.75, 'HuoBi': 0.75
     },
     'HuoBi': {
-        'BitBays': 0.6, 'CHBTC': 0.00, 'OKCoinCN': 0.00
+        'BitBays': 0.48, 'CHBTC': 0.00, 'OKCoinCN': 0.00
     }
 }
 
