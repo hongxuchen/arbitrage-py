@@ -28,7 +28,8 @@ class OKCoinAPI(Platform):
         self.lower_bound = OKCoinAPI.lower_bound_dict[self.coin_type]
         self.symbol = info['symbol']
         self.api_public = ['ticker', 'depth', 'trades']
-        self.api_private = ['userinfo', 'trade', 'batch_trade', 'cancel_order', 'orders', 'order_info', 'orders_info']
+        self.api_private = ['userinfo', 'trade', 'batch_trade', 'cancel_order', 'orders', 'order_info', 'orders_info',
+                            'order_history']
 
     def _real_uri(self, api_type):
         path = '/' + api_type + '.do'
@@ -232,17 +233,38 @@ class OKCoinAPI(Platform):
         ]
         return l
 
-    def api_orders_info(self, order_id_list):
+    def api_orders_info(self, order_id_list, status):
         assert (len(order_id_list) <= 50)
         params = {
             'symbol': self.coin_type + '_' + self.symbol,
-            'order_id': ','.join(order_id_list)
+            'order_id': ','.join(order_id_list),
+            'type': status
         }
         res = self._private_request('orders_info', params)
         return res
 
-    def orders_info(self, order_id_list):
-        info = self.api_orders_info(order_id_list)
+    def orders_info(self, order_id_list, status):
+        info = self.api_orders_info(order_id_list, status)
+        return info
+
+    def api_order_history(self, page, status):
+        params = {
+            'symbol': self.coin_type + '_' + self.symbol,
+            'current_page': page,
+            'page_length': 200,
+            'status': status
+        }
+        res = self._private_request('order_history', params)
+        return res
+
+    def order_history(self, page, status):
+        histories = self.api_order_history(page, status)
+        return histories
+
+    def pending_orders(self):
+        # 1st page, pending '0'
+        pendings = self.order_history(1, 0)
+        return pendings
 
 
 class OKCoinCN(OKCoinAPI):
@@ -260,7 +282,12 @@ class OKCoinCOM(OKCoinAPI):
 if __name__ == '__main__':
     common.init_logger()
     okcoin_cn = OKCoinCN()
-    orders_info = okcoin_cn.orders_info()
+    # order_id_list = [1087125760, 1087125765, 1087125795]
+    # order_id_str_list = [str(order_id) for order_id in order_id_list]
+    # orders_info = okcoin_cn.orders_info(order_id_str_list, 1)
+    # print(orders_info)
+    pendings = okcoin_cn.pending_orders()
+    print(pendings)
     # okcoin_cn.coin_type = 'ltc'
     # print(okcoin_cn.lower_bound)
     # print(okcoin_cn.ask_bid_list(2))

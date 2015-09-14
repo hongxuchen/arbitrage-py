@@ -8,8 +8,8 @@
 * sell_grid: when finding partial,
  
 # Data Structure
-buy_grid_list: (price, list(GridOrderInfo))
-sell_grid_list: (price, list(GridOrderInfo))
+buy_grid_list: element: (price, list(GridOrderInfo))
+sell_grid_list: element: (price, list(GridOrderInfo))
 monitor_list: list(GridOrderInfo)
 partial_buy_list: (price, remaining_amount) (few elements)
 

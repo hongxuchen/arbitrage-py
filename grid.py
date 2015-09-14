@@ -1,60 +1,71 @@
 #!/usr/bin/env python
+from itertools import chain
 import random
 import time
+import sys
+from asset_info import AssetInfo
 import common
 import config
 import grid_conf
-from grid_order import GridOrderInfo
+from grid_order import OrderInstance, GridSlot
 from okcoin import OKCoinCN
 
 
 class Grid(object):
     _logger = common.get_logger()
+    lower_bound = grid_conf.grid_range[0]
+    upper_bound = grid_conf.grid_range[1]
+    grid_diff = grid_conf.grid_diff
+    amount = grid_conf.order_amount
+    batch_check_num = grid_conf.batch_check_num
 
     def __init__(self, plt):
         self.plt = plt
-        self.lower_bound = grid_conf.grid_range[0]
-        self.upper_bound = grid_conf.grid_range[1]
-        self.size = (self.upper_bound - self.lower_bound) / grid_conf.order_diff + 1
-        self.buy_orders = [None] * self.size
-        self.sell_orders = [None] * self.size
-        self.amount = grid_conf.order_amount
+        self.buy_list = []
+        self.partial_orders = []
 
-    def single_trade(self, catalog, price):
-        now = int(time.time())
-        order_id = random.randint(1, 100)
-        if order_id != config.INVALID_ORDER_ID:
-            grid_order = GridOrderInfo(order_id, catalog, now)
-            if catalog == 'buy':
-                index = int(round((price - self.lower_bound) / grid_conf.order_diff))
-            else:
-                index = int(round(price - self.lower_bound - grid_conf.buy_sell_diff) / grid_conf.order_diff)
-            assert (self.buy_orders[index] is None)
-            self.buy_orders[index] = grid_order
-            self._logger.warning("index={:03d}, {}".format(index, grid_order))
-        else:
-            print("error")
+    def init_grid(self):
+        price = self.upper_bound
+        size = (self.upper_bound - self.lower_bound) / self.grid_diff
+        asset = AssetInfo(self.plt)
+        to_consume = (self.upper_bound + self.lower_bound + self.grid_diff) / 2.0 * size * self.amount
+        if asset.fiat_avail < to_consume:
+            self._logger.critical("cannot afford to buy, avail={}, to_consume={}".format(asset.fiat_avail, to_consume))
+            sys.exit(1)
+        while price > self.lower_bound:
+            order_id = self.plt.trade('buy', price, self.amount)
+            now = int(time.time())
+            order = OrderInstance(self.plt, order_id, now)
+            grid_slot = GridSlot(price)
+            grid_slot.append_order(order)
+            self.buy_list.append(grid_slot)
+            price -= self.grid_diff
 
-    def init(self):
-        for i in xrange(self.size):
-            price = self.lower_bound + grid_conf.order_diff * i
-            self.single_trade('buy', price)
+    # TODO: should check quickly
+    def check_orders(self, order_list):
+        should_continue = True
+        to_sell_order_list = []
+        i = 0
+        old_id = 0
+        order_id_list = [instance.get_order_list() for instance in order_list]
+        flat_order_id_list = list(chain.from_iterable(order_id_list))
+        buy_max = len(flat_order_id_list)
+        while should_continue and i < buy_max:
+            check_size = min(buy_max, self.batch_check_num - i)
+            old_id = i
+            i += self.batch_check_num
 
-    def find_bought_list(self):
+    def bought_handler(self):
         pass
 
-    def find_sold_list(self):
-        pass
-
-    def run_main(self):
-        while True:
-            bought_list = self.find_bought_list()
-            for to_sell in bought_list:
-                amount = to_sell.
+    def cancel_all(self):
+        for buy in self.buy_list:
+            buy.cancel_orders()
 
 
 if __name__ == '__main__':
     common.init_logger()
     okcoin = OKCoinCN()
     grid = Grid(okcoin)
-    grid.init()
+    grid.init_grid()
+    # grid.cancel_all()
