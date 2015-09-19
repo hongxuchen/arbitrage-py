@@ -195,14 +195,13 @@ def get_key_from_data(field, dict_data=None):
 
 def send_msg(report):
     emailing_info = get_key_from_data('Emailing')
+    server = emailing_info['server']
     username = emailing_info['username']
-    password = emailing_info['password']
     try:
         sender = emailing_info['sender']
     except KeyError:
         sender = username
     receiver = emailing_info['receiver']
-    server = emailing_info['server']
     ip_str = ipgetter.myip()
     report = str(ip_str) + '\n' + report
     msg = MIMEText(report)
@@ -212,8 +211,10 @@ def send_msg(report):
     try:
         session = smtplib.SMTP(server)
         # session.set_debuglevel(1)
-        session.starttls()
-        session.login(username, password)
+        if server != 'localhost':
+            session.starttls()
+            password = emailing_info['password']
+            session.login(username, password)
         session.sendmail(sender, [receiver], msg.as_string())
         get_logger().warning("sending mail done")
         session.quit()
