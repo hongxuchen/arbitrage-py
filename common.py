@@ -226,7 +226,8 @@ MUTEX = threading.Lock()
 SIGNAL = None
 retry_except_tuple = (
     req_except.ConnectionError, req_except.Timeout, req_except.HTTPError, InvalidNonceError, NULLResponseError,
-    HuoBiError, CHBTCRetryError, urllib3_except.TimeoutError, urllib3_except.HTTPError, urllib3_except.ConnectionError)
+    HuoBiError, CHBTCRetryError, urllib3_except.TimeoutError, urllib3_except.HTTPError, urllib3_except.ConnectionError,
+    ValueError)
 exit_except_tuple = (req_except.URLRequired, req_except.TooManyRedirects, HuoBiExitError, CHBTCExitError)
 USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.130 Safari/537.36'
 
