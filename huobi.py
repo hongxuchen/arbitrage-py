@@ -31,7 +31,7 @@ class HuoBi(Platform):
     _logger = logging_conf.get_logger()
     data_domain = config.huobi_info['data_domain']
     common_headers = {
-        'user-agent': common.USER_AGENT,
+        'user-agent': conf.USER_AGENT,
         'Content-Type': 'application/x-www-form-urlencoded'
     }
 

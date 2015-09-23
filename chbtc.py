@@ -30,7 +30,7 @@ class CHBTC(Platform):
     trade_cancel_api_list = ['order', 'cancelOrder']
     data_domain = config.chbtc_info['data_domain']
     common_headers = {
-        'user-agent': common.USER_AGENT
+        'user-agent': conf.USER_AGENT
     }
 
     def __init__(self):

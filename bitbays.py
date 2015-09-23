@@ -22,7 +22,7 @@ class BitBays(Platform):
         1: 'sell'
     }
     common_headers = {
-        'user-agent': common.USER_AGENT
+        'user-agent': conf.USER_AGENT
     }
     lower_bound_dict = {
         'btc': 0.001

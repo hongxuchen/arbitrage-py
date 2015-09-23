@@ -21,7 +21,7 @@ class OKCoinAPI(Platform):
     _logger = logging_conf.get_logger()
     trade_cancel_api_list = ['cancel_order', 'trade']
     common_headers = {
-        'user-agent': common.USER_AGENT,
+        'user-agent': conf.USER_AGENT,
         'Content-Type': 'application/x-www-form-urlencoded'
     }
 

@@ -74,6 +74,50 @@ def adjust_amount(trade_amount, precision=config.TRADE_PRECISION):
 
 # ==================================================================================
 
+
+
+class InvalidNonceError(Exception):
+    def __init__(self, message):
+        super(InvalidNonceError, self).__init__(message)
+
+
+class NULLResponseError(Exception):
+    def __init__(self, message):
+        super(NULLResponseError, self).__init__(message)
+
+
+class HuoBiError(Exception):
+    def __init__(self, msg):
+        super(HuoBiError, self).__init__(msg)
+
+
+class HuoBiExitError(Exception):
+    def __init__(self, msg):
+        super(HuoBiExitError, self).__init__(msg)
+
+
+class HuoBiIgnoreError(Exception):
+    def __init__(self, msg):
+        super(HuoBiIgnoreError, self).__init__(msg)
+
+
+class CHBTCExitError(Exception):
+    def __init__(self, msg):
+        super(CHBTCExitError, self).__init__(msg)
+
+
+class CHBTCRetryError(Exception):
+    def __init__(self, msg):
+        super(CHBTCRetryError, self).__init__(msg)
+
+
+retry_except_tuple = (
+    req_except.ConnectionError, req_except.Timeout, req_except.HTTPError, InvalidNonceError, NULLResponseError,
+    HuoBiError, CHBTCRetryError, urllib3_except.TimeoutError, urllib3_except.HTTPError, urllib3_except.ConnectionError,
+    ValueError)
+exit_except_tuple = (req_except.URLRequired, req_except.TooManyRedirects, HuoBiExitError, CHBTCExitError)
+
+
 def is_retry_exception(exception):
     for except_type in retry_except_tuple:
         if isinstance(exception, except_type):
@@ -126,41 +170,6 @@ def handle_retry(exception, handler):
     return handle_retry(current_exception, handler)
 
 
-class InvalidNonceError(Exception):
-    def __init__(self, message):
-        super(InvalidNonceError, self).__init__(message)
-
-
-class NULLResponseError(Exception):
-    def __init__(self, message):
-        super(NULLResponseError, self).__init__(message)
-
-
-class HuoBiError(Exception):
-    def __init__(self, msg):
-        super(HuoBiError, self).__init__(msg)
-
-
-class HuoBiExitError(Exception):
-    def __init__(self, msg):
-        super(HuoBiExitError, self).__init__(msg)
-
-
-class HuoBiIgnoreError(Exception):
-    def __init__(self, msg):
-        super(HuoBiIgnoreError, self).__init__(msg)
-
-
-class CHBTCExitError(Exception):
-    def __init__(self, msg):
-        super(CHBTCExitError, self).__init__(msg)
-
-
-class CHBTCRetryError(Exception):
-    def __init__(self, msg):
-        super(CHBTCRetryError, self).__init__(msg)
-
-
 # ==================================================================================
 
 
@@ -195,12 +204,6 @@ def send_msg(report):
 
 MUTEX = threading.Lock()
 SIGNAL = None
-retry_except_tuple = (
-    req_except.ConnectionError, req_except.Timeout, req_except.HTTPError, InvalidNonceError, NULLResponseError,
-    HuoBiError, CHBTCRetryError, urllib3_except.TimeoutError, urllib3_except.HTTPError, urllib3_except.ConnectionError,
-    ValueError)
-exit_except_tuple = (req_except.URLRequired, req_except.TooManyRedirects, HuoBiExitError, CHBTCExitError)
-USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.130 Safari/537.36'
 
 if __name__ == '__main__':
     logging_conf.init_logger()
