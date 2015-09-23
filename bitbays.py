@@ -55,12 +55,6 @@ class BitBays(Platform):
         return self.get_url('/' + api_type + '/')
 
     def _setup_request(self, api_type, params=None):
-        """
-        :param api_type:
-        :param params:
-        :param data:
-        :return:
-        """
 
         def _request_impl():
             r = None
@@ -207,7 +201,6 @@ class BitBays(Platform):
             'count': 20,
             'nonce': self._nonce()
         }
-        # assert (catalog in [0, 1])
         if catalog == 0:
             payload['order'] = 'DESC'
         else:
@@ -217,7 +210,7 @@ class BitBays(Platform):
 
     #############################################################################
 
-    # uses private
+
     def trade(self, op_type, price, amount):
         """
         return: order_id if succeed, otherwise invalid id
@@ -233,7 +226,6 @@ class BitBays(Platform):
         else:
             return res['id']
 
-    # uses private
     def _market_trade(self, op_type, mo_amount):
         trade_dict = {
             'order_type': 1,
@@ -243,17 +235,14 @@ class BitBays(Platform):
         data = self.api_trade(trade_dict)['result']
         return data
 
-    # uses private
     def buy_market(self, mo_amount):
         BitBays._logger.debug('BitBays.buy_market with amount {}'.format(mo_amount))
         return self._market_trade('buy', mo_amount)
 
-    # uses private
     def sell_market(self, mo_amount):
         BitBays._logger.debug('BitBays.sell_market with amount {}'.format(mo_amount))
         return self._market_trade('sell', mo_amount)
 
-    # uses private
     def cancel(self, order_id):
         data = self.api_cancel(order_id)['result']
         if data is None:
@@ -261,7 +250,6 @@ class BitBays(Platform):
         else:
             return True
 
-    # uses private
     def order_info(self, order_id):
         info = self.api_order_info(order_id)['result']
         amount = 0.0
@@ -274,7 +262,6 @@ class BitBays(Platform):
         order_info = OrderInfo(catalog, remaining_amount)
         return order_info
 
-    # uses private
     def assets(self):
         user_info = self.api_user_info()['result']
         info = user_info['wallet']

@@ -188,7 +188,7 @@ def get_key_from_data(field, dict_data=None):
         dict_data = ydata
     try:
         return dict_data[field]
-    except:
+    except KeyError:
         err_msg = 'msg: no ydata for field={}'.format(field)
         handle_exit(err_msg)
 

@@ -50,7 +50,7 @@ class Trader(object):
         :return:
         """
         waited_asset_times = 0
-        ### NOTE: since we lock the trade, only 1 request needed
+        # NOTE: since we lock the trade, only 1 request needed
         asset_info = AssetInfo(self.plt)
         if self.catalog == 'sell':
             asset_amount = asset_info.afford_sell_amount()

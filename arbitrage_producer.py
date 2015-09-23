@@ -18,7 +18,7 @@ class Producer(threading.Thread):
     coin_type = common.get_key_from_data('CoinType')
     diff_dict = config.diff_dict[coin_type]
 
-    ### stateless
+    # stateless
     def __init__(self, plt_list, adjuster_queue):
         super(Producer, self).__init__()
         self.plt_list = plt_list

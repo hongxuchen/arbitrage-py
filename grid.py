@@ -1,11 +1,9 @@
 #!/usr/bin/env python
 from itertools import chain
-import random
 import time
 import sys
 from asset_info import AssetInfo
 import common
-import config
 import grid_conf
 from grid_order import OrderInstance, GridSlot
 from okcoin import OKCoinCN

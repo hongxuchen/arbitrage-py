@@ -125,7 +125,7 @@ class Monitor(threading.Thread):
             return True  # no trade
         trade_amount = common.adjust_amount(coin_change_amount)
         adjust_status = self.adjust_trade(trade_catalog, trade_amount)
-        ## reset after trade
+        # reset after trade
         self.old_coin_change_amount = 0.0
         self.coin_exceed_counter = 0
         return adjust_status
@@ -136,7 +136,7 @@ class Monitor(threading.Thread):
             '[M] exceed_counter={}, amount={}'.format(self.coin_exceed_counter, coin_change_amount))
         trade_amount = abs(coin_change_amount)
         plt_price_list = self._get_plt_price_list(trade_catalog)
-        ### first try
+        # first try
         trade_plt, trade_price = plt_price_list[0]
         monitor_t1 = Trader(trade_plt, trade_catalog, trade_price, trade_amount)
         Monitor._logger.warning('[M] adjust at {}'.format(monitor_t1.plt_name))
@@ -163,14 +163,14 @@ class Monitor(threading.Thread):
             coin, fiat = self.get_asset_changes(asset_list)
             status = self.coin_update_handler(coin, is_last)
         Monitor._logger.info('[M] LOCK released')
-        ### report
+        # report
         # NOTE: this report is delayed
         if abs(self.old_coin_change_amount - coin) > config.MINOR_DIFF or abs(
                         self.old_fiat_change_amount - fiat) > config.MINOR_DIFF:
             self.report_asset(asset_list)
             self.report_asset_changes(coin, fiat)
         self.try_notify_asset_changes(coin, fiat)
-        ### update old
+        # update old
         self.old_coin_change_amount = coin
         self.old_fiat_change_amount = fiat
         return status

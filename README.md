@@ -5,16 +5,18 @@
 
 # TODO
 * [FATAL] monitor adjust still may 'cannot afford' so that it causes long-term imbalance
-reverse the fiat amount for futher trade. The net strategy is that we can change "diff".
+reverse the fiat amount for further trade. The net strategy is that we can change "diff".
 * calculate the probabilities
     - request time
     - failed frequency
     - ask/bid diff times w.r.t. certain amount
     - profits per day
+* profits against original 
 * order/cancel frequently for one platform; when completed, reverse trade on another platform
 * Deal with common.py init issue
 * force implementation
 * Monitor gets starvation
+* use market buy/sell to avoid connection issues
 
 ## hosts
 121.199.251.136 www.okcoin.cn
