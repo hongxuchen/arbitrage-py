@@ -11,6 +11,7 @@ import requests
 
 import config
 import common
+import excepts
 from plt_api import Platform
 import plt_conf
 
@@ -36,13 +37,13 @@ class ItBitAPI(Platform):
         print(r.url)
         if not str(code).startswith('2'):
             err_msg = 'msg: ItBit retcode ERROR: [{}], {}'.format(code, r.content)
-            common.handle_exit(err_msg)
+            excepts.handle_exit(err_msg)
 
         try:
             jsdata = r.json()
             return jsdata
         except Exception as e:
-            common.handle_exit(e)
+            excepts.handle_exit(e)
 
     # public APIs
 

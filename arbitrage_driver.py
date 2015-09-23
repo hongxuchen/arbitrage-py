@@ -9,7 +9,6 @@ from bitbays import BitBays
 import arbitrage_consumer
 import arbitrage_producer
 import arbitrage_monitor
-import common
 import plt_conf
 
 select_plt_dict = {

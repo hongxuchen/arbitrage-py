@@ -4,6 +4,7 @@
 import os
 import yaml
 import common
+import excepts
 
 plt_yaml = os.path.join(os.path.dirname(__file__), 'plt.yaml')
 
@@ -18,7 +19,7 @@ def get_key_from_data(field, dict_data=None):
         return dict_data[field]
     except KeyError:
         err_msg = 'msg: no ydata for field={}'.format(field)
-        common.handle_exit(err_msg)
+        excepts.handle_exit(err_msg)
 
 
 if __name__ == '__main__':

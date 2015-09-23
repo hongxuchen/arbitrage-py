@@ -7,6 +7,7 @@ import requests
 
 import common
 import config
+import excepts
 import logging_conf
 from order_info import OrderInfo
 from plt_api import Platform
@@ -31,7 +32,7 @@ class HuoBi(Platform):
     _logger = logging_conf.get_logger()
     data_domain = config.huobi_info['data_domain']
     common_headers = {
-        'user-agent': conf.USER_AGENT,
+        'user-agent': config.USER_AGENT,
         'Content-Type': 'application/x-www-form-urlencoded'
     }
 
@@ -52,7 +53,7 @@ class HuoBi(Platform):
         return sig
 
     # noinspection PyMethodMayBeStatic
-    def _setup_request(self, api_uri, params=None, data=None):
+    def _setup_request(self, api_uri, params=None):
         def _request_impl():
             r = None
             if api_uri not in self.api_private:
@@ -76,25 +77,25 @@ class HuoBi(Platform):
                     code = res_data['code']
                     HuoBi._logger.error(u'HuoBi Error: code={}, msg={}'.format(code, res_data['msg']))
                     if code in [5, 7, 61, 63, 74]:
-                        raise common.HuoBiExitError('HuoBiExitError: code={}'.format(code))
+                        raise excepts.HuoBiExitError('HuoBiExitError: code={}'.format(code))
                     elif code in [1]:
-                        raise common.HuoBiError('HuoBiError: code={}'.format(code))
+                        raise excepts.HuoBiError('HuoBiError: code={}'.format(code))
             try:
                 res_data = r.json()
                 return res_data
             except ValueError as ee:
                 err_msg = 'msg: HuoBi parse json error "{}" for api_uri={}, response={}'.format(ee, api_uri, r)
-                common.handle_exit(err_msg)
+                excepts.handle_exit(err_msg)
 
         try:
             result = _request_impl()
             return result
         except Exception as e:
-            if common.is_retry_exception(e):
-                return common.handle_retry(e, _request_impl)
+            if excepts.is_retry_exception(e):
+                return excepts.handle_retry(e, _request_impl)
             else:
                 HuoBi._logger.critical("ERROR, EXCEPTION TYPE: {}".format(type(e)))
-                common.handle_exit(e)
+                excepts.handle_exit(e)
 
     def api_ticker(self):
         api_uri = HuoBi.data_domain + '/' + 'ticker_' + self.coin_type + '_json.js'

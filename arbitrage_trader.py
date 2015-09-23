@@ -2,6 +2,7 @@
 from asset_info import AssetInfo
 import common
 import config
+import logging_conf
 from order_info import OrderInfo
 
 

@@ -4,6 +4,7 @@ from __future__ import print_function
 import hashlib
 
 import requests
+import excepts
 import logging_conf
 
 from plt_api import Platform
@@ -21,7 +22,7 @@ class OKCoinAPI(Platform):
     _logger = logging_conf.get_logger()
     trade_cancel_api_list = ['cancel_order', 'trade']
     common_headers = {
-        'user-agent': conf.USER_AGENT,
+        'user-agent': config.USER_AGENT,
         'Content-Type': 'application/x-www-form-urlencoded'
     }
 
@@ -63,27 +64,27 @@ class OKCoinAPI(Platform):
                                      headers=OKCoinAPI.common_headers, timeout=config.TIMEOUT, verify=True)
             else:
                 err_msg = 'msg: OKCoin api_type [{}] not supported'.format(api_type)
-                common.handle_exit(err_msg)
+                excepts.handle_exit(err_msg)
             # OKCoinAPI._logger.debug(r.url)
             try:
                 res = r.json()
                 # OKCoinAPI._logger.warning('response={}'.format(res))
                 if res is None or res is {}:
-                    raise common.NULLResponseError(
+                    raise excepts.NULLResponseError(
                         'NULLResponseError: Response is empty/{} for api_type={}'.format(api_type))
                 return res
             except ValueError as ee:
                 err_msg = 'msg: OKCoin parse json error "{}" for api_type={}, response={}'.format(ee, api_type, r)
-                common.handle_exit(err_msg)
+                excepts.handle_exit(err_msg)
 
         try:
             response_data = _request_impl()
             return response_data
         except Exception as e:
-            if common.is_retry_exception(e):
-                return common.handle_retry(e, _request_impl)
+            if excepts.is_retry_exception(e):
+                return excepts.handle_retry(e, _request_impl)
             else:
-                common.handle_exit(e)
+                excepts.handle_exit(e)
 
     # public api
 
@@ -149,7 +150,7 @@ class OKCoinAPI(Platform):
                 'ERROR: api_type={}, response_data={}'.format(api_type, response_data))
             if api_type not in OKCoinAPI.trade_cancel_api_list:
                 err_msg = 'msg: OKCoin Error during request api_type={}'.format(api_type)
-                common.handle_exit(err_msg)
+                excepts.handle_exit(err_msg)
         return response_data
 
     def api_userinfo(self):
@@ -225,7 +226,7 @@ class OKCoinAPI(Platform):
         except Exception as e:
             OKCoinAPI._logger.critical('ERROR: exception="{}", response={}'.format(e, response))
             err_msg = 'msg: OKCoin order_info error: response={}'.format(response)
-            common.handle_exit(err_msg)
+            excepts.handle_exit(err_msg)
 
     def assets(self):
         funds = self.api_userinfo()['info']['funds']

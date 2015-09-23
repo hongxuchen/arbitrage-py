@@ -11,6 +11,7 @@ import common
 import config
 from arbitrage_adjuster import Adjuster
 from arbitrage_trader import Trader
+import excepts
 import logging_conf
 import plt_conf
 
@@ -51,7 +52,7 @@ class Producer(threading.Thread):
         for trader in trade_pair:
             trade_str += str(trader) + '\n'
         err_msg = 'msg: Found non-existent Order ID Error\n' + asset_str + '\n' + trade_str
-        common.send_msg(err_msg)
+        excepts.send_msg(err_msg)
 
     @staticmethod
     def process_trade(trade_pair):

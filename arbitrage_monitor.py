@@ -10,6 +10,7 @@ import config as config
 from asset_info import AssetInfo
 from bitbays import BitBays
 import common
+import excepts
 import logging_conf
 from okcoin import OKCoinCN
 from arbitrage_trader import Trader
@@ -73,7 +74,7 @@ class Monitor(threading.Thread):
         # config.EMAILING_INTERVAL_SECONDS = 8
         if now - self.last_notifier_time >= config.EMAILING_INTERVAL_SECONDS:
             Monitor._logger.warning('notifying asset changes via email')
-            common.send_msg(report)
+            excepts.send_msg(report)
             self.last_notifier_time = now
 
     def _get_plt_price_list(self, catalog):
