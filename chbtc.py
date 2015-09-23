@@ -2,7 +2,6 @@
 
 from __future__ import print_function
 import hashlib
-import os
 import sha
 import time
 import struct
@@ -12,8 +11,10 @@ import requests
 
 import common
 import config
+import logging_conf
 from order_info import OrderInfo
 from plt_api import Platform
+import plt_conf
 
 
 class CHBTC(Platform):
@@ -25,7 +26,7 @@ class CHBTC(Platform):
         'buy': 1,
         'sell': 0
     }
-    _logger = common.get_logger()
+    _logger = logging_conf.get_logger()
     trade_cancel_api_list = ['order', 'cancelOrder']
     data_domain = config.chbtc_info['data_domain']
     common_headers = {
@@ -36,7 +37,7 @@ class CHBTC(Platform):
         super(CHBTC, self).__init__(config.chbtc_info)
         self.symbol = config.bitbays_info['symbol']
         self.lower_bound = CHBTC.lower_bound_dict[self.coin_type]
-        self.key = common.get_key_from_data('CHBTC')
+        self.key = plt_conf.get_key_from_data('CHBTC')
         self.api_public = ['ticker', 'depth', 'trades']
         self.api_private = ['order', 'cancelOrder', 'getOrder', 'getOrdersNew', 'getOrdersIgnoreTradeType',
                             'getUnfinishedOrdersIgnoreTradeType', 'getAccountInfo']
@@ -249,7 +250,7 @@ class CHBTC(Platform):
 
 
 if __name__ == '__main__':
-    common.init_logger()
+    logging_conf.init_logger()
     chbtc = CHBTC()
     # ask1 = chbtc.ask1()
     # print(chbtc.ask_bid_list(2))

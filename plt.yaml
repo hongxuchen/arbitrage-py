@@ -27,6 +27,8 @@ Available: [OKCoinCN, BitBays, HuoBi, CHBTC]
 
 Enabled: [HuoBi, BitBays]
 
+Enable_Adjuster: True
+
 CoinType: btc
 
 Emailing:

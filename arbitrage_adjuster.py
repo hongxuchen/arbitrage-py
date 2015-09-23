@@ -2,19 +2,19 @@
 
 from __future__ import print_function
 import time
-import math
 
 import concurrent.futures
 
 from bitbays import BitBays
 import common
 import config
+import logging_conf
 from okcoin import OKCoinCN
 from arbitrage_trader import Trader
 
 
 class Adjuster(object):
-    _logger = common.get_logger()
+    _logger = logging_conf.get_logger()
 
     def __init__(self, trade_pair, current_time):
         """

@@ -4,11 +4,13 @@ from __future__ import print_function
 import hashlib
 
 import requests
+import logging_conf
 
 from plt_api import Platform
 import common
 import config
 from order_info import OrderInfo
+import plt_conf
 
 
 class OKCoinAPI(Platform):
@@ -16,7 +18,7 @@ class OKCoinAPI(Platform):
         'btc': 0.01,
         'ltc': 0.1
     }
-    _logger = common.get_logger()
+    _logger = logging_conf.get_logger()
     trade_cancel_api_list = ['cancel_order', 'trade']
     common_headers = {
         'user-agent': common.USER_AGENT,
@@ -83,7 +85,7 @@ class OKCoinAPI(Platform):
             else:
                 common.handle_exit(e)
 
-    ### public api
+    # public api
 
     def api_ticker(self):
         payload = {
@@ -133,7 +135,7 @@ class OKCoinAPI(Platform):
         res = self._setup_request('trades', payload)
         return res
 
-    ### private api
+    # private api
 
     def _private_request(self, api_type, param_dict):
         params = {'api_key': self.key['api']}
@@ -270,17 +272,17 @@ class OKCoinAPI(Platform):
 class OKCoinCN(OKCoinAPI):
     def __init__(self):
         super(OKCoinCN, self).__init__(config.okcoin_cn_info)
-        self.key = common.get_key_from_data('OKCoinCN')
+        self.key = plt_conf.get_key_from_data('OKCoinCN')
 
 
 class OKCoinCOM(OKCoinAPI):
     def __init__(self):
         super(OKCoinCOM, self).__init__(config.okcoin_com_info)
-        self.key = common.get_key_from_data('OKCoinCOM')
+        self.key = plt_conf.get_key_from_data('OKCoinCOM')
 
 
 if __name__ == '__main__':
-    common.init_logger()
+    logging_conf.init_logger()
     okcoin_cn = OKCoinCN()
     # order_id_list = [1087125760, 1087125765, 1087125795]
     # order_id_str_list = [str(order_id) for order_id in order_id_list]

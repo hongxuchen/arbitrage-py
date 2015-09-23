@@ -6,15 +6,17 @@ import urllib
 import time
 
 import requests
+import logging_conf
 
 from plt_api import Platform
 import common
 import config
 from order_info import OrderInfo
+import plt_conf
 
 
 class BitBays(Platform):
-    _logger = common.get_logger()
+    _logger = logging_conf.get_logger()
     catalog_dict = {
         0: 'buy',
         1: 'sell'
@@ -31,7 +33,7 @@ class BitBays(Platform):
         super(BitBays, self).__init__(config.bitbays_info)
         self.symbol = config.bitbays_info['symbol']
         self.lower_bound = BitBays.lower_bound_dict[self.coin_type]
-        self.key = common.get_key_from_data('BitBays')
+        self.key = plt_conf.get_key_from_data('BitBays')
         self.api_public = ['ticker', 'trades', 'depth']
         self.api_private = ['info', 'orders', 'transactions', 'trade', 'cancel', 'order']
         self._counter = int(time.time() * 1000)
@@ -209,7 +211,6 @@ class BitBays(Platform):
         return data
 
     #############################################################################
-
 
     def trade(self, op_type, price, amount):
         """

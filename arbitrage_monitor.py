@@ -10,13 +10,15 @@ import config as config
 from asset_info import AssetInfo
 from bitbays import BitBays
 import common
+import logging_conf
 from okcoin import OKCoinCN
 from arbitrage_trader import Trader
+import plt_conf
 
 
 class Monitor(threading.Thread):
-    _logger = common.get_logger()
-    coin_type = common.get_key_from_data('CoinType')
+    _logger = logging_conf.get_logger()
+    coin_type = plt_conf.get_key_from_data('CoinType')
     exceed_max = config.exceed_max[coin_type]
 
     def __init__(self, plt_list):
@@ -38,7 +40,7 @@ class Monitor(threading.Thread):
 
     @staticmethod
     def report_asset(asset_list):
-        asset_logger = common.get_asset_logger()
+        asset_logger = logging_conf.get_asset_logger()
         report_template = '{:10s} ' + Monitor.coin_type + '={:<10.4f}, cny={:<10.4f}'
         all_coin = 0.0
         all_fiat = 0.0
@@ -63,7 +65,7 @@ class Monitor(threading.Thread):
     @staticmethod
     def report_asset_changes(coin, fiat):
         report = '[M] Asset Change: {:10.4f}{:3s}, {:10.4f}cny'.format(coin, Monitor.coin_type, fiat)
-        common.get_asset_logger().warning(report)
+        logging_conf.get_asset_logger().warning(report)
 
     def try_notify_asset_changes(self, coin, fiat):
         report = 'Asset Change: {:10.4f}{:3s}, {:10.4f}cny'.format(coin, Monitor.coin_type, fiat)

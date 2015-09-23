@@ -3,8 +3,6 @@
 from __future__ import print_function
 import decimal
 from email.mime.text import MIMEText
-import logging
-import logging.config
 import os
 import smtplib
 import threading
@@ -16,10 +14,11 @@ import requests
 import requests.exceptions as req_except
 import urllib3.exceptions as urllib3_except
 
-import yaml
 import ipgetter
 
 import config
+import logging_conf
+import plt_conf
 
 
 def synchronized(lock):
@@ -60,7 +59,7 @@ def round_price(price, precision=config.HuoBi_Price_Precision):
 
 
 def adjust_price(trade_catalog, price):
-    get_logger().info('trade_catalog={}, price={}'.format(trade_catalog, price))
+    logging_conf.get_logger().info('trade_catalog={}, price={}'.format(trade_catalog, price))
     assert (trade_catalog in ['buy', 'sell'])
     if trade_catalog == 'buy':
         new_price = price * (1 + config.ADJUST_PERCENTAGE)
@@ -73,6 +72,8 @@ def adjust_amount(trade_amount, precision=config.TRADE_PRECISION):
     return math.floor(trade_amount * (10 ** precision)) / (10 ** precision)
 
 
+# ==================================================================================
+
 def is_retry_exception(exception):
     for except_type in retry_except_tuple:
         if isinstance(exception, except_type):
@@ -81,7 +82,7 @@ def is_retry_exception(exception):
 
 
 def handle_exit(error):
-    get_logger().critical('Error during request:"{}", will EXIT'.format(error))
+    logging_conf.get_logger().critical('Error during request:"{}", will EXIT'.format(error))
     send_msg('error during request: {}'.format(error))
     traceback.print_exc(file=sys.stdout)
     # noinspection PyProtectedMember
@@ -95,7 +96,7 @@ def handle_retry(exception, handler):
     :param handler: real handler, no params, implemented as closure
     :return: if retry succeeds, should return request result; otherwise, exit abornormally
     """
-    logger = get_logger()
+    logger = logging_conf.get_logger()
     current_exception = exception
     logger.error('RETRY for Exception: "{}"'.format(current_exception))
     retry_counter = 0
@@ -123,23 +124,6 @@ def handle_retry(exception, handler):
     send_msg(msg)
     time.sleep(config.RETRY_SLEEP_SECONDS)
     return handle_retry(current_exception, handler)
-
-
-logging_yaml = os.path.join(os.path.dirname(__file__), 'logging.yaml')
-
-
-def init_logger():
-    with open(logging_yaml) as f:
-        data = yaml.load(f)
-    logging.config.dictConfig(data)
-
-
-def get_logger():
-    return logging.getLogger('logger')
-
-
-def get_asset_logger():
-    return logging.getLogger('asset_logger')
 
 
 class InvalidNonceError(Exception):
@@ -177,24 +161,11 @@ class CHBTCRetryError(Exception):
         super(CHBTCRetryError, self).__init__(msg)
 
 
-plt_yaml = os.path.join(os.path.dirname(__file__), 'platforms.yaml')
-
-with open(plt_yaml) as yfile:
-    ydata = yaml.load(yfile)
-
-
-def get_key_from_data(field, dict_data=None):
-    if dict_data is None:
-        dict_data = ydata
-    try:
-        return dict_data[field]
-    except KeyError:
-        err_msg = 'msg: no ydata for field={}'.format(field)
-        handle_exit(err_msg)
+# ==================================================================================
 
 
 def send_msg(report):
-    emailing_info = get_key_from_data('Emailing')
+    emailing_info = plt_conf.get_key_from_data('Emailing')
     server = emailing_info['server']
     username = emailing_info['username']
     try:
@@ -216,7 +187,7 @@ def send_msg(report):
             password = emailing_info['password']
             session.login(username, password)
         session.sendmail(sender, [receiver], msg.as_string())
-        get_logger().warning("sending mail done")
+        logging_conf.get_logger().warning("sending mail done")
         session.quit()
     except:
         traceback.print_exc(file=sys.stderr)
@@ -232,5 +203,5 @@ exit_except_tuple = (req_except.URLRequired, req_except.TooManyRedirects, HuoBiE
 USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.130 Safari/537.36'
 
 if __name__ == '__main__':
-    init_logger()
+    logging_conf.init_logger()
     send_msg("HELLOWORLD")

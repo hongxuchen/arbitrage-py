@@ -11,18 +11,24 @@ import common
 import config
 from arbitrage_adjuster import Adjuster
 from arbitrage_trader import Trader
+import logging_conf
+import plt_conf
 
 
 class Producer(threading.Thread):
-    _logger = common.get_logger()
-    coin_type = common.get_key_from_data('CoinType')
+    _logger = logging_conf.get_logger()
+    coin_type = plt_conf.get_key_from_data('CoinType')
     diff_dict = config.diff_dict[coin_type]
 
     # stateless
     def __init__(self, plt_list, adjuster_queue):
         super(Producer, self).__init__()
         self.plt_list = plt_list
-        self.adjuster_queue = adjuster_queue
+        if adjuster_queue is not None:
+            self.adjuster_enabled = True
+            self.adjuster_queue = adjuster_queue
+        else:
+            self.adjuster_enabled = False
         self.running = False
         self.min_amount = max(plt_list[0].lower_bound, plt_list[1].lower_bound)
 
@@ -31,7 +37,8 @@ class Producer(threading.Thread):
             time.sleep(config.SLEEP_SECONDS)
             Producer._logger.info('[P] Producer')
             self.process_arbitrage()
-        self.adjuster_queue.put(common.SIGNAL)
+        if self.adjuster_enabled:
+            self.adjuster_queue.put(common.SIGNAL)
 
     @staticmethod
     def _handle_failed_order(trade_pair):
@@ -116,8 +123,9 @@ class Producer(threading.Thread):
         # trade, and get order_id
         Producer.process_trade(trade_pair)
         Producer._logger.info('[P] arbitrage done')
-        adjuster = Adjuster(trade_pair, now)
-        self.adjuster_queue.put(adjuster)
+        if self.adjuster_enabled:
+            adjuster = Adjuster(trade_pair, now)
+            self.adjuster_queue.put(adjuster)
         return True
 
     def try_arbitrage(self, ask_list, bid_list, i):

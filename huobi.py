@@ -7,8 +7,10 @@ import requests
 
 import common
 import config
+import logging_conf
 from order_info import OrderInfo
 from plt_api import Platform
+import plt_conf
 
 
 class HuoBi(Platform):
@@ -26,7 +28,7 @@ class HuoBi(Platform):
         'btc': 0.001,
         'ltc': 0.01
     }
-    _logger = common.get_logger()
+    _logger = logging_conf.get_logger()
     data_domain = config.huobi_info['data_domain']
     common_headers = {
         'user-agent': common.USER_AGENT,
@@ -36,7 +38,7 @@ class HuoBi(Platform):
     def __init__(self):
         super(HuoBi, self).__init__(config.huobi_info)
         self.lower_bound = HuoBi.lower_bound_dict[self.coin_type]
-        self.key = common.get_key_from_data('HuoBi')
+        self.key = plt_conf.get_key_from_data('HuoBi')
         self.api_private = ['cancel_order', 'get_account_info', 'buy', 'sell', 'order_info']
 
     @staticmethod
@@ -164,7 +166,7 @@ class HuoBi(Platform):
 
 
 if __name__ == '__main__':
-    common.init_logger()
+    logging_conf.init_logger()
     huobi = HuoBi()
     # print(huobi.assets())
     # trade_id = huobi.trade('buy', 100, 900)

@@ -6,11 +6,12 @@ from asset_info import AssetInfo
 import common
 import grid_conf
 from grid_order import OrderInstance, GridSlot
+import logging_conf
 from okcoin import OKCoinCN
 
 
 class Grid(object):
-    _logger = common.get_logger()
+    _logger = logging_conf.get_logger()
     lower_bound = grid_conf.grid_range[0]
     upper_bound = grid_conf.grid_range[1]
     grid_diff = grid_conf.grid_diff
@@ -62,7 +63,7 @@ class Grid(object):
 
 
 if __name__ == '__main__':
-    common.init_logger()
+    logging_conf.init_logger()
     okcoin = OKCoinCN()
     grid = Grid(okcoin)
     grid.init_grid()

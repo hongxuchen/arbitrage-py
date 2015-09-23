@@ -6,7 +6,7 @@ from order_info import OrderInfo
 
 
 class Trader(object):
-    _logger = common.get_logger()
+    _logger = logging_conf.get_logger()
 
     def __init__(self, plt, catalog, price, amount, fiat='cny'):
         """

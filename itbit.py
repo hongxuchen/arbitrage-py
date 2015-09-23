@@ -3,7 +3,6 @@
 import base64
 import hashlib
 import hmac
-import os
 import urllib
 import json
 import time
@@ -13,6 +12,7 @@ import requests
 import config
 import common
 from plt_api import Platform
+import plt_conf
 
 
 class ItBitAPI(Platform):
@@ -22,7 +22,7 @@ class ItBitAPI(Platform):
         super(ItBitAPI, self).__init__(info)
         self.domain = info['domain']
         self.symbol = info['symbol']
-        self.key = common.get_key_from_data('ItBit')
+        self.key = plt_conf.get_key_from_data('ItBit')
 
     @staticmethod
     def _to_json(data):
@@ -44,7 +44,7 @@ class ItBitAPI(Platform):
         except Exception as e:
             common.handle_exit(e)
 
-    ### public APIs
+    # public APIs
 
     def ticker(self):
         base_url = self.get_url('markets/' + self.symbol + '/ticker')
@@ -57,7 +57,7 @@ class ItBitAPI(Platform):
         r = self._setup_request('get', base_url)
         print(json.dumps(r, indent=2))
 
-    ### helper functions
+    # helper functions
     @staticmethod
     def _timestamp_nonce():
         timestamp = int(round(time.time()) * 1000)

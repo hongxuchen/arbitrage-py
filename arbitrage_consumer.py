@@ -8,11 +8,12 @@ import time
 from bitbays import BitBays
 import common
 import config
+import logging_conf
 from okcoin import OKCoinCN
 
 
 class Consumer(threading.Thread):
-    _logger = common.get_logger()
+    _logger = logging_conf.get_logger()
 
     def __init__(self, adjuster_queue):
         super(Consumer, self).__init__()

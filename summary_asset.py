@@ -4,10 +4,12 @@ import concurrent.futures
 import arbitrage_driver
 from asset_info import AssetInfo
 import common
+import logging_conf
+import plt_conf
 
-common.init_logger()
+logging_conf.init_logger()
 
-enabled = common.get_key_from_data('Enabled')
+enabled = plt_conf.get_key_from_data('Enabled')
 
 enabled_plt = [arbitrage_driver.select_plt_dict[plt]() for plt in enabled]
 
