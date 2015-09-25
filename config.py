@@ -50,7 +50,7 @@ RETRY_SLEEP_SECONDS = 10
 
 MONITOR_FAIL_MAX = 2
 
-COIN_EXCEED_TIMES = 2
+COIN_EXCEED_TIMES = 1
 
 # CONFIG
 # upper_bound must > lower_bound for all platforms

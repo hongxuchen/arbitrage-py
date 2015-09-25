@@ -26,12 +26,12 @@ except ImportError:
 
 
 class Driver(object):
-    def __init__(self, enable_adjuster=False):
+    def __init__(self):
         logging_conf.init_logger()
         enabled_plt = plt_conf.get_key_from_data('Enabled')
         self.plt_list = [select_plt_dict[plt]() for plt in enabled_plt]
-        self.adjuster_enabled = enable_adjuster
-        if enable_adjuster:
+        self.adjuster_enabled = plt_conf.get_key_from_data('Enable_Adjuster')
+        if self.adjuster_enabled:
             self.adjuster_queue = queue.Queue()
             self.producer = arbitrage_producer.Producer(self.plt_list, self.adjuster_queue)
             self.consumer = arbitrage_consumer.Consumer(self.adjuster_queue)
