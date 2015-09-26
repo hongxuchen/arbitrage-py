@@ -10,7 +10,6 @@ import time
 import requests
 
 import config
-import common
 import excepts
 from plt_api import Platform
 import plt_conf

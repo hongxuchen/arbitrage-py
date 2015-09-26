@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import jinja2
 
 from operator import itemgetter
 import threading
@@ -8,9 +9,9 @@ import concurrent.futures
 
 import config as config
 from asset_info import AssetInfo
-from bitbays import BitBays
 import common
 import excepts
+from huobi import HuoBi
 import logging_conf
 from okcoin import OKCoinCN
 from arbitrage_trader import Trader
@@ -28,8 +29,8 @@ class Monitor(threading.Thread):
         self.original_asset_list = []
         self.running = False
         self.coin_exceed_counter = 0
-        self.old_coin_change_amount = 0.0
-        self.old_fiat_change_amount = 0.0
+        self.old_coin_changes = 0.0
+        self.old_fiat_changes = 0.0
         self.failed_counter = 0
         self.last_notifier_time = time.time()
 
@@ -68,14 +69,24 @@ class Monitor(threading.Thread):
         report = '[M] Asset Change: {:10.4f}{:3s}, {:10.4f}cny'.format(coin, Monitor.coin_type, fiat)
         logging_conf.get_asset_logger().warning(report)
 
-    def try_notify_asset_changes(self, coin, fiat):
-        report = 'Asset Change: {:10.4f}{:3s}, {:10.4f}cny'.format(coin, Monitor.coin_type, fiat)
+    @staticmethod
+    def asset_message_render(asset_list, coin_changes, fiat_changes):
+        jinja2_env = jinja2.Environment(loader=jinja2.FileSystemLoader(config.render_dir), trim_blocks=True)
+        msg = jinja2_env.get_template(config.render_file).render(asset_list=asset_list, coin_changes=coin_changes,
+                                                                 fiat_changes=fiat_changes)
+        return msg
+
+    def try_notify_asset_changes(self, asset_list, coin_changes, fiat_changes):
         now = time.time()
-        # config.EMAILING_INTERVAL_SECONDS = 8
         if now - self.last_notifier_time >= config.EMAILING_INTERVAL_SECONDS:
-            Monitor._logger.warning('notifying asset changes via email')
-            excepts.send_msg(report)
-            self.last_notifier_time = now
+            if abs(coin_changes) <= self.exceed_max:
+                Monitor._logger.info('notifying asset changes via email')
+                report = self.asset_message_render(asset_list, coin_changes, fiat_changes)
+                excepts.send_msg(report)
+                self.last_notifier_time = now
+            else:
+                # NOTE: do not deal with coin imbalance here
+                pass
 
     def _get_plt_price_list(self, catalog):
         if catalog == 'buy':
@@ -89,19 +100,19 @@ class Monitor(threading.Thread):
             pack = zip(self.plt_list, bid1_list)
             return sorted(pack, key=itemgetter(1), reverse=True)
 
-    def coin_update_handler(self, coin_change_amount, is_last):
+    def coin_keeper(self, coin_change_amount, is_last):
         # only when exceeds
         if coin_change_amount > Monitor.exceed_max:
             if is_last:  # make sure will sell
                 self.coin_exceed_counter = config.COIN_EXCEED_TIMES + 2
             # update counter
-            if self.old_coin_change_amount < config.MINOR_DIFF:
+            if self.old_coin_changes < config.MINOR_DIFF:
                 self.coin_exceed_counter = 1
             else:
                 self.coin_exceed_counter += 1
             Monitor._logger.warning(
                 '[M] exceed_counter={}, old_coin_changes={:<10.4f}, current={:<10.4f}'.format(
-                    self.coin_exceed_counter, self.old_coin_change_amount, coin_change_amount))
+                    self.coin_exceed_counter, self.old_coin_changes, coin_change_amount))
             # test whether trade is needed
             if self.coin_exceed_counter > config.COIN_EXCEED_TIMES:
                 trade_catalog = 'sell'
@@ -113,8 +124,8 @@ class Monitor(threading.Thread):
             # update counter
             Monitor._logger.warning(
                 '[M] exceed_counter={}, old_coin_changes={:<10.4f}, current={:<10.4f}'.format(
-                    self.coin_exceed_counter, self.old_coin_change_amount, coin_change_amount))
-            if self.old_coin_change_amount > -config.MINOR_DIFF:
+                    self.coin_exceed_counter, self.old_coin_changes, coin_change_amount))
+            if self.old_coin_changes > -config.MINOR_DIFF:
                 self.coin_exceed_counter = -1
             else:
                 self.coin_exceed_counter -= 1
@@ -129,7 +140,7 @@ class Monitor(threading.Thread):
         trade_amount = common.adjust_amount(coin_change_amount)
         adjust_status = self.adjust_trade(trade_catalog, trade_amount)
         # reset after trade
-        self.old_coin_change_amount = 0.0
+        self.old_coin_changes = 0.0
         self.coin_exceed_counter = 0
         return adjust_status
 
@@ -163,31 +174,31 @@ class Monitor(threading.Thread):
             Monitor._logger.info('[M] LOCK acquired')
             asset_list = self.get_asset_list()
             Monitor._logger.debug('[M] asset_list obtained')
-            coin, fiat = self.get_asset_changes(asset_list)
-            status = self.coin_update_handler(coin, is_last)
+            coin_changes, fiat_changes = self.get_asset_changes(asset_list)
+            status = self.coin_keeper(coin_changes, is_last)
         Monitor._logger.info('[M] LOCK released')
         # report
         # NOTE: this report is delayed
-        if abs(self.old_coin_change_amount - coin) > config.MINOR_DIFF or abs(
-                        self.old_fiat_change_amount - fiat) > config.MINOR_DIFF:
+        if abs(self.old_coin_changes - coin_changes) > config.MINOR_DIFF or abs(
+                        self.old_fiat_changes - fiat_changes) > config.MINOR_DIFF:
             self.report_asset(asset_list)
-            self.report_asset_changes(coin, fiat)
-        self.try_notify_asset_changes(coin, fiat)
+            self.report_asset_changes(coin_changes, fiat_changes)
+        self.try_notify_asset_changes(asset_list, coin_changes, fiat_changes)
         # update old
-        self.old_coin_change_amount = coin
-        self.old_fiat_change_amount = fiat
+        self.old_coin_changes = coin_changes
+        self.old_fiat_changes = fiat_changes
         return status
 
     def run(self, *args, **kwargs):
         # initialize asset
         self.original_asset_list = self.get_asset_list()
         self.report_asset(self.original_asset_list)
-        self.old_coin_change_amount = self.get_asset_changes(self.original_asset_list)[0]
+        self.old_coin_changes = self.get_asset_changes(self.original_asset_list)[0]
         # update asset info
         while self.running:
             time.sleep(config.MONITOR_INTERVAL_SECONDS)
             Monitor._logger.debug('[M] Monitor')
-            adjust_status = self.asset_update_handler(False)  # TODO: return value not used here
+            adjust_status = self.asset_update_handler(False)
             if adjust_status is False:
                 self.failed_counter += 1
                 if self.failed_counter > config.MONITOR_FAIL_MAX:
@@ -203,6 +214,9 @@ class Monitor(threading.Thread):
 
 if __name__ == '__main__':
     okcoin_cn = OKCoinCN()
-    bitbays = BitBays()
-    plt_list = [okcoin_cn, bitbays]
+    huobi = HuoBi()
+    plt_list = [okcoin_cn, huobi]
     monitor = Monitor(plt_list)
+    asset_list = monitor.get_asset_list()
+    msg = monitor.asset_message_render(asset_list, 3.0, 4.0)
+    excepts.send_msg(msg)

@@ -1,3 +1,5 @@
+import os
+
 okcoin_cn_info = {
     'domain': 'https://www.okcoin.cn/api/v1',
     'symbol': 'cny'
@@ -30,6 +32,8 @@ itbit_info = {
     'symbol': 'XBTUSD'
 }
 
+render_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'renders')
+render_file = 'render.html'
 USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.130 Safari/537.36'
 
 DISPLAY_PRECISION = 6
@@ -45,7 +49,6 @@ CONSUMER_TIMEOUTS = 1.0
 
 TIMEOUT = 3.0
 RETRY_MAX = 80
-RETRY_SECONDS = 0.012
 RETRY_SLEEP_SECONDS = 10
 
 MONITOR_FAIL_MAX = 2
@@ -57,13 +60,14 @@ COIN_EXCEED_TIMES = 1
 PENDING_SECONDS = 4.0
 MONITOR_INTERVAL_SECONDS = 3
 
-EMAILING_INTERVAL_SECONDS = 3600
+EMAILING_INTERVAL_SECONDS = 600
 
 PRICE_ROUND = 2.0
 
 MUTEX_TIMEOUTS = 3.0
 
 ####################################################################
+RETRY_SECONDS = 0.01
 
 exceed_max = {
     'btc': 0.001,

@@ -5,13 +5,13 @@ import os
 import smtplib
 import time
 import traceback
-import ipgetter
 import sys
+import requests.exceptions as req_except
+import urllib3.exceptions as urllib3_except
+
 import config
 import logging_conf
 import plt_conf
-import requests.exceptions as req_except
-import urllib3.exceptions as urllib3_except
 
 
 class InvalidNonceError(Exception):
@@ -108,7 +108,7 @@ def handle_retry(exception, handler):
     return handle_retry(current_exception, handler)
 
 
-def send_msg(report):
+def send_msg(report, msg_type='html'):
     emailing_info = plt_conf.get_key_from_data('Emailing')
     server = emailing_info['server']
     username = emailing_info['username']
@@ -117,9 +117,7 @@ def send_msg(report):
     except KeyError:
         sender = username
     receiver = emailing_info['receiver']
-    ip_str = ipgetter.myip()
-    report = str(ip_str) + '\n' + report
-    msg = MIMEText(report)
+    msg = MIMEText(report, msg_type)
     msg['Subject'] = 'Arbitrage Report'
     msg['From'] = sender
     msg['To'] = receiver
@@ -131,7 +129,7 @@ def send_msg(report):
             password = emailing_info['password']
             session.login(username, password)
         session.sendmail(sender, [receiver], msg.as_string())
-        logging_conf.get_logger().warning("sending mail done")
+        logging_conf.get_logger().info("sending mail done")
         session.quit()
     except:
         traceback.print_exc(file=sys.stderr)
