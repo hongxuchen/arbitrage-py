@@ -1,29 +1,29 @@
 version: 1
 
 formatters:
-  fileFormatter:
-    format: '%(levelname)9s %(asctime)s %(threadName)15s %(filename)25s: %(lineno)3s - %(message)s'
+  trackerFormatter:
+    format: '%(levelname)9s %(asctime)s %(threadName)15s %(filename)25s:%(lineno)3s - %(message)s'
     datefmt: '%Y-%m-%d %H:%M:%S'
-  consoleFormatter:
+  simpleFormatter:
     format: '%(asctime)s  %(message)s'
     datefmt: '%Y-%m-%d %H:%M:%S'
 
 handlers:
   console:
     class: logging.StreamHandler
-    formatter: consoleFormatter
+    formatter: simpleFormatter
     level: WARNING
     stream: ext://sys.stdout
   tracker_file:
     class: logging.FileHandler
-    formatter: fileFormatter
+    formatter: trackerFormatter
     level: DEBUG
-    filename: tracker.LOG
+    filename: log/tracker.LOG
   asset_file:
     class: logging.FileHandler
-    formatter: fileFormatter
+    formatter: simpleFormatter
     level: INFO
-    filename: asset.LOG
+    filename: log/asset.LOG
 
 loggers:
   logger:
