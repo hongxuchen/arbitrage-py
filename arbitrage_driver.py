@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
-from chbtc import CHBTC
-from huobi import HuoBi
+from api.chbtc import CHBTC
+from api.huobi import HuoBi
 from itbit import ItBitAPI
 import logging_conf
-from okcoin import OKCoinCN
-from bitbays import BitBays
+from api.okcoin import OKCoinCN
+from api.bitbays import BitBays
 import arbitrage_consumer
 import arbitrage_producer
 import arbitrage_monitor

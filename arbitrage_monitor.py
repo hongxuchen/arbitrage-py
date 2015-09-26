@@ -1,19 +1,18 @@
 #!/usr/bin/env python
-import jinja2
-
 from operator import itemgetter
 import threading
 import time
 
+import jinja2
 import concurrent.futures
 
 import config as config
 from asset_info import AssetInfo
 import common
 import excepts
-from huobi import HuoBi
+from api.huobi import HuoBi
 import logging_conf
-from okcoin import OKCoinCN
+from api.okcoin import OKCoinCN
 from arbitrage_trader import Trader
 import plt_conf
 

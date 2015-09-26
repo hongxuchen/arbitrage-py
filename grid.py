@@ -2,12 +2,12 @@
 from itertools import chain
 import time
 import sys
+
 from asset_info import AssetInfo
-import common
 import grid_conf
 from grid_order import OrderInstance, GridSlot
 import logging_conf
-from okcoin import OKCoinCN
+from api.okcoin import OKCoinCN
 
 
 class Grid(object):

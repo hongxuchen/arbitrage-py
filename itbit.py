@@ -6,12 +6,11 @@ import hmac
 import urllib
 import json
 import time
-
 import requests
 
 import config
 import excepts
-from plt_api import Platform
+from api.plt import Platform
 import plt_conf
 
 

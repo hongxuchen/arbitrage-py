@@ -1,8 +1,7 @@
 #!/usr/bin/env python
-import operator
 
-from huobi import HuoBi
-from okcoin import OKCoinCN
+from api.huobi import HuoBi
+from api.okcoin import OKCoinCN
 
 
 class AssetInfo(object):

@@ -5,11 +5,11 @@ import time
 
 import concurrent.futures
 
-from bitbays import BitBays
+from api.bitbays import BitBays
 import common
 import config
 import logging_conf
-from okcoin import OKCoinCN
+from api.okcoin import OKCoinCN
 from arbitrage_trader import Trader
 
 

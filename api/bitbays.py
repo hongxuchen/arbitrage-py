@@ -9,7 +9,7 @@ import requests
 import excepts
 import logging_conf
 
-from plt_api import Platform
+from plt import Platform
 import common
 import config
 from order_info import OrderInfo

@@ -14,7 +14,7 @@ import config
 import excepts
 import logging_conf
 from order_info import OrderInfo
-from plt_api import Platform
+from plt import Platform
 import plt_conf
 
 
