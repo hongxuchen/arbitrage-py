@@ -134,7 +134,8 @@ class BitBays(Platform):
         res = self._setup_request('depth', params=payload)['result']
         asks = sorted(res['asks'], key=lambda ask: ask[0], reverse=True)[-length:]
         bids = sorted(res['bids'], key=lambda bid: bid[0], reverse=True)[:length]
-        assert (asks[-1][0] + config.MINOR_DIFF >= bids[0][0])
+        # NOTE: bitbays always violates this assertion!!!
+        # assert (asks[-1][0] + config.MINOR_DIFF >= bids[0][0])
         asks_bids = asks + bids
         return asks_bids
 

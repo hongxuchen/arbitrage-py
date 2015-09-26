@@ -23,6 +23,11 @@ try:
     import Queue as queue
 except ImportError:
     import queue
+try:
+    # noinspection PyShadowingBuiltins
+    input = raw_input
+except NameError:
+    pass
 
 
 class Driver(object):
@@ -63,13 +68,16 @@ class Driver(object):
         logging_conf.get_logger().info('=' * 80)
         logging_conf.get_logger().warning('[D] start trade')
         driver.start_trade()
-        while True:
-            # FIXME only works for python2
-            value = raw_input()
-            if value == 'q':
-                break
-        logging_conf.get_logger().warning('[D] stop trade')
-        self.stop_trade()
+        try:
+            while True:
+                value = input()
+                if value == 'q':
+                    break
+        except KeyboardInterrupt:
+            pass
+        finally:
+            logging_conf.get_logger().warning('[D] stop trade')
+            self.stop_trade()
 
 
 if __name__ == '__main__':

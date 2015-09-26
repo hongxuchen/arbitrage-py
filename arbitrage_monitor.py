@@ -202,10 +202,10 @@ class Monitor(threading.Thread):
             if adjust_status is False:
                 self.failed_counter += 1
                 if self.failed_counter > config.MONITOR_FAIL_MAX:
-                    # FIXME deal with this case
-                    pass
+                    report = 'Monitor adjuster failed {} times'.format(self.failed_counter)
+                    excepts.send_msg(report, 'text')
         # last adjust
-        # FIXME this strategy is fine only when exiting in the order: consumer->monitor
+        # NOTE this strategy is fine only when exiting in the order: consumer->monitor
         last_adjust_status = self.asset_update_handler(True)
         if last_adjust_status is False:
             fail_warning = 'last adjust failed, do it yourself!'
