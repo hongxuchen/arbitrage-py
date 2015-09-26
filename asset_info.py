@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import operator
 
 from huobi import HuoBi
 from okcoin import OKCoinCN
@@ -23,12 +24,12 @@ class AssetInfo(object):
         return cls(plt_name, coin_type, fiat, coin)
 
     @classmethod
-    def from_sum(cls, p1, p2):
+    def from_sum(cls, plt_list):
         plt_name = 'ALL'
-        assert (p1.coin_type == p2.coin_type)
-        coin_type = p1.coin_type
-        fiat = [p1.fiat_pending + p2.fiat_pending, p1.fiat_avail + p2.fiat_avail]
-        coin = [p1.coin_pending + p2.coin_pending, p1.coin_avail + p2.coin_avail]
+        coin_type = plt_list[0].coin_type
+        assert (all(coin_type == plt.coin_type for plt in plt_list))
+        fiat = [sum([p.fiat_pending for p in plt_list]), sum(p.fiat_avail for p in plt_list)]
+        coin = [sum([p.coin_pending for p in plt_list]), sum(p.coin_avail for p in plt_list)]
         return cls(plt_name, coin_type, fiat, coin)
 
     def afford_buy_amount(self, price):
@@ -61,6 +62,6 @@ if __name__ == '__main__':
     huobi = HuoBi()
     asset_okcoin = AssetInfo.from_api(okcoin)
     asset_huobi = AssetInfo.from_api(huobi)
-    asset_total = AssetInfo.from_sum(asset_huobi, asset_okcoin)
+    asset_total = AssetInfo.from_sum([asset_huobi, asset_okcoin])
     for asset in [asset_okcoin, asset_huobi, asset_total]:
         print(asset)

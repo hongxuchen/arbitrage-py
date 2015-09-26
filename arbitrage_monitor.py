@@ -71,6 +71,8 @@ class Monitor(threading.Thread):
 
     @staticmethod
     def asset_message_render(asset_list, coin_changes, fiat_changes):
+        asset_total = AssetInfo.from_sum(asset_list)
+        asset_list.append(asset_total)
         jinja2_env = jinja2.Environment(loader=jinja2.FileSystemLoader(config.render_dir), trim_blocks=True)
         msg = jinja2_env.get_template(config.render_file).render(asset_list=asset_list, coin_changes=coin_changes,
                                                                  fiat_changes=fiat_changes)
