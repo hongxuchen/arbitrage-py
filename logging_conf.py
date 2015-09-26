@@ -15,7 +15,7 @@ def init_logger():
     else:
         for f in os.listdir(logger_dir):
             fpath = os.path.join(logger_dir, f)
-            if f.endswith('.LOG') and os.path.isfile(f):
+            if f.endswith('.LOG') and os.path.isfile(fpath):
                 os.remove(fpath)
     logging.config.dictConfig(data)
 
