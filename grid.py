@@ -26,7 +26,7 @@ class Grid(object):
     def init_grid(self):
         price = self.upper_bound
         size = (self.upper_bound - self.lower_bound) / self.grid_diff
-        asset = AssetInfo(self.plt)
+        asset = AssetInfo.from_api(self.plt)
         to_consume = (self.upper_bound + self.lower_bound + self.grid_diff) / 2.0 * size * self.amount
         if asset.fiat_avail < to_consume:
             self._logger.critical("cannot afford to buy, avail={}, to_consume={}".format(asset.fiat_avail, to_consume))

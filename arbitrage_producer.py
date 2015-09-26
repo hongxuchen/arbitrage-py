@@ -44,7 +44,7 @@ class Producer(threading.Thread):
     @staticmethod
     def _handle_failed_order(trade_pair):
         with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
-            assets = list(executor.map(lambda t: AssetInfo(t.plt), trade_pair))
+            assets = list(executor.map(lambda t: AssetInfo.from_api(t.plt), trade_pair))
         asset_str = '[asset info]\n'
         for asset in assets:
             asset_str += str(asset) + '\n'
@@ -82,7 +82,7 @@ class Producer(threading.Thread):
         bid_b_price, bid_b_amount = bid_b[0], bid_b[1]
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
-            asset_info = executor.map(lambda plt: AssetInfo(plt), self.plt_list)
+            asset_info = executor.map(lambda plt: AssetInfo.from_api(plt), self.plt_list)
         Producer._logger.debug('[P] asset_info obtained')
         asset_info_list = list(asset_info)
         asset_info_a = asset_info_list[i]

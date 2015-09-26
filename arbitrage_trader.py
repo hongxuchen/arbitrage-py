@@ -40,8 +40,8 @@ class Trader(object):
         # TradeInfo._logger.debug('BEFORE trade')
         order_id = self.plt.trade(catalog, price, amount)
         Trader._logger.warning(
-            'Trade in {:10s}: {:4s} {:10.4f} {:3s} at price {:10.4f} cny, order_id={:d}'.format(
-                self.plt_name, catalog, amount, self.coin_type, price, order_id))
+            'Trade in {:10s}: {:4s} {:10.4f} {:3s} at price {:10.4f} {}, order_id={:d}'.format(
+                self.plt_name, catalog, amount, self.coin_type, price, self.fiat, order_id))
         return order_id
 
     def _asset_afford_trade(self, trade_amount, trade_price):
@@ -52,7 +52,7 @@ class Trader(object):
         """
         waited_asset_times = 0
         # NOTE: since we lock the trade, only 1 request needed
-        asset_info = AssetInfo(self.plt)
+        asset_info = AssetInfo.from_api(self.plt)
         if self.catalog == 'sell':
             asset_amount = asset_info.afford_sell_amount()
             if asset_amount >= trade_amount:

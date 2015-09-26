@@ -174,8 +174,6 @@ if __name__ == '__main__':
     # print(trade_id)
     trade_id = huobi.trade('sell', 99990, 0.12)
     print(trade_id)
-    # asset_info = AssetInfo(huobi)
-    # print(asset_info.afford_sell_amount())
     # print(huobi.lower_bound)
     # huobi.coin_type = 'ltc'
     # print(huobi.ask_bid_list(1))

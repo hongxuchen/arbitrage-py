@@ -20,8 +20,10 @@ select_plt_dict = {
 }
 
 try:
+    # noinspection PyPep8Naming
     import Queue as queue
 except ImportError:
+    # noinspection PyUnresolvedReferences
     import queue
 try:
     # noinspection PyShadowingBuiltins
@@ -71,7 +73,7 @@ class Driver(object):
         try:
             while True:
                 value = input()
-                if value == 'q':
+                if value.startswith('q'):
                     break
         except KeyboardInterrupt:
             pass

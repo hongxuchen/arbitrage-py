@@ -14,7 +14,7 @@ enabled = plt_conf.get_key_from_data('Enabled')
 enabled_plt = [arbitrage_driver.select_plt_dict[plt]() for plt in enabled]
 
 with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
-    asset_info = executor.map(lambda plt: str(AssetInfo(plt)), enabled_plt)
+    asset_info = executor.map(lambda plt: str(AssetInfo.from_api(plt)), enabled_plt)
 
 report = '\n'.join(asset_info)
 excepts.send_msg(report)

@@ -36,7 +36,7 @@ class Monitor(threading.Thread):
 
     def get_asset_list(self):
         with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
-            assets = executor.map(lambda plt: AssetInfo(plt), self.plt_list)
+            assets = executor.map(lambda plt: AssetInfo.from_api(plt), self.plt_list)
         asset_list = list(assets)
         return asset_list
 
