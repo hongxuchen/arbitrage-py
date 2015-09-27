@@ -31,6 +31,12 @@ class AssetInfo(object):
         coin = [sum([p.coin_pending for p in plt_list]), sum(p.coin_avail for p in plt_list)]
         return cls(plt_name, coin_type, fiat, coin)
 
+    def converted_fiat(self, price):
+        return self.total_coin() * price + self.total_fiat()
+
+    def converted_coin(self, price):
+        return self.total_fiat() / price + self.total_coin()
+
     def afford_buy_amount(self, price):
         return self.fiat_avail / price
 

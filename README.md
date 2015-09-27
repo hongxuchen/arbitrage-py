@@ -4,6 +4,7 @@
 * HuoBi Error: code=37, msg=该委托已在队列中，不能取消或修
 
 # TODO
+* main thread works as a server
 * [FATAL] monitor adjust still may 'cannot afford' so that it causes long-term imbalance
 reverse the fiat amount for further trade. The net strategy is that we can change "diff".
 * calculate the probabilities
@@ -11,7 +12,7 @@ reverse the fiat amount for further trade. The net strategy is that we can chang
     - failed frequency
     - ask/bid diff times w.r.t. certain amount
     - profits per day
-* profits against original 
+* profits against original
 * order/cancel frequently for one platform; when completed, reverse trade on another platform
 * Deal with common.py init issue
 * force implementation

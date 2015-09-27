@@ -5,6 +5,7 @@ import time
 
 import jinja2
 import concurrent.futures
+from api.bitbays import BitBays
 
 import config as config
 from asset_info import AssetInfo
@@ -70,11 +71,15 @@ class Monitor(threading.Thread):
 
     @staticmethod
     def asset_message_render(asset_list, coin_changes, fiat_changes):
+        assert (len(asset_list) == 2)
         asset_total = AssetInfo.from_sum(asset_list)
         asset_list.append(asset_total)
+        coin_price = common.get_coin_price()
+        converted_fiat = asset_total.total_fiat() + asset_total.total_coin() * coin_price
+        converted_coin = asset_total.total_coin() + asset_total.total_fiat() / coin_price
         jinja2_env = jinja2.Environment(loader=jinja2.FileSystemLoader(config.render_dir), trim_blocks=True)
         msg = jinja2_env.get_template(config.render_file).render(asset_list=asset_list, coin_changes=coin_changes,
-                                                                 fiat_changes=fiat_changes)
+                                                                 fiat_changes=fiat_changes, coin_price=coin_price)
         return msg
 
     def try_notify_asset_changes(self, asset_list, coin_changes, fiat_changes):

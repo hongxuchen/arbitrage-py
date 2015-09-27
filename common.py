@@ -31,6 +31,17 @@ def get_usd_cny_rate():
     return decimal.Decimal(r.text.split(",")[1])
 
 
+def get_coin_price(coin_type='btc', fiat='cny'):
+    try:
+        r = requests.get('https://www.okcoin.cn/api/v1/ticker.do?symbol={}_{}'.format(coin_type, fiat),
+                         timeout=config.TIMEOUT)
+        data = r.json()
+        fiat_price = data['ticker']['last']
+        return to_decimal(fiat_price)
+    except:
+        return to_decimal(0)
+
+
 def to_decimal(value_str, precision=config.DISPLAY_PRECISION):
     return round(float(value_str), precision)
 
@@ -66,3 +77,4 @@ SIGNAL = None
 
 if __name__ == '__main__':
     logging_conf.init_logger()
+    print(get_coin_price())

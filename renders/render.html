@@ -1,23 +1,36 @@
 <html lang="en">
 <h3>Summary</h3>
+
 <p>coin changes: {{'{:<10.4f}'.format(coin_changes)}}, fiat changes: {{'{:<10.4f}'.format(fiat_changes)}}</p>
+
 <h3>Details</h3>
-<table border="1" width="60%">
+<table border="1" width="75%">
     <tr>
-        <td align="right">Platform</td>
-        <td align="right">avail coins</td>
-        <td align="right">pending coins</td>
-        <td align="right">avail fiat</td>
-        <td align="right">pending fiat</td>
+        <th align="center" rowspan="2">Platform</th>
+        <th align="center" colspan="2">coin</th>
+        <th align="center" colspan="2">fiat</th>
+        <th align="center" colspan="2">converted</th>
+    </tr>
+    <tr>
+        <th align="center">available</th>
+        <th align="center">pending</th>
+        <th align="center">available</th>
+        <th align="center">pending</th>
+        <th align="center">coin</th>
+        <th align="center">fiat</th>
     </tr>
     {%for asset in asset_list%}
     <tr>
-        <td align="right">{{asset.plt_name}}</td>
-        <td align="right">{{'{:<10.4f}'.format(asset.coin_avail)}}</td>
-        <td align="right">{{'{:<10.4f}'.format(asset.coin_pending)}}</td>
-        <td align="right">{{'{:<10.4f}'.format(asset.fiat_avail)}}</td>
-        <td align="right">{{'{:<10.4f}'.format(asset.fiat_pending)}}</td>
+        <th align="center">{{asset.plt_name}}</th>
+        <td align="center">{{'{:<10.4f}'.format(asset.coin_avail)}}</td>
+        <td align="center">{{'{:<10.4f}'.format(asset.coin_pending)}}</td>
+        <td align="center">{{'{:<10.4f}'.format(asset.fiat_avail)}}</td>
+        <td align="center">{{'{:<10.4f}'.format(asset.fiat_pending)}}</td>
+        <td align="center">{{'{:<10.4f}'.format(asset.converted_coin(coin_price))}}</td>
+        <td align="center">{{'{:<10.4f}'.format(asset.converted_fiat(coin_price))}}</td>
     </tr>
     {%endfor%}
 </table>
+
+<h3>Suggestions</h3>
 </html>
