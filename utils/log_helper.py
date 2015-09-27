@@ -3,10 +3,11 @@ import logging
 import logging.config
 import os
 import yaml
+from settings import config
 
 
 def init_logger():
-    logging_yaml = os.path.join(os.path.dirname(__file__), 'logging.yaml')
+    logging_yaml = os.path.join(config.settings_dir, 'log.yaml')
     with open(logging_yaml) as f:
         data = yaml.load(f)
     logger_dir = 'log'

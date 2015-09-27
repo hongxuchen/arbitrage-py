@@ -5,19 +5,18 @@ import threading
 
 import concurrent.futures
 
-from asset_info import AssetInfo
-import common
-import config
-from arbitrage_adjuster import Adjuster
-from arbitrage_trader import Trader
-import excepts
-import logging_conf
-import plt_conf
+from utils.asset_info import AssetInfo
+from settings import config
+from arbitrage.adjuster import Adjuster
+from arbitrage.trader import Trader
+from utils import common, plt_helper
+from utils import excepts
+from utils import log_helper
 
 
 class Producer(threading.Thread):
-    _logger = logging_conf.get_logger()
-    coin_type = plt_conf.get_key_from_data('CoinType')
+    _logger = log_helper.get_logger()
+    coin_type = plt_helper.get_key_from_data('CoinType')
     diff_dict = config.diff_dict[coin_type]
 
     # stateless

@@ -1,8 +1,5 @@
 #!/usr/bin/env python
-import common
-import logging_conf
-from order_info import OrderInfo
-import order_info
+from utils import log_helper
 
 
 class OrderInstance(object):
@@ -20,7 +17,7 @@ class OrderInstance(object):
 
 
 class GridSlot(object):
-    _logger = logging_conf.get_logger()
+    _logger = log_helper.get_logger()
 
     def __init__(self, price):
         self.price = price

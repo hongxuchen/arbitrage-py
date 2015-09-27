@@ -2,20 +2,18 @@
 
 from __future__ import print_function
 import hashlib
-import sha
+from hashlib import sha1
 import time
 import struct
 from collections import OrderedDict
-
 import requests
 
-import common
-import config
-import excepts
-import logging_conf
-from order_info import OrderInfo
+from settings import config
+from utils import common, plt_helper
+from utils import excepts
+from utils import log_helper
+from utils.order_info import OrderInfo
 from plt import Platform
-import plt_conf
 
 
 class CHBTC(Platform):
@@ -27,7 +25,7 @@ class CHBTC(Platform):
         'buy': 1,
         'sell': 0
     }
-    _logger = logging_conf.get_logger()
+    _logger = log_helper.get_logger()
     trade_cancel_api_list = ['order', 'cancelOrder']
     data_domain = config.chbtc_info['data_domain']
     common_headers = {
@@ -38,12 +36,12 @@ class CHBTC(Platform):
         super(CHBTC, self).__init__(config.chbtc_info)
         self.symbol = config.bitbays_info['symbol']
         self.lower_bound = CHBTC.lower_bound_dict[self.coin_type]
-        self.key = plt_conf.get_key_from_data('CHBTC')
+        self.key = plt_helper.get_key_from_data('CHBTC')
         self.api_public = ['ticker', 'depth', 'trades']
         self.api_private = ['order', 'cancelOrder', 'getOrder', 'getOrdersNew', 'getOrdersIgnoreTradeType',
                             'getUnfinishedOrdersIgnoreTradeType', 'getAccountInfo']
 
-    def _setup_requests(self, api_type, params=None, data=None):
+    def _setup_requests(self, api_type, params=None):
         def _request_impl():
             r = None
             if api_type in self.api_public:
@@ -69,7 +67,8 @@ class CHBTC(Platform):
                         return res_data
                     CHBTC._logger.error(u'CHBTC Error: code={}, msg={}'.format(code, res_data['message']))
                     if code in [1001, 1002, 1003, 3002, 3003, 3004, 3005, 3006, 4001, 4002]:
-                        raise excepts.CHBTCExitError('CHBTCExitError: code={}, msg={}'.format(code, res_data['message']))
+                        raise excepts.CHBTCExitError(
+                            'CHBTCExitError: code={}, msg={}'.format(code, res_data['message']))
                     elif code in [2001, 2002, 2003, 3001]:
                         CHBTC._logger.warning('ignore error, code={}'.format(code))
                     else:
@@ -134,11 +133,11 @@ class CHBTC(Platform):
             slist[index] = chr(ord(slist[index]) ^ value)
         return "".join(slist)
 
-    ## TODO use hashlib
+    # TODO use hashlib
     @staticmethod
     def __digest(a_val):
         value = struct.pack("%ds" % len(a_val), a_val)
-        h = sha.new()
+        h = sha1()
         h.update(value)
         dg = h.hexdigest()
         return dg
@@ -251,7 +250,7 @@ class CHBTC(Platform):
 
 
 if __name__ == '__main__':
-    logging_conf.init_logger()
+    log_helper.init_logger()
     chbtc = CHBTC()
     # ask1 = chbtc.ask1()
     # print(chbtc.ask_bid_list(2))

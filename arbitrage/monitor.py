@@ -5,22 +5,20 @@ import time
 
 import jinja2
 import concurrent.futures
-from api.bitbays import BitBays
 
-import config as config
-from asset_info import AssetInfo
-import common
-import excepts
+from settings import config
+from utils.asset_info import AssetInfo
+from utils import common, plt_helper
+from utils import excepts
+from utils import log_helper
 from api.huobi import HuoBi
-import logging_conf
 from api.okcoin import OKCoinCN
-from arbitrage_trader import Trader
-import plt_conf
+from trader import Trader
 
 
 class Monitor(threading.Thread):
-    _logger = logging_conf.get_logger()
-    coin_type = plt_conf.get_key_from_data('CoinType')
+    _logger = log_helper.get_logger()
+    coin_type = plt_helper.get_key_from_data('CoinType')
     exceed_max = config.exceed_max[coin_type]
 
     def __init__(self, plt_list):
@@ -42,7 +40,7 @@ class Monitor(threading.Thread):
 
     @staticmethod
     def report_asset(asset_list):
-        asset_logger = logging_conf.get_asset_logger()
+        asset_logger = log_helper.get_asset_logger()
         report_template = '{:10s} ' + Monitor.coin_type + '={:<10.4f}, cny={:<10.4f}'
         all_coin = 0.0
         all_fiat = 0.0
@@ -67,7 +65,7 @@ class Monitor(threading.Thread):
     @staticmethod
     def report_asset_changes(coin, fiat):
         report = '[M] Asset Change: {:10.4f}{:3s}, {:10.4f}cny'.format(coin, Monitor.coin_type, fiat)
-        logging_conf.get_asset_logger().warning(report)
+        log_helper.get_asset_logger().warning(report)
 
     @staticmethod
     def asset_message_render(asset_list, coin_changes, fiat_changes):
@@ -75,7 +73,7 @@ class Monitor(threading.Thread):
         asset_total = AssetInfo.from_sum(asset_list)
         asset_list.append(asset_total)
         coin_price = common.get_coin_price()
-        jinja2_env = jinja2.Environment(loader=jinja2.FileSystemLoader(config.render_dir), trim_blocks=True)
+        jinja2_env = jinja2.Environment(loader=jinja2.FileSystemLoader(config.res_dir), trim_blocks=True)
         msg = jinja2_env.get_template(config.render_file).render(asset_list=asset_list, coin_changes=coin_changes,
                                                                  fiat_changes=fiat_changes, coin_price=coin_price)
         return msg

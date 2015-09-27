@@ -32,7 +32,9 @@ itbit_info = {
     'symbol': 'XBTUSD'
 }
 
-render_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'renders')
+root_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..')
+res_dir = os.path.join(root_dir, 'res')
+settings_dir = os.path.join(root_dir, 'settings')
 render_file = 'render.html'
 USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.130 Safari/537.36'
 

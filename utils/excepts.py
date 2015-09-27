@@ -9,9 +9,9 @@ import sys
 import requests.exceptions as req_except
 import urllib3.exceptions as urllib3_except
 
-import config
-import logging_conf
-import plt_conf
+import log_helper
+import plt_helper
+from settings import config
 
 
 class InvalidNonceError(Exception):
@@ -64,7 +64,7 @@ def is_retry_exception(exception):
 
 
 def handle_exit(error):
-    logging_conf.get_logger().critical('Error during request:"{}", will EXIT'.format(error))
+    log_helper.get_logger().critical('Error during request:"{}", will EXIT'.format(error))
     send_msg('error during request: {}'.format(error))
     traceback.print_exc(file=sys.stdout)
     # noinspection PyProtectedMember
@@ -78,7 +78,7 @@ def handle_retry(exception, handler):
     :param handler: real handler, no params, implemented as closure
     :return: if retry succeeds, should return request result; otherwise, exit abornormally
     """
-    logger = logging_conf.get_logger()
+    logger = log_helper.get_logger()
     current_exception = exception
     logger.error('RETRY for Exception: "{}"'.format(current_exception))
     retry_counter = 0
@@ -109,7 +109,7 @@ def handle_retry(exception, handler):
 
 
 def send_msg(report, msg_type='html'):
-    emailing_info = plt_conf.get_key_from_data('Emailing')
+    emailing_info = plt_helper.get_key_from_data('Emailing')
     server = emailing_info['server']
     username = emailing_info['username']
     try:
@@ -121,6 +121,7 @@ def send_msg(report, msg_type='html'):
     msg['Subject'] = 'Arbitrage Report'
     msg['From'] = sender
     msg['To'] = receiver
+    # noinspection PyBroadException
     try:
         session = smtplib.SMTP(server)
         # session.set_debuglevel(1)
@@ -129,12 +130,12 @@ def send_msg(report, msg_type='html'):
             password = emailing_info['password']
             session.login(username, password)
         session.sendmail(sender, [receiver], msg.as_string())
-        logging_conf.get_logger().info("sending mail done")
+        log_helper.get_logger().info("sending mail done")
         session.quit()
     except:
         traceback.print_exc(file=sys.stderr)
 
 
 if __name__ == '__main__':
-    logging_conf.init_logger()
+    log_helper.init_logger()
     send_msg("HELLOWORLD")

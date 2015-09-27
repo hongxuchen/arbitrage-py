@@ -6,8 +6,8 @@ import threading
 import math
 import requests
 
-import config
-import logging_conf
+from settings import config
+import log_helper
 
 
 def synchronized(lock):
@@ -60,7 +60,7 @@ def round_price(price, precision=config.HuoBi_Price_Precision):
 
 
 def adjust_price(trade_catalog, price):
-    logging_conf.get_logger().info('trade_catalog={}, price={}'.format(trade_catalog, price))
+    log_helper.get_logger().info('trade_catalog={}, price={}'.format(trade_catalog, price))
     assert (trade_catalog in ['buy', 'sell'])
     if trade_catalog == 'buy':
         new_price = price * (1 + config.ADJUST_PERCENTAGE)
@@ -77,5 +77,5 @@ MUTEX = threading.Lock()
 SIGNAL = None
 
 if __name__ == '__main__':
-    logging_conf.init_logger()
+    log_helper.init_logger()
     print(get_coin_price())

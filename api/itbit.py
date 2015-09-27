@@ -8,10 +8,9 @@ import json
 import time
 import requests
 
-import config
-import excepts
+from settings import config
+from utils import excepts, plt_helper
 from api.plt import Platform
-import plt_conf
 
 
 class ItBitAPI(Platform):
@@ -21,7 +20,7 @@ class ItBitAPI(Platform):
         super(ItBitAPI, self).__init__(info)
         self.domain = info['domain']
         self.symbol = info['symbol']
-        self.key = plt_conf.get_key_from_data('ItBit')
+        self.key = plt_helper.get_key_from_data('ItBit')
 
     @staticmethod
     def _to_json(data):

@@ -1,10 +1,13 @@
 #!/usr/bin/env python
 
-# TODO: use singleton
 import os
+
 import yaml
-import excepts
-import logging_conf
+
+from settings import config
+
+import utils.excepts
+import utils.log_helper as log_helper
 
 
 def _display(k):
@@ -23,12 +26,12 @@ def get_key_from_data(field):
         return _plt_ydata[field]
     except KeyError:
         err_msg = 'msg: no ydata for field={}'.format(field)
-        excepts.handle_exit(err_msg)
+        utils.excepts.handle_exit(err_msg)
 
 
 def parse_plt_conf():
     global _plt_ydata
-    plt_yaml = os.path.join(os.path.dirname(__file__), 'plt.yaml')
+    plt_yaml = os.path.join(config.settings_dir, 'plt.yaml')
     display_list = ['Enabled', 'Enable_Adjuster', 'CoinType']
     with open(plt_yaml) as yfile:
         _plt_ydata = yaml.load(yfile)
@@ -39,6 +42,6 @@ def parse_plt_conf():
 
 
 if __name__ == '__main__':
-    logging_conf.init_logger()
+    log_helper.init_logger()
     enabled = get_key_from_data('Enable_Adjuster')
     print(enabled)

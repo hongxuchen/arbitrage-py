@@ -5,13 +5,12 @@ import urllib
 import time
 import requests
 
-import common
-import config
-import excepts
-import logging_conf
-from order_info import OrderInfo
+from settings import config
+from utils import common, plt_helper
+from utils import excepts
+from utils import log_helper
+from utils.order_info import OrderInfo
 from plt import Platform
-import plt_conf
 
 
 class HuoBi(Platform):
@@ -29,7 +28,7 @@ class HuoBi(Platform):
         'btc': 0.001,
         'ltc': 0.01
     }
-    _logger = logging_conf.get_logger()
+    _logger = log_helper.get_logger()
     data_domain = config.huobi_info['data_domain']
     common_headers = {
         'user-agent': config.USER_AGENT,
@@ -39,7 +38,7 @@ class HuoBi(Platform):
     def __init__(self):
         super(HuoBi, self).__init__(config.huobi_info)
         self.lower_bound = HuoBi.lower_bound_dict[self.coin_type]
-        self.key = plt_conf.get_key_from_data('HuoBi')
+        self.key = plt_helper.get_key_from_data('HuoBi')
         self.api_private = ['cancel_order', 'get_account_info', 'buy', 'sell', 'order_info']
 
     @staticmethod
@@ -55,7 +54,6 @@ class HuoBi(Platform):
     # noinspection PyMethodMayBeStatic
     def _setup_request(self, api_uri, params=None):
         def _request_impl():
-            r = None
             if api_uri not in self.api_private:
                 r = requests.get(api_uri, params=params, headers=HuoBi.common_headers, timeout=config.TIMEOUT)
             else:
@@ -167,7 +165,7 @@ class HuoBi(Platform):
 
 
 if __name__ == '__main__':
-    logging_conf.init_logger()
+    log_helper.init_logger()
     huobi = HuoBi()
     # print(huobi.assets())
     # trade_id = huobi.trade('buy', 100, 900)

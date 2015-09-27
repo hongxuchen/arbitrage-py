@@ -4,20 +4,18 @@ import hashlib
 import hmac
 import urllib
 import time
-
 import requests
-import excepts
-import logging_conf
 
+from utils import excepts, plt_helper
+from utils import log_helper
 from plt import Platform
-import common
-import config
-from order_info import OrderInfo
-import plt_conf
+from utils import common
+from settings import config
+from utils.order_info import OrderInfo
 
 
 class BitBays(Platform):
-    _logger = logging_conf.get_logger()
+    _logger = log_helper.get_logger()
     catalog_dict = {
         0: 'buy',
         1: 'sell'
@@ -34,7 +32,7 @@ class BitBays(Platform):
         super(BitBays, self).__init__(config.bitbays_info)
         self.symbol = config.bitbays_info['symbol']
         self.lower_bound = BitBays.lower_bound_dict[self.coin_type]
-        self.key = plt_conf.get_key_from_data('BitBays')
+        self.key = plt_helper.get_key_from_data('BitBays')
         self.api_public = ['ticker', 'trades', 'depth']
         self.api_private = ['info', 'orders', 'transactions', 'trade', 'cancel', 'order']
         self._counter = int(time.time() * 1000)

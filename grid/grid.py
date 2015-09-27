@@ -3,15 +3,15 @@ from itertools import chain
 import time
 import sys
 
-from asset_info import AssetInfo
+from utils.asset_info import AssetInfo
 import grid_conf
 from grid_order import OrderInstance, GridSlot
-import logging_conf
+from utils import log_helper
 from api.okcoin import OKCoinCN
 
 
 class Grid(object):
-    _logger = logging_conf.get_logger()
+    _logger = log_helper.get_logger()
     lower_bound = grid_conf.grid_range[0]
     upper_bound = grid_conf.grid_range[1]
     grid_diff = grid_conf.grid_diff
@@ -63,7 +63,7 @@ class Grid(object):
 
 
 if __name__ == '__main__':
-    logging_conf.init_logger()
+    log_helper.init_logger()
     okcoin = OKCoinCN()
     grid = Grid(okcoin)
     grid.init_grid()

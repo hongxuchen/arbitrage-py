@@ -1,13 +1,12 @@
 #!/usr/bin/env python
-from asset_info import AssetInfo
-import common
-import config
-import logging_conf
-from order_info import OrderInfo
+from utils.asset_info import AssetInfo
+from settings import config
+from utils import log_helper, common
+from utils.order_info import OrderInfo
 
 
 class Trader(object):
-    _logger = logging_conf.get_logger()
+    _logger = log_helper.get_logger()
 
     def __init__(self, plt, catalog, price, amount, fiat='cny'):
         """

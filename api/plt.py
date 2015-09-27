@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
-import plt_conf
+from utils import plt_helper
 
 
 class Platform(object):
     def __init__(self, info):
-        self.coin_type = plt_conf.get_key_from_data('CoinType')
+        self.coin_type = plt_helper.get_key_from_data('CoinType')
         self.domain = info['domain']
         self.key = None
 

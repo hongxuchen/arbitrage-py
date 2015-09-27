@@ -2,16 +2,14 @@
 
 from __future__ import print_function
 import hashlib
-
 import requests
-import excepts
-import logging_conf
 
+from utils import log_helper, plt_helper
 from plt import Platform
-import common
-import config
-from order_info import OrderInfo
-import plt_conf
+from utils import common
+from utils import excepts
+from settings import config
+from utils.order_info import OrderInfo
 
 
 class OKCoinAPI(Platform):
@@ -19,7 +17,7 @@ class OKCoinAPI(Platform):
         'btc': 0.01,
         'ltc': 0.1
     }
-    _logger = logging_conf.get_logger()
+    _logger = log_helper.get_logger()
     trade_cancel_api_list = ['cancel_order', 'trade']
     common_headers = {
         'user-agent': config.USER_AGENT,
@@ -216,8 +214,8 @@ class OKCoinAPI(Platform):
         return res
 
     def order_info(self, order_id):
+        response = self.api_order_info(order_id)
         try:
-            response = self.api_order_info(order_id)
             info = response['orders'][0]
             catalog = info['type']
             remaining_amount = info['amount'] - info['deal_amount']
@@ -273,17 +271,17 @@ class OKCoinAPI(Platform):
 class OKCoinCN(OKCoinAPI):
     def __init__(self):
         super(OKCoinCN, self).__init__(config.okcoin_cn_info)
-        self.key = plt_conf.get_key_from_data('OKCoinCN')
+        self.key = plt_helper.get_key_from_data('OKCoinCN')
 
 
 class OKCoinCOM(OKCoinAPI):
     def __init__(self):
         super(OKCoinCOM, self).__init__(config.okcoin_com_info)
-        self.key = plt_conf.get_key_from_data('OKCoinCOM')
+        self.key = plt_helper.get_key_from_data('OKCoinCOM')
 
 
 if __name__ == '__main__':
-    logging_conf.init_logger()
+    log_helper.init_logger()
     okcoin_cn = OKCoinCN()
     # order_id_list = [1087125760, 1087125765, 1087125795]
     # order_id_str_list = [str(order_id) for order_id in order_id_list]

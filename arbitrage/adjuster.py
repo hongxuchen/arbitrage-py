@@ -6,15 +6,15 @@ import time
 import concurrent.futures
 
 from api.bitbays import BitBays
-import common
-import config
-import logging_conf
+from settings import config
+from utils import log_helper
+from utils import common
 from api.okcoin import OKCoinCN
-from arbitrage_trader import Trader
+from trader import Trader
 
 
 class Adjuster(object):
-    _logger = logging_conf.get_logger()
+    _logger = log_helper.get_logger()
 
     def __init__(self, trade_pair, current_time):
         """
