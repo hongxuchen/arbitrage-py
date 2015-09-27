@@ -2,7 +2,7 @@
 
 from api.chbtc import CHBTC
 from api.huobi import HuoBi
-from itbit import ItBitAPI
+from api.itbit import ItBitAPI
 import logging_conf
 from api.okcoin import OKCoinCN
 from api.bitbays import BitBays
