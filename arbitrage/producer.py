@@ -9,9 +9,7 @@ from utils.asset_info import AssetInfo
 from settings import config
 from arbitrage.adjuster import Adjuster
 from arbitrage.trader import Trader
-from utils import common, plt_helper
-from utils import excepts
-from utils import log_helper
+from utils import common, plt_helper, log_helper, excepts
 
 
 class Producer(threading.Thread):

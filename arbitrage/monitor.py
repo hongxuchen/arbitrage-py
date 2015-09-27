@@ -19,7 +19,7 @@ from trader import Trader
 class Monitor(threading.Thread):
     _logger = log_helper.get_logger()
     coin_type = plt_helper.get_key_from_data('CoinType')
-    exceed_max = config.exceed_max[coin_type]
+    exceed_max = config.exceed_max_dict[coin_type]
 
     def __init__(self, plt_list):
         super(Monitor, self).__init__()

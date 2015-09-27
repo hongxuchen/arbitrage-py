@@ -36,6 +36,7 @@ root_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..')
 res_dir = os.path.join(root_dir, 'res')
 settings_dir = os.path.join(root_dir, 'settings')
 render_file = 'render.html'
+
 USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.130 Safari/537.36'
 
 DISPLAY_PRECISION = 6
@@ -71,20 +72,19 @@ MUTEX_TIMEOUTS = 3.0
 ####################################################################
 RETRY_SECONDS = 0.01
 
-exceed_max = {
+exceed_max_dict = {
     'btc': 0.001,
     'ltc': 0.01
+}
+upper_bound = {
+    'btc': 1.0,
+    'ltc': 30
 }
 
 amount_percent = 1.0
 HuoBi_Price_Precision = 2
 TRADE_PRECISION = 4
 SLEEP_SECONDS = 0.4
-
-upper_bound = {
-    'btc': 1.0,
-    'ltc': 30
-}
 
 # Semantics: when Pa.ask1 + diff_dict[Pa][Pb] <= Pb.bid1, (buy at Pa, sell at Pb)
 # NOTE: if price(Pa) > price(Pb) for most of the time, it's more likely to (sell at Pa, buy at Pb);
