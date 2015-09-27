@@ -137,6 +137,7 @@ class OKCoinAPI(Platform):
     # private api
 
     def _private_request(self, api_type, param_dict):
+        print(self.key)
         params = {'api_key': self.key['api']}
         if param_dict is not None:
             params.update(param_dict)
@@ -270,8 +271,8 @@ class OKCoinAPI(Platform):
 
 class OKCoinCN(OKCoinAPI):
     plt_info = {
-        'domain': 'https://www.okcoin.com/api/v1',
-        'symbol': 'usd'
+        'domain': 'https://www.okcoin.cn/api/v1',
+        'symbol': 'cny'
     }
 
     def __init__(self):
@@ -281,8 +282,8 @@ class OKCoinCN(OKCoinAPI):
 
 class OKCoinCOM(OKCoinAPI):
     plt_info = {
-        'domain': 'https://www.okcoin.cn/api/v1',
-        'symbol': 'cny'
+        'domain': 'https://www.okcoin.com/api/v1',
+        'symbol': 'usd'
     }
 
     def __init__(self):
@@ -293,12 +294,13 @@ class OKCoinCOM(OKCoinAPI):
 if __name__ == '__main__':
     log_helper.init_logger()
     okcoin_cn = OKCoinCN()
+    print(okcoin_cn.assets())
     # order_id_list = [1087125760, 1087125765, 1087125795]
     # order_id_str_list = [str(order_id) for order_id in order_id_list]
     # orders_info = okcoin_cn.orders_info(order_id_str_list, 1)
     # print(orders_info)
-    pendings = okcoin_cn.pending_orders()
-    print(pendings)
+    # pendings = okcoin_cn.pending_orders()
+    # print(pendings)
     # okcoin_cn.coin_type = 'ltc'
     # print(okcoin_cn.lower_bound)
     # print(okcoin_cn.ask_bid_list(2))
