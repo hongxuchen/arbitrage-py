@@ -32,6 +32,7 @@ def get_usd_cny_rate():
 
 
 def get_coin_price(coin_type='btc', fiat='cny'):
+    # noinspection PyBroadException
     try:
         r = requests.get('https://www.okcoin.cn/api/v1/ticker.do?symbol={}_{}'.format(coin_type, fiat),
                          timeout=config.TIMEOUT)
