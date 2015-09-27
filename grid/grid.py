@@ -5,6 +5,7 @@ import sys
 
 from utils.asset_info import AssetInfo
 import grid_conf
+from settings import config
 from grid_order import OrderInstance, GridSlot
 from utils import log_helper
 from api.okcoin import OKCoinCN
@@ -20,8 +21,48 @@ class Grid(object):
 
     def __init__(self, plt):
         self.plt = plt
-        self.buy_list = []
+        self.orders = {
+            'buy': [],
+            'sell': []
+        }
         self.partial_orders = []
+        # this recorder records all and only pending orders; the ID are in DES order
+        # insert when each order is submitted
+        # remove when:
+        # 1. the order is regarded as finished
+        # 2. the order exceeds the time but unfinished (partial/no)
+        self.pending_recorder = []
+
+    def find_slot_index(self, catalog, price):
+        """
+        :param catalog:
+        :param price:
+        :return: if find, return (True,index); otherwise, return (False, index); True/False indicates found or not
+        """
+
+        slot_list = self.orders[catalog]
+        for i in xrange(len(slot_list)):
+            if abs(slot_list[i].price - price) < config.MINOR_DIFF:
+                return True, i
+            # DESC
+            if catalog == 'buy' and price - slot_list[i].price > config.MINOR_DIFF:
+                return False, i
+            # ASC
+            elif catalog == 'sell' and slot_list[i].price - price > config.MINOR_DIFF:
+                return False, i
+        return False, len(slot_list)
+
+    def make_order(self, catalog, price):
+        order_id = self.plt.trade(catalog, price, self.amount)
+        now = int(time.time())
+        order = OrderInstance(self.plt, order_id, now)
+        found, index = self.find_slot_index(catalog, price)
+        if found:
+            grid_slot = self.orders[catalog][index]
+        else:
+            grid_slot = GridSlot(price)
+            self.orders[catalog][index].insert(index, grid_slot)
+        grid_slot.append_order(order)
 
     def init_grid(self):
         price = self.upper_bound
@@ -32,34 +73,22 @@ class Grid(object):
             self._logger.critical("cannot afford to buy, avail={}, to_consume={}".format(asset.fiat_avail, to_consume))
             sys.exit(1)
         while price > self.lower_bound:
-            order_id = self.plt.trade('buy', price, self.amount)
-            now = int(time.time())
-            order = OrderInstance(self.plt, order_id, now)
-            grid_slot = GridSlot(price)
-            grid_slot.append_order(order)
-            self.buy_list.append(grid_slot)
+            self.make_order('buy', price)
             price -= self.grid_diff
 
     # TODO: should check quickly
-    def check_orders(self, order_list):
+    def check_orders(self):
         should_continue = True
         to_sell_order_list = []
-        i = 0
-        old_id = 0
-        order_id_list = [instance.get_order_list() for instance in order_list]
-        flat_order_id_list = list(chain.from_iterable(order_id_list))
-        buy_max = len(flat_order_id_list)
-        while should_continue and i < buy_max:
-            check_size = min(buy_max, self.batch_check_num - i)
-            old_id = i
-            i += self.batch_check_num
+        pending_list = self.plt.pending_orders()
 
     def bought_handler(self):
         pass
 
     def cancel_all(self):
-        for buy in self.buy_list:
-            buy.cancel_orders()
+        for order_list in self.orders.values():
+            for slot in order_list:
+                slot.cancel_orders()
 
 
 if __name__ == '__main__':
