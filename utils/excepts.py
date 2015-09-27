@@ -65,7 +65,7 @@ def is_retry_exception(exception):
 
 def handle_exit(error):
     utils.log_helper.get_logger().critical('Error during request:"{}", will EXIT'.format(error))
-    send_msg('error during request: {}'.format(error))
+    send_msg('error during request: {}'.format(error), 'text')
     traceback.print_exc(file=sys.stdout)
     # noinspection PyProtectedMember
     os._exit(1)
@@ -103,12 +103,12 @@ def handle_retry(exception, handler):
                 handle_exit(e)  # fail, exit
     msg = 'Request Exception "{}" after retrying {} times'.format(current_exception, config.RETRY_MAX)
     logger.critical(msg)
-    send_msg(msg)
+    send_msg(msg, 'text')
     time.sleep(config.RETRY_SLEEP_SECONDS)
     return handle_retry(current_exception, handler)
 
 
-def send_msg(report, msg_type='html'):
+def send_msg(report, msg_type):
     emailing_info = utils.plt_helper.get_key_from_data('Emailing')
     server = emailing_info['server']
     username = emailing_info['username']
@@ -138,4 +138,4 @@ def send_msg(report, msg_type='html'):
 
 if __name__ == '__main__':
     utils.log_helper.init_logger()
-    send_msg("HELLOWORLD")
+    send_msg("HELLOWORLD", 'text')

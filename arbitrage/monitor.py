@@ -8,7 +8,7 @@ import concurrent.futures
 
 from settings import config
 from utils.asset_info import AssetInfo
-from utils import common, plt_helper
+from utils import (common, plt_helper)
 from utils import excepts
 from utils import log_helper
 from api.huobi import HuoBi
@@ -84,7 +84,7 @@ class Monitor(threading.Thread):
             if abs(coin_changes) <= self.exceed_max:
                 Monitor._logger.info('notifying asset changes via email')
                 report = self.asset_message_render(asset_list, coin_changes, fiat_changes)
-                excepts.send_msg(report)
+                excepts.send_msg(report, 'html')
                 self.last_notifier_time = now
             else:
                 # NOTE: do not deal with coin imbalance here
@@ -221,4 +221,4 @@ if __name__ == '__main__':
     monitor = Monitor(plt_list)
     asset_list = monitor.get_asset_list()
     msg = monitor.asset_message_render(asset_list, 3.0, 4.0)
-    excepts.send_msg(msg)
+    excepts.send_msg(msg, 'html')
