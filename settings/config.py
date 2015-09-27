@@ -1,37 +1,5 @@
 import os
 
-okcoin_cn_info = {
-    'domain': 'https://www.okcoin.cn/api/v1',
-    'symbol': 'cny'
-}
-
-huobi_info = {
-    'domain': 'https://api.huobi.com/apiv3',
-    'symbol': 'cny',
-    'data_domain': 'http://api.huobi.com/staticmarket'
-}
-
-okcoin_com_info = {
-    'domain': 'https://www.okcoin.com/api/v1',
-    'symbol': 'usd'
-}
-
-bitbays_info = {
-    'domain': 'https://bitbays.com/api/v1',
-    'symbol': 'cny'
-}
-
-chbtc_info = {
-    'domain': 'https://trade.chbtc.com/api/',
-    'data_domain': 'http://api.chbtc.com/data/',
-    'symbol': 'cny'
-}
-
-itbit_info = {
-    'domain': 'https://beta-api.itbit.com/v1/',
-    'symbol': 'XBTUSD'
-}
-
 root_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..')
 res_dir = os.path.join(root_dir, 'res')
 settings_dir = os.path.join(root_dir, 'settings')

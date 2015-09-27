@@ -269,14 +269,24 @@ class OKCoinAPI(Platform):
 
 
 class OKCoinCN(OKCoinAPI):
+    plt_info = {
+        'domain': 'https://www.okcoin.com/api/v1',
+        'symbol': 'usd'
+    }
+
     def __init__(self):
-        super(OKCoinCN, self).__init__(config.okcoin_cn_info)
+        super(OKCoinCN, self).__init__(self.plt_info)
         self.key = plt_helper.get_key_from_data('OKCoinCN')
 
 
 class OKCoinCOM(OKCoinAPI):
+    plt_info = {
+        'domain': 'https://www.okcoin.cn/api/v1',
+        'symbol': 'cny'
+    }
+
     def __init__(self):
-        super(OKCoinCOM, self).__init__(config.okcoin_com_info)
+        super(OKCoinCOM, self).__init__(self.plt_info)
         self.key = plt_helper.get_key_from_data('OKCoinCOM')
 
 

@@ -15,6 +15,11 @@ from utils.order_info import OrderInfo
 
 
 class BitBays(Platform):
+    plt_info = {
+        'domain': 'https://bitbays.com/api/v1',
+        'symbol': 'cny'
+    }
+
     _logger = log_helper.get_logger()
     catalog_dict = {
         0: 'buy',
@@ -29,8 +34,8 @@ class BitBays(Platform):
     trade_cancel_list = ['cancel', 'trade']
 
     def __init__(self):
-        super(BitBays, self).__init__(config.bitbays_info)
-        self.symbol = config.bitbays_info['symbol']
+        super(BitBays, self).__init__(self.plt_info)
+        self.symbol = self.plt_info['symbol']
         self.lower_bound = BitBays.lower_bound_dict[self.coin_type]
         self.key = plt_helper.get_key_from_data('BitBays')
         self.api_public = ['ticker', 'trades', 'depth']

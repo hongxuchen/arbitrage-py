@@ -8,18 +8,21 @@ import json
 import time
 import requests
 
-from settings import config
 from utils import excepts, plt_helper
 from api.plt import Platform
 
 
 class ItBitAPI(Platform):
+    plt_info = {
+        'domain': 'https://beta-api.itbit.com/v1/',
+        'symbol': 'XBTUSD'
+    }
     markets = ['XBTUSD', 'XBTSGD', 'XBTEUR']
 
-    def __init__(self, info):
-        super(ItBitAPI, self).__init__(info)
-        self.domain = info['domain']
-        self.symbol = info['symbol']
+    def __init__(self):
+        super(ItBitAPI, self).__init__(self.plt_info)
+        self.domain = self.plt_info['domain']
+        self.symbol = self.plt_info['symbol']
         self.key = plt_helper.get_key_from_data('ItBit')
 
     @staticmethod
@@ -239,7 +242,7 @@ class ItBitAPI(Platform):
 
 
 if __name__ == '__main__':
-    itbit = ItBitAPI(config.itbit_info)
+    itbit = ItBitAPI()
     # itbit.ticker()
     # itbit.order_book()
     # itbit.get_all_wallets()

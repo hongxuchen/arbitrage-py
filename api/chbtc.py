@@ -17,6 +17,11 @@ from plt import Platform
 
 
 class CHBTC(Platform):
+    plt_info = {
+        'domain': 'https://trade.chbtc.com/api/',
+        'data_domain': 'http://api.chbtc.com/data/',
+        'symbol': 'cny'
+    }
     lower_bound_dict = {
         'btc': 0.001,
         'ltc': 0.001
@@ -27,14 +32,14 @@ class CHBTC(Platform):
     }
     _logger = log_helper.get_logger()
     trade_cancel_api_list = ['order', 'cancelOrder']
-    data_domain = config.chbtc_info['data_domain']
+    data_domain = plt_info['data_domain']
     common_headers = {
         'user-agent': config.USER_AGENT
     }
 
     def __init__(self):
-        super(CHBTC, self).__init__(config.chbtc_info)
-        self.symbol = config.bitbays_info['symbol']
+        super(CHBTC, self).__init__(self.plt_info)
+        self.symbol = self.plt_info['symbol']
         self.lower_bound = CHBTC.lower_bound_dict[self.coin_type]
         self.key = plt_helper.get_key_from_data('CHBTC')
         self.api_public = ['ticker', 'depth', 'trades']
@@ -133,7 +138,6 @@ class CHBTC(Platform):
             slist[index] = chr(ord(slist[index]) ^ value)
         return "".join(slist)
 
-    # TODO use hashlib
     @staticmethod
     def __digest(a_val):
         value = struct.pack("%ds" % len(a_val), a_val)

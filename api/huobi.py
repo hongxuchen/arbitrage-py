@@ -14,6 +14,11 @@ from plt import Platform
 
 
 class HuoBi(Platform):
+    plt_info = {
+        'domain': 'https://api.huobi.com/apiv3',
+        'symbol': 'cny',
+        'data_domain': 'http://api.huobi.com/staticmarket'
+    }
     coin_type_map = {
         'btc': 1,
         'ltc': 2
@@ -29,14 +34,14 @@ class HuoBi(Platform):
         'ltc': 0.01
     }
     _logger = log_helper.get_logger()
-    data_domain = config.huobi_info['data_domain']
+    data_domain = plt_info['data_domain']
     common_headers = {
         'user-agent': config.USER_AGENT,
         'Content-Type': 'application/x-www-form-urlencoded'
     }
 
     def __init__(self):
-        super(HuoBi, self).__init__(config.huobi_info)
+        super(HuoBi, self).__init__(self.plt_info)
         self.lower_bound = HuoBi.lower_bound_dict[self.coin_type]
         self.key = plt_helper.get_key_from_data('HuoBi')
         self.api_private = ['cancel_order', 'get_account_info', 'buy', 'sell', 'order_info']
