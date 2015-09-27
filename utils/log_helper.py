@@ -13,12 +13,6 @@ def init_logger():
     logger_dir = 'log'
     if not os.path.isdir(logger_dir):
         os.mkdir(logger_dir)
-    else:
-        pass
-        # for f in os.listdir(logger_dir):
-        #     fpath = os.path.join(logger_dir, f)
-        #     if f.endswith('.LOG') and os.path.isfile(fpath):
-        #         os.remove(fpath)
     logging.config.dictConfig(data)
 
 

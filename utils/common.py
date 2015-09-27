@@ -7,7 +7,7 @@ import math
 import requests
 
 from settings import config
-import log_helper
+from utils import log_helper
 
 
 def synchronized(lock):

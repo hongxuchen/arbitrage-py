@@ -30,15 +30,14 @@ reverse the fiat amount for further trade. The net strategy is that we can chang
 
 
 
-# OKCoin错误码
-
+# OKCoinCN error code
 ```
 10001   用户请求过于频繁
 10002   系统错误
 10009   订单不存在
 10010   余额不足
 10011   买卖的数量小于coin最小买卖额度
-10014   下单价格不得≤0或≥1000000
+10014   下单价格不得≤0 或≥1000000
 10015   下单价格与最新成交价偏差过大
 10016   币数量不足
 10023   获取最新成交价错误

@@ -5,7 +5,7 @@ import hashlib
 import requests
 
 from utils import log_helper, plt_helper
-from plt import Platform
+from api.plt import Platform
 from utils import common
 from utils import excepts
 from settings import config

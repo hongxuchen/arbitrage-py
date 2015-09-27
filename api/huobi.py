@@ -10,7 +10,7 @@ from utils import common, plt_helper
 from utils import excepts
 from utils import log_helper
 from utils.order_info import OrderInfo
-from plt import Platform
+from api.plt import Platform
 
 
 class HuoBi(Platform):

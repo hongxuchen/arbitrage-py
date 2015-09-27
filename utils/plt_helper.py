@@ -7,7 +7,7 @@ import yaml
 from settings import config
 
 import utils.excepts
-import utils.log_helper as log_helper
+import utils.log_helper
 
 
 def _display(k):
@@ -42,6 +42,6 @@ def parse_plt_conf():
 
 
 if __name__ == '__main__':
-    log_helper.init_logger()
+    utils.log_helper.init_logger()
     enabled = get_key_from_data('Enable_Adjuster')
     print(enabled)

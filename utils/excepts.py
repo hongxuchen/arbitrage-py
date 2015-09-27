@@ -9,8 +9,8 @@ import sys
 import requests.exceptions as req_except
 import urllib3.exceptions as urllib3_except
 
-import log_helper
-import plt_helper
+import utils.log_helper
+import utils.plt_helper
 from settings import config
 
 
@@ -64,7 +64,7 @@ def is_retry_exception(exception):
 
 
 def handle_exit(error):
-    log_helper.get_logger().critical('Error during request:"{}", will EXIT'.format(error))
+    utils.log_helper.get_logger().critical('Error during request:"{}", will EXIT'.format(error))
     send_msg('error during request: {}'.format(error))
     traceback.print_exc(file=sys.stdout)
     # noinspection PyProtectedMember
@@ -78,7 +78,7 @@ def handle_retry(exception, handler):
     :param handler: real handler, no params, implemented as closure
     :return: if retry succeeds, should return request result; otherwise, exit abornormally
     """
-    logger = log_helper.get_logger()
+    logger = utils.log_helper.get_logger()
     current_exception = exception
     logger.error('RETRY for Exception: "{}"'.format(current_exception))
     retry_counter = 0
@@ -109,7 +109,7 @@ def handle_retry(exception, handler):
 
 
 def send_msg(report, msg_type='html'):
-    emailing_info = plt_helper.get_key_from_data('Emailing')
+    emailing_info = utils.plt_helper.get_key_from_data('Emailing')
     server = emailing_info['server']
     username = emailing_info['username']
     try:
@@ -130,12 +130,12 @@ def send_msg(report, msg_type='html'):
             password = emailing_info['password']
             session.login(username, password)
         session.sendmail(sender, [receiver], msg.as_string())
-        log_helper.get_logger().info("sending mail done")
+        utils.log_helper.get_logger().info("sending mail done")
         session.quit()
     except:
         traceback.print_exc(file=sys.stderr)
 
 
 if __name__ == '__main__':
-    log_helper.init_logger()
+    utils.log_helper.init_logger()
     send_msg("HELLOWORLD")
