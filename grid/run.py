@@ -67,7 +67,7 @@ class Grid(object):
                 return False, i
         return False, len(slot_list)
 
-    def make_order(self, catalog, price):
+    def _make_order(self, catalog, price):
         order_id = self.plt.trade(catalog, price, self.amount)
         # print(order_id)
         found, index = self._find_slot_index(catalog, price)
@@ -92,40 +92,6 @@ class Grid(object):
         self.order_recorder = dict()
         self.order_instance_dict = dict()
 
-    def finished_list_handler(self, pending_id_list):
-        for catalog in self.order_recorder:
-            for slot in self.order_recorder[catalog]:
-                pass
-
-    def pending_list_handler(self, pending_ids):
-        """
-        deal with pending order timeouts, this works in "orders"
-        :param pending_ids:
-        :return:
-        """
-        now = int(time.time())
-        for order_id in self.order_instance_dict:
-            if order_id in pending_ids:
-                order_instance = self.order_instance_dict[order_id]
-                duration = now - order_instance.start_time
-                if duration > conf.cancel_duration:
-                    cancel_order(order_instance)
-
-    def init_grid(self):
-        """
-        init (buy) grid
-        :return:
-        """
-        price = self.upper_bound
-        size = (self.upper_bound - self.lower_bound) / self.grid_diff
-        asset = AssetInfo.from_api(self.plt)
-        to_consume = (self.upper_bound + self.lower_bound + self.grid_diff) / 2.0 * size * self.amount
-        if asset.fiat_avail < to_consume:
-            self._logger.critical("cannot afford to buy, avail={}, to_consume={}".format(asset.fiat_avail, to_consume))
-            sys.exit(1)
-        while price > self.lower_bound:
-            self.make_order('buy', price)
-            price -= self.grid_diff
 
     def update_pending_orders(self):
         pending_id_list = []
@@ -138,6 +104,36 @@ class Grid(object):
                 grid_order.set_remaining(pending.remaining)
         return pending_id_list
 
+    def local_orders_handler(self):
+        """
+        deal with pending order timeouts, this works in "orders_recorder"
+        :return:
+        """
+        pending_id_list = self.update_pending_orders()
+        for catalog in self.order_recorder:
+            for slot in self.order_recorder[catalog]:
+                for order_id in slot.order_id_list:
+                    if order_id not in pending_id_list:
+                        self.finished_list_handler(order_id)
+                    else:
+                        pass
+
+    def init_grid(self):
+        """
+        initialize (buy) grid
+        :return:
+        """
+        price = self.upper_bound
+        size = (self.upper_bound - self.lower_bound) / self.grid_diff
+        asset = AssetInfo.from_api(self.plt)
+        to_consume = (self.upper_bound + self.lower_bound + self.grid_diff) / 2.0 * size * self.amount
+        if asset.fiat_avail < to_consume:
+            self._logger.critical("cannot afford to buy, avail={}, to_consume={}".format(asset.fiat_avail, to_consume))
+            sys.exit(1)
+        while price > self.lower_bound:
+            self._make_order('buy', price)
+            price -= self.grid_diff
+
     def dump_order_info(self):
         for catalog in self.order_recorder:
             print(catalog)
@@ -145,17 +141,8 @@ class Grid(object):
             for slot in order_list:
                 print(slot)
 
-    # "local" pending
-    def dump_pending(self):
+    def finished_list_handler(self, order_id):
         pass
-
-    def bought_handler(self):
-        pass
-
-    def cancel_all(self):
-        for order_list in self.order_recorder.values():
-            for slot in order_list:
-                slot.cancel_orders()
 
 
 if __name__ == '__main__':
