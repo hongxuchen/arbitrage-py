@@ -48,7 +48,7 @@ class Producer(threading.Thread):
         for trader in trade_pair:
             trade_str += str(trader) + '\n'
         err_msg = 'msg: Found non-existent Order ID Error\n' + asset_str + '\n' + trade_str
-        excepts.send_msg(err_msg, 'text')
+        excepts.send_msg(err_msg, 'plain')
 
     @staticmethod
     def process_trade(trade_pair):

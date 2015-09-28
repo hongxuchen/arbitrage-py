@@ -205,7 +205,7 @@ class Monitor(threading.Thread):
                 self.failed_counter += 1
                 if self.failed_counter > config.MONITOR_FAIL_MAX:
                     report = 'Monitor adjuster failed {} times'.format(self.failed_counter)
-                    excepts.send_msg(report, 'text')
+                    excepts.send_msg(report, 'plain')
         # last adjust
         # NOTE this strategy is fine only when exiting in the order: consumer->monitor
         last_adjust_status = self.asset_update_handler(True)

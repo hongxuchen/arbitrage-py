@@ -2,14 +2,13 @@
 
 from __future__ import print_function
 import hashlib
+
 import requests
 
-from utils import log_helper, plt_helper
-from api.plt import Platform
-from utils import common
-from utils import excepts
-from settings import config
 from utils.order_info import OrderInfo
+from utils import log_helper, plt_helper, common, excepts
+from api.plt import Platform
+from settings import config
 
 
 class OKCoinAPI(Platform):

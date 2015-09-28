@@ -65,7 +65,7 @@ def is_retry_exception(exception):
 
 def handle_exit(error):
     utils.log_helper.get_logger().critical('Error during request:"{}", will EXIT'.format(error))
-    send_msg('error during request: {}'.format(error), 'text')
+    send_msg('error during request: {}'.format(error), 'plain')
     traceback.print_exc(file=sys.stdout)
     # noinspection PyProtectedMember
     os._exit(1)
@@ -103,7 +103,7 @@ def handle_retry(exception, handler):
                 handle_exit(e)  # fail, exit
     msg = 'Request Exception "{}" after retrying {} times'.format(current_exception, config.RETRY_MAX)
     logger.critical(msg)
-    send_msg(msg, 'text')
+    send_msg(msg, 'plain')
     time.sleep(config.RETRY_SLEEP_SECONDS)
     return handle_retry(current_exception, handler)
 
@@ -138,4 +138,4 @@ def send_msg(report, msg_type):
 
 if __name__ == '__main__':
     utils.log_helper.init_logger()
-    send_msg("HELLOWORLD", 'text')
+    send_msg("HELLOWORLD", 'plain')
