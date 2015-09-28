@@ -60,7 +60,7 @@ class HuoBi(Platform):
     def _setup_request(self, api_uri, params=None):
         def _request_impl():
             if api_uri not in self.api_private:
-                r = requests.get(api_uri, params=params, headers=HuoBi.common_headers, timeout=config.TIMEOUT)
+                r = requests.get(api_uri, data=params, headers=HuoBi.common_headers, timeout=config.TIMEOUT)
             else:
                 timestamp = long(time.time())
                 param_dict = {
@@ -72,8 +72,8 @@ class HuoBi(Platform):
                 if params is not None:
                     param_dict.update(params)
                 param_dict['sign'] = self._sign(param_dict)
-                # print(param_dict)
                 del param_dict['secret_key']
+                # print(param_dict)
                 r = requests.post(self.domain, params=param_dict, headers=HuoBi.common_headers, timeout=config.TIMEOUT)
                 res_data = r.json()
                 if 'code' in res_data and res_data['code'] != 0:
@@ -175,8 +175,8 @@ if __name__ == '__main__':
     # print(huobi.assets())
     # trade_id = huobi.trade('buy', 100, 900)
     # print(trade_id)
-    trade_id = huobi.trade('sell', 99990, 0.12)
-    print(trade_id)
+    # trade_id = huobi.trade('sell', 99990, 0.12)
+    # print(trade_id)
     # print(huobi.lower_bound)
     # huobi.coin_type = 'ltc'
     # print(huobi.ask_bid_list(1))
