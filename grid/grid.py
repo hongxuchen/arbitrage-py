@@ -54,6 +54,7 @@ class Grid(object):
 
     def make_order(self, catalog, price):
         order_id = self.plt.trade(catalog, price, self.amount)
+        print(order_id)
         now = int(time.time())
         order = OrderInstance(self.plt, order_id, now)
         found, index = self.find_slot_index(catalog, price)
@@ -61,7 +62,7 @@ class Grid(object):
             grid_slot = self.orders[catalog][index]
         else:
             grid_slot = GridSlot(price)
-            self.orders[catalog][index].insert(index, grid_slot)
+            self.orders[catalog].insert(index, grid_slot)
         grid_slot.append_order(order)
 
     def init_grid(self):
@@ -75,6 +76,16 @@ class Grid(object):
         while price > self.lower_bound:
             self.make_order('buy', price)
             price -= self.grid_diff
+
+    def dump_orders(self):
+        for catalog in self.orders:
+            print(catalog)
+            order_list = self.orders[catalog]
+            for slot in order_list:
+                print(slot)
+
+    def dump_pending(self):
+        pass
 
     # TODO: should check quickly
     def check_orders(self):
@@ -94,6 +105,8 @@ class Grid(object):
 if __name__ == '__main__':
     log_helper.init_logger()
     okcoin = OKCoinCN()
-    grid = Grid(okcoin)
-    grid.init_grid()
+    print(okcoin.pending_orders())
+    # grid = Grid(okcoin)
+    # grid.init_grid()
+    # grid.dump_orders()
     # grid.cancel_all()

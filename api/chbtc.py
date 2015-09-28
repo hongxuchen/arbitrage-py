@@ -20,7 +20,7 @@ class CHBTC(Platform):
     plt_info = {
         'domain': 'https://trade.chbtc.com/api/',
         'data_domain': 'http://api.chbtc.com/data/',
-        'symbol': 'cny'
+        'fiat': 'cny'
     }
     lower_bound_dict = {
         'btc': 0.001,
@@ -39,7 +39,7 @@ class CHBTC(Platform):
 
     def __init__(self):
         super(CHBTC, self).__init__(self.plt_info)
-        self.symbol = self.plt_info['symbol']
+        self.fiat = self.plt_info['fiat']
         self.lower_bound = CHBTC.lower_bound_dict[self.coin_type]
         self.key = plt_helper.get_key_from_data('CHBTC')
         self.api_public = ['ticker', 'depth', 'trades']
@@ -189,8 +189,8 @@ class CHBTC(Platform):
         frozen, avail = user_info['frozen'], user_info['balance']
         l = [
             [
-                common.to_decimal(frozen[self.symbol.upper()]['amount']),
-                common.to_decimal(avail[self.symbol.upper()]['amount'])],
+                common.to_decimal(frozen[self.fiat.upper()]['amount']),
+                common.to_decimal(avail[self.fiat.upper()]['amount'])],
             [
                 common.to_decimal(frozen[self.coin_type.upper()]['amount']),
                 common.to_decimal((avail[self.coin_type.upper()])['amount'])

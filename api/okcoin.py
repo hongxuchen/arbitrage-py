@@ -26,7 +26,7 @@ class OKCoinAPI(Platform):
     def __init__(self, info):
         super(OKCoinAPI, self).__init__(info)
         self.lower_bound = OKCoinAPI.lower_bound_dict[self.coin_type]
-        self.symbol = info['symbol']
+        self.fiat = info['fiat']
         self.api_public = ['ticker', 'depth', 'trades']
         self.api_private = ['userinfo', 'trade', 'batch_trade', 'cancel_order', 'orders', 'order_info', 'orders_info',
                             'order_history']
@@ -87,7 +87,7 @@ class OKCoinAPI(Platform):
 
     def api_ticker(self):
         payload = {
-            'symbol': self.coin_type + '_' + self.symbol
+            'symbol': self.coin_type + '_' + self.fiat
         }
         res = self._setup_request('ticker', payload)
         return res
@@ -107,7 +107,7 @@ class OKCoinAPI(Platform):
     def api_depth(self, length=2):
         assert (1 <= length <= 200)
         payload = {
-            'symbol': self.coin_type + '_' + self.symbol,
+            'symbol': self.coin_type + '_' + self.fiat,
             'size': length,
             'merge': 0
         }
@@ -126,7 +126,7 @@ class OKCoinAPI(Platform):
 
     def api_trades(self, since=None):
         payload = {
-            'symbol': self.coin_type + '_' + self.symbol
+            'symbol': self.coin_type + '_' + self.fiat
         }
         if since is not None:
             payload['since'] = since
@@ -156,7 +156,7 @@ class OKCoinAPI(Platform):
 
     def api_trade(self, trade_dict):
         params = {
-            'symbol': self.coin_type + '_' + self.symbol
+            'symbol': self.coin_type + '_' + self.fiat
         }
         params.update(trade_dict)
         if 'price' in params:
@@ -191,7 +191,7 @@ class OKCoinAPI(Platform):
 
     def api_cancel_order(self, order_id):
         params = {
-            'symbol': self.coin_type + '_' + self.symbol,
+            'symbol': self.coin_type + '_' + self.fiat,
             'order_id': order_id
         }
         res = self._private_request('cancel_order', params)
@@ -206,7 +206,7 @@ class OKCoinAPI(Platform):
 
     def api_order_info(self, order_id):
         params = {
-            'symbol': self.coin_type + '_' + self.symbol,
+            'symbol': self.coin_type + '_' + self.fiat,
             'order_id': order_id
         }
         res = self._private_request('order_info', params)
@@ -228,7 +228,7 @@ class OKCoinAPI(Platform):
     def assets(self):
         funds = self.api_userinfo()['info']['funds']
         l = [
-            [common.to_decimal(funds['freezed'][self.symbol]), common.to_decimal(funds['free'][self.symbol])],
+            [common.to_decimal(funds['freezed'][self.fiat]), common.to_decimal(funds['free'][self.fiat])],
             [common.to_decimal(funds['freezed'][self.coin_type]), common.to_decimal(funds['free'][self.coin_type])]
         ]
         return l
@@ -236,7 +236,7 @@ class OKCoinAPI(Platform):
     def api_orders_info(self, order_id_list, status):
         assert (len(order_id_list) <= 50)
         params = {
-            'symbol': self.coin_type + '_' + self.symbol,
+            'symbol': self.coin_type + '_' + self.fiat,
             'order_id': ','.join(order_id_list),
             'type': status
         }
@@ -249,7 +249,7 @@ class OKCoinAPI(Platform):
 
     def api_order_history(self, page, status):
         params = {
-            'symbol': self.coin_type + '_' + self.symbol,
+            'symbol': self.coin_type + '_' + self.fiat,
             'current_page': page,
             'page_length': 200,
             'status': status
@@ -258,19 +258,29 @@ class OKCoinAPI(Platform):
         return res
 
     def order_history(self, page, status):
-        histories = self.api_order_history(page, status)
+        histories = self.api_order_history(page, status)['orders']
         return histories
 
     def pending_orders(self):
         # 1st page, pending '0'
-        pendings = self.order_history(1, 0)
-        return pendings
+        res = self.order_history(1, 0)
+        pending_buy = []
+        pending_sell = []
+        for order in res:
+            symbol = order['symbol']
+            catalog = order['type']
+            if symbol == self.coin_type + '_' + self.fiat:
+                if catalog == 'buy':
+                    pending_buy.append(order)
+                else:  # catalog == 'sell'
+                    pending_sell.append(order)
+        return res
 
 
 class OKCoinCN(OKCoinAPI):
     plt_info = {
         'domain': 'https://www.okcoin.cn/api/v1',
-        'symbol': 'cny'
+        'fiat': 'cny'
     }
 
     def __init__(self):
@@ -281,7 +291,7 @@ class OKCoinCN(OKCoinAPI):
 class OKCoinCOM(OKCoinAPI):
     plt_info = {
         'domain': 'https://www.okcoin.com/api/v1',
-        'symbol': 'usd'
+        'fiat': 'usd'
     }
 
     def __init__(self):

@@ -16,8 +16,8 @@ from api.plt import Platform
 class HuoBi(Platform):
     plt_info = {
         'domain': 'https://api.huobi.com/apiv3',
-        'symbol': 'cny',
-        'data_domain': 'http://api.huobi.com/staticmarket'
+        'data_domain': 'http://api.huobi.com/staticmarket',
+        'fiat': 'cny'
     }
     coin_type_map = {
         'btc': 1,
