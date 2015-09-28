@@ -2,10 +2,11 @@
 
 from __future__ import print_function
 import hashlib
+from pprint import pprint
 
 import requests
 
-from utils.order_info import OrderInfo
+from utils.order_info import OrderInfo, PlatformOrderInfo
 from utils import log_helper, plt_helper, common, excepts
 from api.plt import Platform
 from settings import config
@@ -257,24 +258,38 @@ class OKCoinAPI(Platform):
         res = self._private_request('order_history', params)
         return res
 
+    # order_id cannot be used for sorting; but create_data can
     def order_history(self, page, status):
         histories = self.api_order_history(page, status)['orders']
-        return histories
+        buy_list = []
+        sell_list = []
+        for order in histories:
+            if status == 0:
+                assert (order['status'] in [0, 1])
+            else:  # status == 0
+                assert (order['status'] in [-1, 2, 4])
+            catalog = order['type']
+            if order['symbol'] == self.coin_type + '_' + self.fiat:
+                print(order)
+                remaining = order['amount'] - order['deal_amount']
+                plt_order_info = PlatformOrderInfo(order['order_id'], catalog, remaining)
+                if catalog == 'buy':
+                    buy_list.append(plt_order_info)
+                else:
+                    sell_list.append(plt_order_info)
+        pending_dict = {
+            'buy': buy_list,
+            'sell': sell_list
+        }
+        return pending_dict
 
     def pending_orders(self):
-        # 1st page, pending '0'
-        res = self.order_history(1, 0)
-        pending_buy = []
-        pending_sell = []
-        for order in res:
-            symbol = order['symbol']
-            catalog = order['type']
-            if symbol == self.coin_type + '_' + self.fiat:
-                if catalog == 'buy':
-                    pending_buy.append(order)
-                else:  # catalog == 'sell'
-                    pending_sell.append(order)
-        return res
+        # 1st page, 0 for unfilled
+        return self.order_history(1, 0)
+
+    # avoid using this
+    def filled_orders(self):
+        return self.order_history(1, 1)
 
 
 class OKCoinCN(OKCoinAPI):
@@ -307,8 +322,8 @@ if __name__ == '__main__':
     # order_id_str_list = [str(order_id) for order_id in order_id_list]
     # orders_info = okcoin_cn.orders_info(order_id_str_list, 1)
     # print(orders_info)
-    pendings = okcoin_cn.pending_orders()
-    print(pendings)
+    pending = okcoin_cn.pending_orders()
+    pprint(pending)
     # okcoin_cn.coin_type = 'ltc'
     # print(okcoin_cn.lower_bound)
     # print(okcoin_cn.ask_bid_list(2))

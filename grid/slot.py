@@ -3,17 +3,17 @@ from utils import log_helper
 
 
 class OrderInstance(object):
-    def __init__(self, plt, order_id, start_time):
-        self.plt = plt
-        self.order_id = order_id
+    def __init__(self, catalog, start_time, remaining):
+        self.catalog = catalog
         self.start_time = start_time
+        self.remaining = remaining
 
-    def get_remaining(self):
-        order_info = self.plt.order_info(self.order_id)
-        return order_info.remaining_amount
+    def set_remaining(self, remaining):
+        self.remaining = remaining
 
     def __repr__(self):
-        return "order_id={:<10d}, start_time={}".format(self.order_id, self.start_time)
+        return "catalog={:<4s}, start_time={}".format(self.catalog, self.start_time)
+
 
 
 class GridSlot(object):

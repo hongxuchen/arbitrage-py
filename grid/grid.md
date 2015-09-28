@@ -32,3 +32,5 @@ update(partial_buy_list)
 * sold_handler
 ```
 ```
+
+* Different from arbitrage, this should always be server oriented

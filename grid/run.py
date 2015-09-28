@@ -4,20 +4,20 @@ import time
 import sys
 
 from utils.asset_info import AssetInfo
-import grid_conf
+import conf
 from settings import config
-from grid_order import OrderInstance, GridSlot
+from slot import OrderInstance, GridSlot
 from utils import log_helper
 from api.okcoin import OKCoinCN
 
 
 class Grid(object):
     _logger = log_helper.get_logger()
-    lower_bound = grid_conf.grid_range[0]
-    upper_bound = grid_conf.grid_range[1]
-    grid_diff = grid_conf.grid_diff
-    amount = grid_conf.order_amount
-    batch_check_num = grid_conf.batch_check_num
+    lower_bound = conf.grid_range[0]
+    upper_bound = conf.grid_range[1]
+    grid_diff = conf.grid_diff
+    amount = conf.order_amount
+    batch_check_num = conf.batch_check_num
 
     def __init__(self, plt):
         self.plt = plt
@@ -25,15 +25,9 @@ class Grid(object):
             'buy': [],
             'sell': []
         }
-        self.partial_orders = []
-        # this recorder records all and only pending orders; the ID are in DES order
-        # insert when each order is submitted
-        # remove when:
-        # 1. the order is regarded as finished
-        # 2. the order exceeds the time but unfinished (partial/no)
-        self.pending_recorder = []
+        self.order_instance_dict = dict()
 
-    def find_slot_index(self, catalog, price):
+    def _find_slot_index(self, catalog, price):
         """
         :param catalog:
         :param price:
@@ -54,16 +48,19 @@ class Grid(object):
 
     def make_order(self, catalog, price):
         order_id = self.plt.trade(catalog, price, self.amount)
-        print(order_id)
-        now = int(time.time())
-        order = OrderInstance(self.plt, order_id, now)
-        found, index = self.find_slot_index(catalog, price)
+        # print(order_id)
+        found, index = self._find_slot_index(catalog, price)
         if found:
             grid_slot = self.orders[catalog][index]
         else:
             grid_slot = GridSlot(price)
             self.orders[catalog].insert(index, grid_slot)
-        grid_slot.append_order(order)
+        grid_slot.append_order(order_id)
+        instance = OrderInstance(catalog, int(time.time()), self.amount)
+        self.order_instance_dict[order_id] = instance
+
+    def cancel_order(self, order_instance):
+        pass
 
     def init_grid(self):
         price = self.upper_bound
@@ -77,21 +74,19 @@ class Grid(object):
             self.make_order('buy', price)
             price -= self.grid_diff
 
-    def dump_orders(self):
+    def get_pending_orders(self):
+        unfilled_buys, unfilled_sells = self.plt.pending_orders()
+
+    def dump_order_info(self):
         for catalog in self.orders:
             print(catalog)
             order_list = self.orders[catalog]
             for slot in order_list:
                 print(slot)
 
+    # "local" pending
     def dump_pending(self):
         pass
-
-    # TODO: should check quickly
-    def check_orders(self):
-        should_continue = True
-        to_sell_order_list = []
-        pending_list = self.plt.pending_orders()
 
     def bought_handler(self):
         pass

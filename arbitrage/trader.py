@@ -138,7 +138,7 @@ class Trader(object):
             return self.plt.cancel(self.order_id)
 
     def get_order_info(self):
-        # if order failed, copy catalog, remaining is self.amount
+        # NOTE: workaround if order failed, copy catalog, remaining is self.amount
         if self.order_id == config.INVALID_ORDER_ID:
             return OrderInfo(self.catalog, self.amount)
         else:
