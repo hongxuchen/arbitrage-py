@@ -5,6 +5,8 @@ res_dir = os.path.join(root_dir, 'res')
 settings_dir = os.path.join(root_dir, 'settings')
 render_file = 'render.html'
 
+####################################################################
+
 USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.130 Safari/537.36'
 
 DISPLAY_PRECISION = 6
@@ -20,11 +22,9 @@ ASSET_FOR_TRAID_DIFF = 0.0005
 
 CONSUMER_TIMEOUTS = 1.0
 
-TIMEOUT = 3.0
+REQUEST_TIMEOUT = 3.0
 RETRY_MAX = 80
 RETRY_SLEEP_SECONDS = 10
-
-MONITOR_FAIL_MAX = 2
 
 COIN_EXCEED_TIMES = 1
 
@@ -33,14 +33,19 @@ COIN_EXCEED_TIMES = 1
 PENDING_SECONDS = 4.0
 MONITOR_INTERVAL_SECONDS = 3
 
-EMAILING_INTERVAL_SECONDS = 3600
-
 PRICE_ROUND = 2.0
 
-MUTEX_TIMEOUTS = 3.0
+RETRY_SECONDS = 0.01
+
+AMOUNT_PERCENT = 1.0
+HUOBI_PRICE_PRECISION = 2
+TRADE_PRECISION = 4
 
 ####################################################################
-RETRY_SECONDS = 0.01
+
+emailing_interval_seconds = 3600
+
+monitor_fail_max = 2
 
 exceed_max_dict = {
     'btc': 0.001,
@@ -51,10 +56,11 @@ upper_bound = {
     'ltc': 30
 }
 
-amount_percent = 1.0
-HuoBi_Price_Precision = 2
-TRADE_PRECISION = 4
-SLEEP_SECONDS = 0.4
+grid_cancel_all = True
+grid_sleep_seconds = 1.0
+
+# sleep seconds, to avoid API too frequently
+sleep_seconds = 0.2
 
 # Semantics: when Pa.ask1 + diff_dict[Pa][Pb] <= Pb.bid1, (buy at Pa, sell at Pb)
 # NOTE: if price(Pa) > price(Pb) for most of the time, it's more likely to (sell at Pa, buy at Pb);

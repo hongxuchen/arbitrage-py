@@ -8,5 +8,4 @@ grid_diff = 5
 order_amount = 0.01
 batch_check_num = 50
 
-INVALID_BUY = 0
-INVALID_SELL = 99999
+AVOID_TIMEOUT = True

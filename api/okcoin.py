@@ -56,10 +56,10 @@ class OKCoinAPI(Platform):
             r = None
             if api_type in self.api_public:
                 r = requests.request('get', self._real_uri(api_type), params=params, headers=OKCoinAPI.common_headers,
-                                     timeout=config.TIMEOUT, verify=True)
+                                     timeout=config.REQUEST_TIMEOUT, verify=True)
             elif api_type in self.api_private:
                 r = requests.request('post', self._real_uri(api_type), data=data, params=params,
-                                     headers=OKCoinAPI.common_headers, timeout=config.TIMEOUT, verify=True)
+                                     headers=OKCoinAPI.common_headers, timeout=config.REQUEST_TIMEOUT, verify=True)
             else:
                 err_msg = 'msg: OKCoin api_type [{}] not supported'.format(api_type)
                 excepts.handle_exit(err_msg)

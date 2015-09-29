@@ -60,7 +60,7 @@ class HuoBi(Platform):
     def _setup_request(self, api_uri, params=None):
         def _request_impl():
             if api_uri not in self.api_private:
-                r = requests.get(api_uri, data=params, headers=HuoBi.common_headers, timeout=config.TIMEOUT)
+                r = requests.get(api_uri, data=params, headers=HuoBi.common_headers, timeout=config.REQUEST_TIMEOUT)
             else:
                 timestamp = long(time.time())
                 param_dict = {
@@ -74,7 +74,7 @@ class HuoBi(Platform):
                 param_dict['sign'] = self._sign(param_dict)
                 del param_dict['secret_key']
                 # print(param_dict)
-                r = requests.post(self.domain, params=param_dict, headers=HuoBi.common_headers, timeout=config.TIMEOUT)
+                r = requests.post(self.domain, params=param_dict, headers=HuoBi.common_headers, timeout=config.REQUEST_TIMEOUT)
                 res_data = r.json()
                 if 'code' in res_data and res_data['code'] != 0:
                     code = res_data['code']

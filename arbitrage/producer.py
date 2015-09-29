@@ -31,7 +31,7 @@ class Producer(threading.Thread):
 
     def run(self):
         while self.running:
-            time.sleep(config.SLEEP_SECONDS)
+            time.sleep(config.sleep_seconds)
             Producer._logger.info('[P] Producer')
             self.process_arbitrage()
         if self.adjuster_enabled:
@@ -93,8 +93,8 @@ class Producer(threading.Thread):
             plt_a_buy_amount = asset_info_a.afford_buy_amount(ask_a_adjust_price) - config.ASSET_FOR_TRAID_DIFF
             plt_b_sell_amount = asset_info_b.afford_sell_amount() - config.ASSET_FOR_TRAID_DIFF
             amount = min(config.upper_bound[Producer.coin_type],
-                         ask_a_amount * config.amount_percent,
-                         bid_b_amount * config.amount_percent,
+                         ask_a_amount * config.AMOUNT_PERCENT,
+                         bid_b_amount * config.AMOUNT_PERCENT,
                          plt_a_buy_amount,
                          plt_b_sell_amount)
             amount = max(self.min_amount, amount)

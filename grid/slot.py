@@ -2,7 +2,7 @@
 from utils import log_helper
 
 
-class OrderInstance(object):
+class GridInstance(object):
     def __init__(self, catalog, start_time, remaining):
         self.catalog = catalog
         self.start_time = start_time
@@ -16,10 +16,14 @@ class OrderInstance(object):
 
 
 class GridSlot(object):
+    """
+    This class only store LOCAL grid slot information
+    """
     _logger = log_helper.get_logger()
 
-    def __init__(self, price):
+    def __init__(self, catalog, price):
         self.price = price
+        self.catalog = catalog
         self.order_id_list = []
 
     def append_order(self, order_instance):

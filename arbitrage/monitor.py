@@ -80,7 +80,7 @@ class Monitor(threading.Thread):
 
     def try_notify_asset_changes(self, asset_list, coin_changes, fiat_changes):
         now = time.time()
-        if now - self.last_notifier_time >= config.EMAILING_INTERVAL_SECONDS:
+        if now - self.last_notifier_time >= config.emailing_interval_seconds:
             if abs(coin_changes) <= self.exceed_max:
                 Monitor._logger.info('notifying asset changes via email')
                 report = self.asset_message_render(asset_list, coin_changes, fiat_changes)
@@ -203,7 +203,7 @@ class Monitor(threading.Thread):
             adjust_status = self.asset_update_handler(False)
             if adjust_status is False:
                 self.failed_counter += 1
-                if self.failed_counter > config.MONITOR_FAIL_MAX:
+                if self.failed_counter > config.monitor_fail_max:
                     report = 'Monitor adjuster failed {} times'.format(self.failed_counter)
                     excepts.send_msg(report, 'plain')
         # last adjust

@@ -27,7 +27,7 @@ def synchronized(lock):
 
 
 def get_usd_cny_rate():
-    r = requests.get("http://finance.yahoo.com/d/quotes.csv?e=.csv&f=sl1d1t1&s=USDCNY=X", timeout=config.TIMEOUT)
+    r = requests.get("http://finance.yahoo.com/d/quotes.csv?e=.csv&f=sl1d1t1&s=USDCNY=X", timeout=config.REQUEST_TIMEOUT)
     return decimal.Decimal(r.text.split(",")[1])
 
 
@@ -35,7 +35,7 @@ def get_coin_price(coin_type='btc', fiat='cny'):
     # noinspection PyBroadException
     try:
         r = requests.get('https://www.okcoin.cn/api/v1/ticker.do?symbol={}_{}'.format(coin_type, fiat),
-                         timeout=config.TIMEOUT)
+                         timeout=config.REQUEST_TIMEOUT)
         data = r.json()
         fiat_price = data['ticker']['last']
         return to_decimal(fiat_price)
@@ -55,7 +55,7 @@ def reverse_catalog(original_catalog):
         return 'buy'
 
 
-def round_price(price, precision=config.HuoBi_Price_Precision):
+def round_price(price, precision=config.HUOBI_PRICE_PRECISION):
     return round(price, precision)
 
 
