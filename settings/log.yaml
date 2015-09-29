@@ -5,7 +5,8 @@ formatters:
     format: '%(levelname)9s %(asctime)s %(threadName)15s %(filename)25s:%(lineno)3s - %(message)s'
     datefmt: '%Y-%m-%d %H:%M:%S'
   simpleFormatter:
-    format: '%(asctime)s  %(message)s'
+#    format: '%(asctime)s  %(message)s'
+    format: '%(levelname)9s %(asctime)s %(filename)15s:%(lineno)3s - %(message)s'
     datefmt: '%Y-%m-%d %H:%M:%S'
 
 handlers:

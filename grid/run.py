@@ -1,12 +1,14 @@
 #!/usr/bin/env python
+from pprint import pprint
 
 import time
 import sys
+from api.okcoin import OKCoinCN
 
 from utils.asset_info import AssetInfo
 from utils import common
 from settings import config
-from slot import GridInstance, GridSlot
+from slot import GridOrder, GridSlot
 from utils import log_helper
 
 
@@ -51,8 +53,9 @@ class Grid(object):
                 grid_slot = GridSlot(catalog, price)
                 self.orders_recorder[catalog].insert(index, grid_slot)
         grid_slot.append_order(order_id)
-        instance = GridInstance(catalog, int(time.time()), config.grid_order_amount)
+        instance = GridOrder(catalog, int(time.time()), config.grid_order_amount)
         self.order_instance_dict[order_id] = instance
+        self._logger.warning('order: catalog={:<4s} price={:<10.4f}, order_id={:<15d}'.format(catalog, price, order_id))
 
     # TODO should provide an option for this since NOT always should cancel
     # FIXME if we use local time and don't persistent it, we HAVE to cancel all
@@ -64,14 +67,18 @@ class Grid(object):
         for order_id in self.order_instance_dict:
             # TODO may fail, but not serious
             self.plt.cancel(order_id)
+            self._logger.warning('cancelled {}'.format(self.order_instance_dict[order_id]))
         self.orders_recorder = dict()
         self.order_instance_dict = dict()
+        self._logger.warning('all orders cancelled')
 
     def update_pending_orders(self):
         pending_id_list = []
         pending_dict = self.plt.pending_orders()
         for catalog in pending_dict:
+            self._logger.warning('platform: catalog={:4s}'.format(catalog))
             for pending in pending_dict[catalog]:
+                self._logger.warning(pending)
                 pending_id = pending.order_id
                 pending_id_list.append(pending_id)
                 grid_order = self.order_instance_dict[pending_id]
@@ -115,6 +122,9 @@ class Grid(object):
         slot_pending_list = [order_id for order_id in slot.order_id_list if order_id in global_pending_list]
         slot_finished_list = [order_id for order_id in slot.order_id_list if order_id not in global_pending_list]
         total_remaining = sum(self.order_instance_dict[order_id].remaining for order_id in global_pending_list)
+        self._logger.warning('slot.price={:<10.4f}'.format(slot.price))
+        self._logger.warning('pending_list={}'.format(slot_pending_list))
+        self._logger.warning('finished_list={}'.format(slot_finished_list))
         lower_bound = self.plt.lower_bound_dict[self.plt.coin_type]
         if len(slot_pending_list) == 0 or total_remaining < lower_bound:
             self._reset_slot_orders(slot)
@@ -130,7 +140,7 @@ class Grid(object):
                 self._reset_slot_orders(slot)
                 self._make_order(slot.catalog, slot.price, slot)
             else:  # if no timeouts, deal with finished
-                self._cleanup_orders(slot, slot_finished_list)
+                self._cleanup_orders(slot_finished_list, slot)
 
     def local_orders_handler(self):
         """
@@ -150,8 +160,7 @@ class Grid(object):
         price = self.grid_max
         size = (self.grid_max - self.grid_min) / config.grid_price_diff
         asset = AssetInfo.from_api(self.plt)
-        to_consume = (
-                     self.grid_max + self.grid_min + config.grid_price_diff) / 2.0 * size * config.grid_order_amount
+        to_consume = (self.grid_max + self.grid_min + config.grid_price_diff) / 2.0 * size * config.grid_order_amount
         if asset.fiat_avail < to_consume:
             self._logger.critical("cannot afford to buy, avail={}, to_consume={}".format(asset.fiat_avail, to_consume))
             sys.exit(1)
@@ -160,8 +169,10 @@ class Grid(object):
             price -= config.grid_price_diff
 
     def run_main(self):
+        self.init_grid()
         try:
             while True:
+                self.local_orders_handler()
                 time.sleep(config.sleep_seconds)
         except KeyboardInterrupt:
             pass
@@ -171,3 +182,8 @@ class Grid(object):
 
 if __name__ == '__main__':
     log_helper.init_logger()
+    okcoin = OKCoinCN()
+    grid = Grid(okcoin)
+    # pendings = grid.plt.pending_orders()
+    # pprint(pendings)
+    grid.run_main()

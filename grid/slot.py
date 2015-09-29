@@ -2,7 +2,7 @@
 from utils import log_helper
 
 
-class GridInstance(object):
+class GridOrder(object):
     def __init__(self, catalog, start_time, remaining):
         self.catalog = catalog
         self.start_time = start_time

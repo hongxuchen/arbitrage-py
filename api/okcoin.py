@@ -270,7 +270,6 @@ class OKCoinAPI(Platform):
                 assert (order['status'] in [-1, 2, 4])
             catalog = order['type']
             if order['symbol'] == self.coin_type + '_' + self.fiat:
-                print(order)
                 remaining = order['amount'] - order['deal_amount']
                 plt_order_info = PlatformOrderInfo(order['order_id'], catalog, remaining)
                 if catalog == 'buy':
