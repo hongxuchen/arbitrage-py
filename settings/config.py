@@ -43,6 +43,17 @@ TRADE_PRECISION = 4
 
 ####################################################################
 
+grid_range = 1300, 1325
+
+grid_cancel_duration = 4800
+grid_buy_sell_diff = 1.0
+grid_price_diff = 5
+grid_order_amount = 0.01
+
+AVOID_TIMEOUT = True
+
+####################################################################
+
 emailing_interval_seconds = 3600
 
 monitor_fail_max = 2

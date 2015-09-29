@@ -5,7 +5,6 @@ import sys
 
 from utils.asset_info import AssetInfo
 from utils import common
-import settings
 from settings import config
 from slot import GridInstance, GridSlot
 from utils import log_helper
@@ -13,7 +12,7 @@ from utils import log_helper
 
 class Grid(object):
     _logger = log_helper.get_logger()
-    grid_min, grid_max = settings.grid_range
+    grid_min, grid_max = config.grid_range
 
     def __init__(self, plt):
         self.plt = plt
@@ -43,7 +42,7 @@ class Grid(object):
         return False, len(slot_list)
 
     def _make_order(self, catalog, price, grid_slot=None):
-        order_id = self.plt.trade(catalog, price, settings.order_amount)
+        order_id = self.plt.trade(catalog, price, config.grid_order_amount)
         if grid_slot is None:
             found, index = self._find_slot_index(catalog, price)
             if found:
@@ -52,7 +51,7 @@ class Grid(object):
                 grid_slot = GridSlot(catalog, price)
                 self.orders_recorder[catalog].insert(index, grid_slot)
         grid_slot.append_order(order_id)
-        instance = GridInstance(catalog, int(time.time()), settings.order_amount)
+        instance = GridInstance(catalog, int(time.time()), config.grid_order_amount)
         self.order_instance_dict[order_id] = instance
 
     # TODO should provide an option for this since NOT always should cancel
@@ -97,10 +96,10 @@ class Grid(object):
     @staticmethod
     def grid_reverse_price(current_catalog, price):
         if current_catalog == 'buy':
-            reverse_price = price + settings.buy_sell_diff
+            reverse_price = price + config.grid_buy_sell_diff
         else:
             assert (current_catalog == 'sell')
-            reverse_price = price - settings.buy_sell_diff
+            reverse_price = price - config.grid_buy_sell_diff
         return reverse_price
 
     def _handle_slot(self, slot, global_pending_list):
@@ -111,7 +110,7 @@ class Grid(object):
         """
 
         def timeout(order_instance, now):
-            return now - order_instance.start_time > settings.cancel_duration
+            return now - order_instance.start_time > config.grid_cancel_duration
 
         slot_pending_list = [order_id for order_id in slot.order_id_list if order_id in global_pending_list]
         slot_finished_list = [order_id for order_id in slot.order_id_list if order_id not in global_pending_list]
@@ -126,7 +125,7 @@ class Grid(object):
             now = int(time.time())
             has_timeout = any(timeout(self.order_instance_dict[order_id], now) for order_id in slot_pending_list)
             # has >= 1 timeout, cancel all; order one
-            if settings.AVOID_TIMEOUT and has_timeout:
+            if config.AVOID_TIMEOUT and has_timeout:
                 self.cancel_slot_orders(slot)
                 self._reset_slot_orders(slot)
                 self._make_order(slot.catalog, slot.price, slot)
@@ -149,15 +148,16 @@ class Grid(object):
         :return:
         """
         price = self.grid_max
-        size = (self.grid_max - self.grid_min) / settings.grid_diff
+        size = (self.grid_max - self.grid_min) / config.grid_price_diff
         asset = AssetInfo.from_api(self.plt)
-        to_consume = (self.grid_max + self.grid_min + settings.grid_diff) / 2.0 * size * settings.order_amount
+        to_consume = (
+                     self.grid_max + self.grid_min + config.grid_price_diff) / 2.0 * size * config.grid_order_amount
         if asset.fiat_avail < to_consume:
             self._logger.critical("cannot afford to buy, avail={}, to_consume={}".format(asset.fiat_avail, to_consume))
             sys.exit(1)
         while price > self.grid_min:
             self._make_order('buy', price)
-            price -= settings.grid_diff
+            price -= config.grid_price_diff
 
     def run_main(self):
         try:
