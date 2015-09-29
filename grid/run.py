@@ -1,8 +1,10 @@
 #!/usr/bin/env python
+from __future__ import print_function
 from pprint import pprint
 
 import time
 import sys
+import traceback
 from api.okcoin import OKCoinCN
 
 from utils.asset_info import AssetInfo
@@ -81,14 +83,19 @@ class Grid(object):
                 self._logger.warning(pending)
                 pending_id = pending.order_id
                 pending_id_list.append(pending_id)
-                grid_order = self.order_instance_dict[pending_id]
-                grid_order.set_remaining(pending.remaining)
+                try:
+                    grid_order = self.order_instance_dict[pending_id]
+                    grid_order.set_remaining(pending.remaining)
+                except KeyError:
+                    traceback.print_exc(file=sys.stderr)
+                    pprint(self.order_instance_dict)
+                    self.cancel_all_orders()
         return pending_id_list
 
     def _cleanup_orders(self, order_list, slot):
         for order_id in order_list:
             del self.order_instance_dict[order_id]
-            slot.remove(order_id)
+            slot.order_id_list.remove(order_id)
 
     def _reset_slot_orders(self, slot):
         for order_id in slot.order_id_list:
