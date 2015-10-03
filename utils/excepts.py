@@ -117,7 +117,7 @@ def send_msg(report, msg_type):
     except KeyError:
         sender = username
     receiver = emailing_info['receiver']
-    msg = MIMEText(report, msg_type)
+    msg = MIMEText(report, msg_type, _charset='utf-8')
     msg['Subject'] = 'Arbitrage Report'
     msg['From'] = sender
     msg['To'] = receiver

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from jinja2.exceptions import TemplateSyntaxError
 from operator import itemgetter
 import threading
 import time
@@ -75,7 +76,8 @@ class Monitor(threading.Thread):
         coin_price = common.get_coin_price()
         jinja2_env = jinja2.Environment(loader=jinja2.FileSystemLoader(config.res_dir), trim_blocks=True)
         msg = jinja2_env.get_template(config.render_file).render(asset_list=asset_list, coin_changes=coin_changes,
-                                                                 fiat_changes=fiat_changes, coin_price=coin_price)
+                                                                 fiat_changes=fiat_changes, coin_price=coin_price,
+                                                                 language=config.language)
         return msg
 
     def try_notify_asset_changes(self, asset_list, coin_changes, fiat_changes):
@@ -84,7 +86,10 @@ class Monitor(threading.Thread):
             if abs(coin_changes) <= self.exceed_max:
                 Monitor._logger.info('notifying asset changes via email')
                 report = self.asset_message_render(asset_list, coin_changes, fiat_changes)
-                excepts.send_msg(report, 'html')
+                try:
+                    excepts.send_msg(report, 'html')
+                except TemplateSyntaxError as e:
+                    excepts.send_msg('wrong template, {}'.format(e), 'plain')
                 self.last_notifier_time = now
             else:
                 # NOTE: do not deal with coin imbalance here

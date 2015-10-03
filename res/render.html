@@ -1,7 +1,15 @@
-<html lang="en">
-{%if coin_price < 0.01%}
-{%include 'simple.html'%}
+<html>
+{%if language=='zh' %}
+  {%if coin_price < 0.01%}
+    {%include 'simple-zh.html'%}
+  {%else%}
+    {%include 'complete-zh.html'%}
+  {%endif%}
 {%else%}
-{%include 'complete.html'%}
+  {%if coin_price < 0.01%}
+    {%include 'simple.html'%}
+  {%else%}
+    {%include 'complete.html'%}
+  {%endif%}
 {%endif%}
 </html>

@@ -1,3 +1,4 @@
+# coding=utf8
 import os
 
 root_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..')
@@ -67,6 +68,8 @@ upper_bound = {
     'btc': 1.0,
     'ltc': 30
 }
+
+language = 'zh'
 
 grid_cancel_all = True
 grid_sleep_seconds = 1.0
