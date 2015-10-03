@@ -116,11 +116,11 @@ def send_msg(report, msg_type):
         sender = emailing_info['sender']
     except KeyError:
         sender = username
-    receiver = emailing_info['receiver']
+    receivers = emailing_info['receivers']
     msg = MIMEText(report, msg_type, _charset='utf-8')
     msg['Subject'] = 'Arbitrage Report'
     msg['From'] = sender
-    msg['To'] = receiver
+    msg['To'] = ', '.join(receivers)
     # noinspection PyBroadException
     try:
         session = smtplib.SMTP(server)
@@ -129,7 +129,7 @@ def send_msg(report, msg_type):
             session.starttls()
             password = emailing_info['password']
             session.login(username, password)
-        session.sendmail(sender, [receiver], msg.as_string())
+        session.sendmail(sender, receivers, msg.as_string())
         utils.log_helper.get_logger().info("sending mail done")
         session.quit()
     except:

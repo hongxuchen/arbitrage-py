@@ -34,9 +34,8 @@ Enable_Adjuster: True
 CoinType: btc
 
 Emailing:
-    username: chenhx.666@163.com
-    password: V2BAZRB2chenhx
-    server: smtp.163.com
+    username: cc_hongxuchen@outlook.com
+    server: localhost
     receivers:
         - leftcopy.chx@gmail.com
         - hongxuchen@outlook.com
