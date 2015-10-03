@@ -118,7 +118,8 @@ def send_msg(report, msg_type):
         sender = username
     receivers = emailing_info['receivers']
     msg = MIMEText(report, msg_type, _charset='utf-8')
-    msg['Subject'] = 'Arbitrage Report'
+    subject = 'Arbitrage for {}'.format(config.client_id)
+    msg['Subject'] = subject
     msg['From'] = sender
     msg['To'] = ', '.join(receivers)
     # noinspection PyBroadException
