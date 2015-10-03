@@ -33,6 +33,8 @@ Enable_Adjuster: True
 
 CoinType: btc
 
+ClientID: Hongxu
+
 Emailing:
     username: chenhx.666@163.com
     password: V2BAZRB2chenhx

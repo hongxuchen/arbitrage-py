@@ -118,7 +118,8 @@ def send_msg(report, msg_type):
         sender = username
     receivers = emailing_info['receivers']
     msg = MIMEText(report, msg_type, _charset='utf-8')
-    subject = 'Arbitrage for {}'.format(config.client_id)
+    client_id = utils.plt_helper.get_key_from_data('ClientID')
+    subject = 'Arbitrage for {}'.format(client_id)
     msg['Subject'] = subject
     msg['From'] = sender
     msg['To'] = ', '.join(receivers)
