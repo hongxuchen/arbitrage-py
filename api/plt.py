@@ -69,7 +69,7 @@ class Platform(object):
     def order_info(self, order_id):
         """
         :param order_id: order id
-        :return: an OrderInfo instance
+        :return: a PlatformOrderInfo instance
         """
         pass
 

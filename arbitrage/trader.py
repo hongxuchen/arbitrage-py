@@ -2,7 +2,7 @@
 from utils.asset_info import AssetInfo
 from settings import config
 from utils import log_helper, common
-from utils.order_info import OrderInfo
+from utils.order_info import PlatformOrderInfo
 
 
 class Trader(object):
@@ -140,7 +140,7 @@ class Trader(object):
     def get_order_info(self):
         # NOTE: workaround if order failed, copy catalog, remaining is self.amount
         if self.order_id == config.INVALID_ORDER_ID:
-            return OrderInfo(self.catalog, self.amount)
+            return PlatformOrderInfo(self.order_id, self.catalog, self.amount)
         else:
             return self.plt.order_info(self.order_id)
 

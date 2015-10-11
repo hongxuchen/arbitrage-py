@@ -3,13 +3,14 @@
 import hashlib
 import urllib
 import time
+
 import requests
 
 from settings import config
 from utils import common, plt_helper
 from utils import excepts
 from utils import log_helper
-from utils.order_info import OrderInfo
+from utils.order_info import PlatformOrderInfo
 from api.plt import Platform
 
 
@@ -157,7 +158,7 @@ class HuoBi(Platform):
         processed = common.to_decimal(res['processed_amount'])
         remaining_amount = order_amount - processed
         catalog = HuoBi.catalog_map[res['type']]
-        order_info = OrderInfo(catalog, remaining_amount)
+        order_info = PlatformOrderInfo(order_id, catalog, remaining_amount)
         return order_info
 
     def assets(self):

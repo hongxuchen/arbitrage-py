@@ -4,6 +4,7 @@ import hashlib
 import hmac
 import urllib
 import time
+
 import requests
 
 from utils import excepts, plt_helper
@@ -11,7 +12,7 @@ from utils import log_helper
 from api.plt import Platform
 from utils import common
 from settings import config
-from utils.order_info import OrderInfo
+from utils.order_info import PlatformOrderInfo
 
 
 class BitBays(Platform):
@@ -266,7 +267,7 @@ class BitBays(Platform):
             amount = info['mo_amount']
         remaining_amount = common.to_decimal(amount) - common.to_decimal(info['amount_done'])
         catalog = BitBays.catalog_dict[info['catalog']]
-        order_info = OrderInfo(catalog, remaining_amount)
+        order_info = PlatformOrderInfo(order_id, catalog, remaining_amount)
         return order_info
 
     def assets(self):

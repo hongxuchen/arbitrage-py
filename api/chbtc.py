@@ -12,7 +12,7 @@ from settings import config
 from utils import common, plt_helper
 from utils import excepts
 from utils import log_helper
-from utils.order_info import OrderInfo
+from utils.order_info import PlatformOrderInfo
 from api.plt import Platform
 
 
@@ -249,7 +249,7 @@ class CHBTC(Platform):
             catalog = 'buy'
         else:  # catalog_type == 0
             catalog = 'sell'
-        order_info = OrderInfo(catalog, remaining_amount)
+        order_info = PlatformOrderInfo(order_id, catalog, remaining_amount)
         return order_info
 
 

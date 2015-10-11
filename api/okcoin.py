@@ -6,7 +6,7 @@ from pprint import pprint
 
 import requests
 
-from utils.order_info import OrderInfo, PlatformOrderInfo
+from utils.order_info import PlatformOrderInfo
 from utils import log_helper, plt_helper, common, excepts
 from api.plt import Platform
 from settings import config
@@ -215,16 +215,11 @@ class OKCoinAPI(Platform):
 
     def order_info(self, order_id):
         response = self.api_order_info(order_id)
-        try:
-            info = response['orders'][0]
-            catalog = info['type']
-            remaining_amount = info['amount'] - info['deal_amount']
-            order_info = OrderInfo(catalog, remaining_amount)
-            return order_info
-        except Exception as e:
-            OKCoinAPI._logger.critical('ERROR: exception="{}", response={}'.format(e, response))
-            err_msg = 'msg: OKCoin order_info error: response={}'.format(response)
-            excepts.handle_exit(err_msg)
+        info = response['orders'][0]
+        catalog = info['type']
+        remaining_amount = info['amount'] - info['deal_amount']
+        order_info = PlatformOrderInfo(order_id, catalog, remaining_amount)
+        return order_info
 
     def assets(self):
         funds = self.api_userinfo()['info']['funds']
