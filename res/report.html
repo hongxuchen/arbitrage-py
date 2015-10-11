@@ -1,0 +1,47 @@
+<p>coin changes: {{'{:<10.4f}'.format(coin_changes)}}, fiat changes: {{'{:<10.4f}'.format(fiat_changes)}}</p>
+
+{%if coin_price > 0.01%}
+{%set complete_report = True%}
+{%else%}
+{%set complete_report = False%}
+{%endif%}
+
+{%set complete_report = True%}
+<p>current rate: {{'{:<10.4f}'.format(coin_price)}}</p>
+{%endif%}
+
+<h3>Details</h3>
+<table border="1" width="75%">
+  <tr>
+    <th align="center" rowspan="2">Platform</th>
+    <th align="center" colspan="2">coin</th>
+    <th align="center" colspan="2">fiat</th>
+    {%set complete_report = True%}
+    <th align="center" colspan="2">converted</th>
+    {%endif%}
+  </tr>
+  <tr>
+    <th align="center">available</th>
+    <th align="center">pending</th>
+    <th align="center">available</th>
+    <th align="center">pending</th>
+    {%set complete_report = True%}
+    <th align="center">coin</th>
+    <th align="center">fiat</th>
+    {%endif%}
+  </tr>
+  {%for asset in asset_list%}
+  <tr>
+    <th align="center">{{asset.plt_name}}</th>
+    <td align="center">{{'{:<10.4f}'.format(asset.coin_avail)}}</td>
+    <td align="center">{{'{:<10.4f}'.format(asset.coin_pending)}}</td>
+    <td align="center">{{'{:<10.4f}'.format(asset.fiat_avail)}}</td>
+    <td align="center">{{'{:<10.4f}'.format(asset.fiat_pending)}}</td>
+    {%set complete_report = True%}
+    <td align="center">{{'{:<10.4f}'.format(asset.converted_coin(coin_price))}}</td>
+    <td align="center">{{'{:<10.4f}'.format(asset.converted_fiat(coin_price))}}</td>
+    {%endif%}
+  </tr>
+  {%endfor%}
+
+</table>
