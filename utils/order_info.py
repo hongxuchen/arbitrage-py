@@ -11,10 +11,10 @@ class PlatformOrderInfo(object):
     def __init__(self, order_id, catalog, remaining):
         self.catalog = catalog
         self.order_id = order_id
-        self.remaining = remaining
+        self.remaining_amount = remaining
 
     def has_pending(self):
-        return self.remaining > config.MINOR_DIFF
+        return self.remaining_amount > config.MINOR_DIFF
 
     def __repr__(self):
-        return 'id={:<15d} catalog={:<4s} remaining={:<10.4f}'.format(self.order_id, self.catalog, self.remaining)
+        return 'id={:<15d} catalog={:<4s} remaining={:<10.4f}'.format(self.order_id, self.catalog, self.remaining_amount)
