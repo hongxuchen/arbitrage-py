@@ -18,7 +18,7 @@ class Producer(threading.Thread):
     diff_dict = config.diff_dict[coin_type]
 
     # stateless
-    def __init__(self, plt_list, adjuster_queue):
+    def __init__(self, plt_list, adjuster_queue, stats):
         super(Producer, self).__init__()
         self.plt_list = plt_list
         if adjuster_queue is not None:
@@ -28,6 +28,7 @@ class Producer(threading.Thread):
             self.adjuster_enabled = False
         self.running = False
         self.min_amount = max(plt_list[0].lower_bound, plt_list[1].lower_bound)
+        self.stats = stats
 
     def run(self):
         while self.running:
@@ -107,10 +108,12 @@ class Producer(threading.Thread):
 
         # case 1: no trade
         if final_amount - self.min_amount < config.MINOR_DIFF:
+            self.stats.insufficient_num += 1
             Producer._logger.info('[P] arbitrage cancelled, insufficient amount')
             return False
 
         # case 2: trade
+        self.stats.arbitrage_num += 1
         buy_trade = Trader(plt_a, 'buy', ask_a_adjust_price, final_amount)  # buy at plt_a
         sell_trade = Trader(plt_b, 'sell', bid_b_adjust_price, final_amount)  # sell at plt_b
         # (buy, sell)
@@ -140,6 +143,7 @@ class Producer(threading.Thread):
 
         arbitrage_diff = Producer.diff_dict[plt_name_a][plt_name_b]
         if ask_a[0] + arbitrage_diff < bid_b[0]:
+            self.stats.trade_chance += 1
             Producer._logger.debug('[P] Arbitrage chance: {} {}'.format(ask_a, bid_b))
             with common.MUTEX:
                 Producer._logger.info('[P] LOCK acquired')

@@ -15,9 +15,10 @@ from api.okcoin import OKCoinCN
 class Consumer(threading.Thread):
     _logger = log_helper.get_logger()
 
-    def __init__(self, adjuster_queue):
+    def __init__(self, adjuster_queue, stats):
         super(Consumer, self).__init__()
         self.adjuster_queue = adjuster_queue
+        self.stats = stats
 
     # noinspection PyMethodMayBeStatic
     def consume(self, adjuster):
@@ -27,7 +28,7 @@ class Consumer(threading.Thread):
             sleep_seconds = config.PENDING_SECONDS - seconds
             Consumer._logger.info('[C] sleep for {:.3f}s'.format(sleep_seconds))
             time.sleep(sleep_seconds)
-        adjuster.adjust_pending()
+        adjuster.adjust_pending(self.stats)
 
     def run(self):
         while True:

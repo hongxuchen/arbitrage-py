@@ -6,6 +6,7 @@ import time
 
 import jinja2
 import concurrent.futures
+from arbitrage.stats import Statistics
 
 from settings import config
 from utils.asset_info import AssetInfo
@@ -22,7 +23,7 @@ class Monitor(threading.Thread):
     coin_type = plt_helper.get_key_from_data('CoinType')
     exceed_max = config.exceed_max_dict[coin_type]
 
-    def __init__(self, plt_list):
+    def __init__(self, plt_list, stats):
         super(Monitor, self).__init__()
         self.plt_list = plt_list
         self.original_asset_list = []
@@ -32,6 +33,7 @@ class Monitor(threading.Thread):
         self.old_fiat_changes = 0.0
         self.failed_counter = 0
         self.last_notifier_time = time.time()
+        self.stats = stats
 
     def get_asset_list(self):
         with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
@@ -69,7 +71,7 @@ class Monitor(threading.Thread):
         log_helper.get_asset_logger().warning(report)
 
     @staticmethod
-    def asset_message_render(asset_list, coin_changes, fiat_changes):
+    def asset_message_render(asset_list, coin_changes, fiat_changes, stats):
         assert (len(asset_list) == 2)
         asset_total = AssetInfo.from_sum(asset_list)
         asset_list.append(asset_total)
@@ -77,7 +79,8 @@ class Monitor(threading.Thread):
         jinja2_env = jinja2.Environment(loader=jinja2.FileSystemLoader(config.res_dir), trim_blocks=True)
         msg = jinja2_env.get_template(config.render_file).render(asset_list=asset_list, coin_changes=coin_changes,
                                                                  fiat_changes=fiat_changes, coin_price=coin_price,
-                                                                 language=config.language)
+                                                                 language=config.language, stats=stats)
+        stats.reset()
         return msg
 
     def try_notify_asset_changes(self, asset_list, coin_changes, fiat_changes):
@@ -85,7 +88,7 @@ class Monitor(threading.Thread):
         if now - self.last_notifier_time >= config.emailing_interval_seconds:
             if abs(coin_changes) <= self.exceed_max:
                 Monitor._logger.info('notifying asset changes via email')
-                report = self.asset_message_render(asset_list, coin_changes, fiat_changes)
+                report = self.asset_message_render(asset_list, coin_changes, fiat_changes, self.stats)
                 try:
                     excepts.send_msg(report, 'html')
                 except TemplateSyntaxError as e:
@@ -144,6 +147,8 @@ class Monitor(threading.Thread):
         else:  # -exceed_max <= coin_change_amount <= exceed_max
             self.coin_exceed_counter = 0
             return True  # no trade
+        # keeper
+        self.stats.monitor_num += 1
         trade_amount = common.adjust_amount(coin_change_amount)
         adjust_status = self.adjust_trade(trade_catalog, trade_amount)
         # reset after trade
@@ -223,7 +228,8 @@ if __name__ == '__main__':
     okcoin_cn = OKCoinCN()
     huobi = HuoBi()
     plt_list = [okcoin_cn, huobi]
-    monitor = Monitor(plt_list)
+    stats = Statistics()
+    monitor = Monitor(plt_list, stats)
     asset_list = monitor.get_asset_list()
-    msg = monitor.asset_message_render(asset_list, 3.0, 4.0)
+    msg = monitor.asset_message_render(asset_list, 3.0, 4.0, stats)
     excepts.send_msg(msg, 'html')

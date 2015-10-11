@@ -1,4 +1,8 @@
+<h3>概述</h3>
+
 <p>虚拟币变化: {{'{:<10.4f}'.format(coin_changes)}}, 法币变化: {{'{:<10.4f}'.format(fiat_changes)}}</p>
+<p>交易机会: {{stats.trade_chance}}, 资金不足次数:{{stats.insufficient_num}}</p>
+<p>交易次数: {{stats.arbitrage_num}}, 未完全成交次数:{{stats.adjust_num}}, 全局调整次数:{{stats.monitor_num}}</p>
 
 {%if coin_price > 0.01%}
 {%set complete_report = True%}
@@ -6,11 +10,10 @@
 {%set complete_report = False%}
 {%endif%}
 
+<h3>详情</h3>
 {%if complete_report%}
 <p>当前汇率: {{'{:<10.4f}'.format(coin_price)}}</p>
 {%endif%}
-
-<h3>详情</h3>
 <table border="1" width="75%">
   <tr>
     <th align="center" rowspan="2">平台</th>

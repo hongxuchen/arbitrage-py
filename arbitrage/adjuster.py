@@ -119,10 +119,11 @@ class Adjuster(object):
         return trade_catalog, trade_amount
 
     # noinspection PyPep8Naming
-    def adjust_pending(self):
+    def adjust_pending(self, stats):
         adjust_res = self.get_adjust_info()
         if adjust_res is None:
             return
+        stats.adjust_num += 1
         trade_catalog, trade_amount = adjust_res[0], adjust_res[1]
         # t1, t2 = self.normalize_trade_pair_strategy1(self.trade_pair)
         t1, t2 = self.normalize_trade_pair_strategy2(self.trade_pair, trade_catalog)

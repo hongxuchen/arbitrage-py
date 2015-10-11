@@ -3,6 +3,7 @@
 from api.chbtc import CHBTC
 from api.huobi import HuoBi
 from api.itbit import ItBitAPI
+from arbitrage.stats import Statistics
 from utils import log_helper, plt_helper
 from api.okcoin import OKCoinCN
 from api.bitbays import BitBays
@@ -35,13 +36,14 @@ class Driver(object):
         enabled_plt = plt_helper.get_key_from_data('Enabled')
         self.plt_list = [select_plt_dict[plt]() for plt in enabled_plt]
         self.adjuster_enabled = plt_helper.get_key_from_data('Enable_Adjuster')
+        stats = Statistics()
         if self.adjuster_enabled:
             self.adjuster_queue = queue.Queue()
-            self.producer = producer.Producer(self.plt_list, self.adjuster_queue)
-            self.consumer = consumer.Consumer(self.adjuster_queue)
+            self.producer = producer.Producer(self.plt_list, self.adjuster_queue, stats)
+            self.consumer = consumer.Consumer(self.adjuster_queue, stats)
         else:
-            self.producer = producer.Producer(self.plt_list, None)
-        self.monitor = monitor.Monitor(self.plt_list)
+            self.producer = producer.Producer(self.plt_list, None, stats)
+        self.monitor = monitor.Monitor(self.plt_list, stats)
         self.running = False
 
     def start_trade(self):
