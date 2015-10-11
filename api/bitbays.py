@@ -69,7 +69,8 @@ class BitBays(Platform):
             elif api_type in self.api_private:
                 params['nonce'] = self._nonce()
                 headers = self._post_param(params)
-                r = requests.post(self._real_uri(api_type), data=params, headers=headers, timeout=config.REQUEST_TIMEOUT)
+                r = requests.post(self._real_uri(api_type), data=params, headers=headers,
+                                  timeout=config.REQUEST_TIMEOUT)
             else:
                 err_msg = 'msg: BitBays api_type={} not supported'.format(api_type)
                 excepts.handle_exit(err_msg)
@@ -137,7 +138,7 @@ class BitBays(Platform):
         res = self._setup_request('depth', params=payload)['result']
         asks = sorted(res['asks'], key=lambda ask: ask[0], reverse=True)[-length:]
         bids = sorted(res['bids'], key=lambda bid: bid[0], reverse=True)[:length]
-        # NOTE: bitbays always violates this assertion!!!
+        # NOTE: bitbays keeps violating this assertion!!!
         # assert (asks[-1][0] + config.MINOR_DIFF >= bids[0][0])
         asks_bids = asks + bids
         return asks_bids
@@ -281,24 +282,3 @@ class BitBays(Platform):
 if __name__ == '__main__':
     bitbays = BitBays()
     print(bitbays.lower_bound)
-    # while True:
-    # print(bitbays.ask_bid_list(2))
-    # print(bitbays.assets())
-    # print(bitbays.api_transactions(0))
-    # order_id = bitbays.trade('sell', 10000, 1000)
-    # print(bitbays.ask1())
-    # print(order_id)
-    # print(bitbays.cancel(123456))
-    # limit order id
-    # res = bitbays.order_info(order_id)
-    # print(res)
-    # order_id = bitbays.trade('buy', 10, 0.001)
-    # print(order_id)
-    # order_info = bitbays.order_info(order_id)
-    # print(order_info)
-    # res = bitbays.buy_market(0.01)
-    # print(res)
-    # order_id = 44036603
-    # res = bitbays.order_info(order_id)
-    # res = bitbays.sell_market(0.001)
-    # print(res)

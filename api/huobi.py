@@ -74,7 +74,8 @@ class HuoBi(Platform):
                 param_dict['sign'] = self._sign(param_dict)
                 del param_dict['secret_key']
                 # print(param_dict)
-                r = requests.post(self.domain, params=param_dict, headers=HuoBi.common_headers, timeout=config.REQUEST_TIMEOUT)
+                r = requests.post(self.domain, params=param_dict, headers=HuoBi.common_headers,
+                                  timeout=config.REQUEST_TIMEOUT)
                 res_data = r.json()
                 if 'code' in res_data and res_data['code'] != 0:
                     code = res_data['code']
@@ -172,33 +173,4 @@ class HuoBi(Platform):
 if __name__ == '__main__':
     log_helper.init_logger()
     huobi = HuoBi()
-    # print(huobi.assets())
-    # trade_id = huobi.trade('buy', 100, 900)
-    # print(trade_id)
-    # trade_id = huobi.trade('sell', 99990, 0.12)
-    # print(trade_id)
-    # print(huobi.lower_bound)
-    # huobi.coin_type = 'ltc'
-    # print(huobi.ask_bid_list(1))
-    # sell = huobi.trade('buy', 1, 0.1)
-    # print(sell)
-    # sell = 255053206
-    # order_info = huobi.order_info(sell)
-    # print(order_info)
-    # c1 = huobi.cancel(sell)
-    # print(c1)
-    # buy = huobi.trade('buy', 100, 0.1)
-    # print(buy)
-    # order_info = huobi.order_info(buy)
-    # print(order_info)
-    # c2 = huobi.cancel(buy)
-    # print(c2)
-    # res = huobi.trade('sell', 123456, 0.1)
-    # print(res)
-    # res = res = huobi.trade('sell', 12345, 0.1)
-    # print(res)
-    # res = huobi.cancel(123456)
-    # print(res)
     print(huobi.assets())
-    # print(huobi.ask1(), huobi.bid1())
-    # print(huobi.ask_bid_list(1))

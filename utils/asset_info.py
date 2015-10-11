@@ -11,9 +11,6 @@ class AssetInfo(object):
         self.fiat_pending, self.fiat_avail = fiat
         self.coin_pending, self.coin_avail = coin
 
-        # [self.fiat_pending, self.fiat_avail] = asset_raw_list[0]
-        # [self.coin_pending, self.coin_avail] = asset_raw_list[1]
-
     @classmethod
     def from_api(cls, plt):
         asset_raw_list = plt.assets()
@@ -57,13 +54,6 @@ class AssetInfo(object):
 
 if __name__ == '__main__':
     okcoin = OKCoinCN()
-    # info1 = AssetInfo(okc)
-    # print(info1)
-    # bb = BitBays()
-    # info2 = AssetInfo(bb)
-    # print(info2)
-    # print(info1.total_coin() + info2.total_coin())
-    # print(info1.total_fiat() + info2.total_fiat())
     huobi = HuoBi()
     asset_okcoin = AssetInfo.from_api(okcoin)
     asset_huobi = AssetInfo.from_api(huobi)
