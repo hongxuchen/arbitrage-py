@@ -36,6 +36,8 @@ CoinType: btc
 ClientID: Hongxu
 
 Emailing:
+#    username: cc_hongxuchen@outlook.com
+#    server: localhost
     username: chenhx.666@163.com
     password: V2BAZRB2chenhx
     server: smtp.163.com
