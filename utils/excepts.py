@@ -19,6 +19,11 @@ class InvalidNonceError(Exception):
         super(InvalidNonceError, self).__init__(message)
 
 
+class RateExceedError(Exception):
+    def __init__(self, message):
+        super(RateExceedError, self).__init__(message)
+
+
 class NULLResponseError(Exception):
     def __init__(self, message):
         super(NULLResponseError, self).__init__(message)
@@ -50,9 +55,9 @@ class CHBTCRetryError(Exception):
 
 
 retry_except_tuple = (
-    req_except.ConnectionError, req_except.Timeout, req_except.HTTPError, InvalidNonceError, NULLResponseError,
-    HuoBiError, CHBTCRetryError, urllib3_except.TimeoutError, urllib3_except.HTTPError, urllib3_except.ConnectionError,
-    ValueError)
+    req_except.ConnectionError, req_except.Timeout, req_except.HTTPError, InvalidNonceError, RateExceedError,
+    NULLResponseError, HuoBiError, CHBTCRetryError, urllib3_except.TimeoutError, urllib3_except.HTTPError,
+    urllib3_except.ConnectionError, ValueError)
 exit_except_tuple = (req_except.URLRequired, req_except.TooManyRedirects, HuoBiExitError, CHBTCExitError)
 
 
@@ -84,10 +89,16 @@ def handle_retry(exception, handler):
     retry_counter = 0
     while retry_counter < config.RETRY_MAX:
         retry_counter += 1
-        if retry_counter % 10 == 0:
-            time.sleep(config.RETRY_SLEEP_SECONDS)
+        # sleep
+        if isinstance(current_exception, RateExceedError):
+            logger.error("RateExceedError, will sleep for {}s".format(config.RATE_EXCEED_SLEEP_SECONDS))
+            time.sleep(config.RATE_EXCEED_SLEEP_SECONDS)
         else:
-            time.sleep(config.RETRY_SECONDS)
+            if retry_counter % 10 == 0:
+                time.sleep(config.RETRY_SLEEP_SECONDS)
+            else:
+                time.sleep(config.RETRY_SECONDS)
+        # retry
         try:
             logger.warning('retry_counter={:<2}'.format(retry_counter))
             res = handler()  # real handle function
@@ -101,10 +112,12 @@ def handle_retry(exception, handler):
                 continue
             else:
                 handle_exit(e)  # fail, exit
+    # notifying
     msg = 'Request Exception "{}" after retrying {} times'.format(current_exception, config.RETRY_MAX)
     logger.critical(msg)
     send_msg(msg, 'plain')
     time.sleep(config.RETRY_SLEEP_SECONDS)
+    # retry
     return handle_retry(current_exception, handler)
 
 

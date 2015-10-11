@@ -87,6 +87,8 @@ class BitBays(Platform):
                 if msg.startswith('Invalid Nonce'):
                     raise excepts.InvalidNonceError(
                         'InvalidNonceError: {}, current_nonce={}'.format(msg, params['nonce']))
+                if msg.startswith("Rate Limit Exceeded"):
+                    raise excepts.RateExceedError("Rate Exceeded for api_type={}".format(api_type))
                 else:
                     BitBays._logger.critical(
                         'ERROR: api_type={}, error_message={}'.format(api_type, msg))
