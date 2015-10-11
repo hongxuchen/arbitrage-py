@@ -33,7 +33,7 @@ class Producer(threading.Thread):
     def run(self):
         while self.running:
             time.sleep(config.sleep_seconds)
-            Producer._logger.info('[P] Producer')
+            Producer._logger.debug('[P] Producer')
             self.process_arbitrage()
         if self.adjuster_enabled:
             self.adjuster_queue.put(common.SIGNAL)
@@ -146,9 +146,9 @@ class Producer(threading.Thread):
             self.stats.trade_chance += 1
             Producer._logger.debug('[P] Arbitrage chance: {} {}'.format(ask_a, bid_b))
             with common.MUTEX:
-                Producer._logger.info('[P] LOCK acquired')
+                Producer._logger.debug('[P] LOCK acquired')
                 self.arbitrage_impl(i, ask_list[i], bid_list[1 - i])
-            Producer._logger.info('[P] LOCK released')
+            Producer._logger.debug('[P] LOCK released')
             return True
         else:
             return False

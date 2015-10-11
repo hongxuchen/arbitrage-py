@@ -2,7 +2,7 @@ version: 1
 
 formatters:
   trackerFormatter:
-    format: '%(levelname)9s %(asctime)s %(threadName)15s %(filename)25s:%(lineno)3s - %(message)s'
+    format: '%(levelname)9s %(asctime)s %(filename)25s:%(lineno)3s - %(message)s'
     datefmt: '%Y-%m-%d %H:%M:%S'
   simpleFormatter:
 #    format: '%(asctime)s  %(message)s'
@@ -16,19 +16,18 @@ handlers:
     level: WARNING
     stream: ext://sys.stdout
   tracker_file:
-    class: logging.handlers.RotatingFileHandler
+    class: logging.handlers.TimedRotatingFileHandler
     formatter: trackerFormatter
-    level: DEBUG
+    level: INFO
     filename: log/tracker.log
-    maxBytes: 10485760
-    backupCount: 5
+    when: midnight
+    backupCount: 7
   asset_file:
-    class: logging.handlers.RotatingFileHandler
+    class: logging.handlers.TimedRotatingFileHandler
     formatter: simpleFormatter
     level: INFO
     filename: log/asset.log
-    maxBytes: 10485760
-    backupCount: 5
+    when: W0
 
 loggers:
   logger:

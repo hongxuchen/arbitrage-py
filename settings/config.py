@@ -56,7 +56,7 @@ AVOID_TIMEOUT = True
 
 ####################################################################
 
-emailing_interval_seconds = 60
+emailing_interval_seconds = 600
 
 monitor_fail_max = 2
 

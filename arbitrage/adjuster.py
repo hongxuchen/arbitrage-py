@@ -132,7 +132,7 @@ class Adjuster(object):
         # not really care about the EXACT price
         new_t1 = Trader(trade_plt, trade_catalog, trade_price, trade_amount)
         with common.MUTEX:
-            Adjuster._logger.info('[C] LOCK acquired, adjust trading')
+            Adjuster._logger.debug('[C] LOCK acquired, adjust trading')
             t1_adjust_status = new_t1.adjust_trade()
             if t1_adjust_status is False:
                 trade_plt = t2.plt
@@ -143,7 +143,7 @@ class Adjuster(object):
                 if t2_adjust_status is False:
                     Adjuster._logger.critical('FAILED adjust for [{}, {}]'.format(t1.plt_name, t2.plt_name))
                     # TODO may need to use monitor here
-            Adjuster._logger.info('[C] LOCK released, adjust done')
+            Adjuster._logger.debug('[C] LOCK released, adjust done')
 
 
 if __name__ == '__main__':

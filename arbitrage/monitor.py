@@ -183,12 +183,12 @@ class Monitor(threading.Thread):
     def asset_update_handler(self, is_last):
         # handle coin changes
         with common.MUTEX:
-            Monitor._logger.info('[M] LOCK acquired')
+            Monitor._logger.debug('[M] LOCK acquired')
             asset_list = self.get_asset_list()
             Monitor._logger.debug('[M] asset_list obtained')
             coin_changes, fiat_changes = self.get_asset_changes(asset_list)
             status = self.coin_keeper(coin_changes, is_last)
-        Monitor._logger.info('[M] LOCK released')
+        Monitor._logger.debug('[M] LOCK released')
         # report
         # NOTE: this report is delayed
         if abs(self.old_coin_changes - coin_changes) > config.MINOR_DIFF or abs(
