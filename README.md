@@ -1,23 +1,17 @@
 # known issues
 * okcoin sometimes may return {} data, known for `ask_bid_list`, `order_info`
-* not afford to buy
 * HuoBi Error: code=37, msg=该委托已在队列中，不能取消或修
-
-# TODO
 * main thread works as a server
 * [FATAL] monitor adjust still may 'cannot afford' so that it causes long-term imbalance
-reverse the fiat amount for further trade. The net strategy is that we can change "diff".
-* calculate the probabilities
+  - seems the problem of data inconsistency
+* statistics
     - request time
-    - failed frequency
     - ask/bid diff times w.r.t. certain amount
     - profits per day
-* profits against original
-* order/cancel frequently for one platform; when completed, reverse trade on another platform
-* Deal with common.py init issue
-* force implementation
+    - profits against original
+* Deal with config.py and plt.yaml
 * Monitor gets starvation
-* use market buy/sell to avoid connection issues
+* use market buy/sell to avoid connection issues <-- seems infeasible since platform data inconsistency
 
 ## hosts
 121.199.251.136 www.okcoin.cn
