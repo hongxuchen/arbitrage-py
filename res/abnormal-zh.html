@@ -1,0 +1,27 @@
+<h2></h2>
+
+<p><b>出现异常</b>: 局部调整次数超过{{adjust_num}}</p>
+
+<table border="1" width="40%">
+    <tr>
+        <th align="center" rowspan="2">平台</th>
+        <th align="center" colspan="2">虚拟币</th>
+        <th align="center" colspan="2">法币</th>
+    </tr>
+    <tr>
+        <th align="center">可用</th>
+        <th align="center">未成交</th>
+        <th align="center">可用</th>
+        <th align="center">未成交</th>
+    </tr>
+    {%for asset in asset_list%}
+    <tr>
+        <th align="center">{{asset.plt_name}}</th>
+        <td align="center">{{'{:<10.4f}'.format(asset.coin_avail)}}</td>
+        <td align="center">{{'{:<10.4f}'.format(asset.coin_pending)}}</td>
+        <td align="center">{{'{:<10.4f}'.format(asset.fiat_avail)}}</td>
+        <td align="center">{{'{:<10.4f}'.format(asset.fiat_pending)}}</td>
+    </tr>
+    {%endfor%}
+
+</table>

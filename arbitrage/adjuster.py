@@ -1,16 +1,23 @@
 #!/usr/bin/env python
 
 from __future__ import print_function
+import jinja2
+from jinja2.exceptions import TemplateSyntaxError
 import time
 
 import concurrent.futures
 
 from api.bitbays import BitBays
+from api.huobi import HuoBi
+from arbitrage.stats import Statistics
 from settings import config
 from utils import log_helper
 from utils import common
 from api.okcoin import OKCoinCN
 from trader import Trader
+from utils.asset_info import AssetInfo
+
+import utils.excepts
 
 
 class Adjuster(object):
@@ -144,14 +151,35 @@ class Adjuster(object):
                     Adjuster._logger.critical('FAILED adjust for [{}, {}]'.format(t1.plt_name, t2.plt_name))
                     # TODO may need to use monitor here
             Adjuster._logger.debug('[C] LOCK released, adjust done')
+        # abnormal
+        plt_list = [trade.plt for trade in self.trade_pair]
+        self.try_notify_abnormal(plt_list, stats)
+
+    @staticmethod
+    def try_notify_abnormal(plt_list, stats):
+        if stats.adjust_num > config.ADJUST_NUM:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+                assets = executor.map(lambda plt: AssetInfo.from_api(plt), plt_list)
+            asset_list = list(assets)
+            jinja2_env = jinja2.Environment(loader=jinja2.FileSystemLoader(config.res_dir), trim_blocks=True)
+            msg = jinja2_env.get_template(config.abnormal_file).render(asset_list=asset_list,
+                                                                       adjust_num=config.ADJUST_NUM)
+            try:
+                utils.excepts.send_msg(msg, 'html')
+            except TemplateSyntaxError as e:
+                utils.excepts.send_msg("wrong template, {}".format(e), 'plain')
 
 
 if __name__ == '__main__':
     okcoin = OKCoinCN()
-    bitbays = BitBays()
-    ok_trade = Trader(okcoin, 'buy', 10, 0.01)
-    bb_trade = Trader(bitbays, 'sell', 10000, 0.01)
-    t_pair = ok_trade, bb_trade
-    now = time.time()
-    arbitrage = Adjuster(t_pair, now)
-    print(arbitrage)
+    hb = HuoBi()
+    plt_list = [okcoin, hb]
+    stats = Statistics()
+    stats.adjust_num = 12
+    Adjuster.try_notify_abnormal(plt_list, stats)
+    # ok_trade = Trader(okcoin, 'buy', 10, 0.01)
+    # bb_trade = Trader(bitbays, 'sell', 10000, 0.01)
+    # t_pair = ok_trade, bb_trade
+    # now = time.time()
+    # arbitrage = Adjuster(t_pair, now)
+    # print(arbitrage)

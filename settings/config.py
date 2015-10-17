@@ -5,6 +5,8 @@ root_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..')
 res_dir = os.path.join(root_dir, 'res')
 settings_dir = os.path.join(root_dir, 'settings')
 render_file = 'render.html'
+# TODO
+abnormal_file = 'abnormal-zh.html'
 
 ####################################################################
 
@@ -58,6 +60,7 @@ AVOID_TIMEOUT = True
 ####################################################################
 
 emailing_interval_seconds = 3600
+ADJUST_NUM = int((emailing_interval_seconds / 3600.0) * 8)
 
 monitor_fail_max = 2
 
