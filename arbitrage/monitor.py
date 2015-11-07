@@ -2,11 +2,9 @@
 import threading
 import time
 from operator import itemgetter
-
 import concurrent.futures
 import jinja2
 from jinja2.exceptions import TemplateSyntaxError
-
 from api.huobi import HuoBi
 from api.okcoin import OKCoinCN
 from arbitrage.stats import Statistics
@@ -33,7 +31,13 @@ class Monitor(threading.Thread):
         self.last_notifier_time = time.time()
         self.stats = stats
 
+    # asset
+
     def get_asset_list(self):
+        """
+        get asset list, the order is the same as plt list
+        :return: list of AssetInfo
+        """
         with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
             assets = executor.map(lambda plt: AssetInfo.from_api(plt), self.plt_list)
         asset_list = list(assets)
@@ -41,18 +45,26 @@ class Monitor(threading.Thread):
 
     @staticmethod
     def report_asset(asset_list):
+        """
+        log current each platform's asset, including "ALL"
+        :param asset_list: platform's asset info, exluding "ALL"
+        :return:
+        """
         asset_logger = log_helper.get_asset_logger()
         report_template = '{:10s} ' + Monitor.coin_type + '={:<10.4f}, cny={:<10.4f}'
-        all_coin = 0.0
-        all_fiat = 0.0
+        total_asset = AssetInfo.from_sum(asset_list)
+        asset_list.append(total_asset)
         for asset in asset_list:
             plt_coin, plt_fiat = asset.total_coin(), asset.total_fiat()
-            all_coin += plt_coin
-            all_fiat += plt_fiat
             asset_logger.info(report_template.format(asset.plt_name, plt_coin, plt_fiat))
-        asset_logger.info(report_template.format('ALL', all_coin, all_fiat))
+
+    # asset changes
 
     def get_asset_changes(self, asset_list):
+        """
+        :param asset_list: platform's asset info, excluding "ALL"
+        :return: (coin_change, fiat_change)
+        """
         coin, original_coin = 0.0, 0.0
         fiat, original_fiat = 0.0, 0.0
         for original in self.original_asset_list:
@@ -65,11 +77,25 @@ class Monitor(threading.Thread):
 
     @staticmethod
     def report_asset_changes(coin, fiat):
+        """
+        log asset changes
+        :param coin:
+        :param fiat:
+        :return:
+        """
         report = '[M] Asset Change: {:10.4f}{:3s}, {:10.4f}cny'.format(coin, Monitor.coin_type, fiat)
         log_helper.get_asset_logger().warning(report)
 
     @staticmethod
     def asset_message_render(asset_list, coin_changes, fiat_changes, stats):
+        """
+        return a templated string for emailing
+        :param asset_list:
+        :param coin_changes:
+        :param fiat_changes:
+        :param stats:
+        :return:
+        """
         assert (len(asset_list) == 2)
         asset_total = AssetInfo.from_sum(asset_list)
         asset_list.append(asset_total)
@@ -82,6 +108,13 @@ class Monitor(threading.Thread):
         return msg
 
     def try_notify_asset_changes(self, asset_list, coin_changes, fiat_changes):
+        """
+        notify asset changes if proper; this should have no effect but possible emailing
+
+        :param fiat_changes:
+        :param coin_changes:
+        :param asset_list: asset info, including sumed
+        """
         now = time.time()
         if now - self.last_notifier_time >= config.emailing_interval_seconds:
             if abs(coin_changes) <= self.exceed_max:
@@ -92,11 +125,17 @@ class Monitor(threading.Thread):
                 except TemplateSyntaxError as e:
                     excepts.send_msg('wrong template, {}'.format(e), 'plain')
                 self.last_notifier_time = now
-            else:
-                # NOTE: do not deal with coin imbalance here
-                pass
 
     def _get_plt_price_list(self, catalog):
+        """
+        get the price list for platforms; the final price is sorted according to catalog. i.e.,
+
+        - if catalog is buy, x1<x2<...xn
+        - if catalog is sell, x1>x2>...xn
+
+        :param catalog: buy/sell
+        :return: list of (plt, price)
+        """
         if catalog == 'buy':
             with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
                 ask1_list = list(executor.map(lambda plt: plt.ask1(), self.plt_list))
@@ -109,6 +148,13 @@ class Monitor(threading.Thread):
             return sorted(pack, key=itemgetter(1), reverse=True)
 
     def coin_keeper(self, coin_change_amount, is_last):
+        """
+        keeps the coin amount to be within an allowed range; if exceed range, determine catalog and do adjust trade
+
+        :param coin_change_amount: unbalanced coin amount
+        :param is_last: True/False; if True, always do adjust when found unbalanced
+        :return: whether the coin has been kept balanced
+        """
         # only when exceeds
         if coin_change_amount > Monitor.exceed_max:
             if is_last:  # make sure will sell
@@ -155,6 +201,12 @@ class Monitor(threading.Thread):
         return adjust_status
 
     def adjust_trade(self, trade_catalog, coin_change_amount):
+        """
+        calculate each platform's price, and trade with a adjusted value; return value tells succeed or not
+        :param trade_catalog: bug/sell
+        :param coin_change_amount: biased coin amount
+        :return: True/False
+        """
         adjust_status = True
         Monitor._logger.warning(
             '[M] exceed_counter={}, amount={}'.format(self.coin_exceed_counter, coin_change_amount))
@@ -179,6 +231,16 @@ class Monitor(threading.Thread):
         return adjust_status
 
     def asset_update_handler(self, is_last):
+        """
+        general handler for asset update, do the following things:
+
+        * keep coin amount fixed
+        * if asset changed, log asset and changes
+        * possible emailing
+        * update old changes
+        :param is_last: when True always process an adjust
+        :return: whether coin keeper succeeds
+        """
         # handle coin changes
         with common.MUTEX:
             Monitor._logger.debug('[M] LOCK acquired')
@@ -193,6 +255,7 @@ class Monitor(threading.Thread):
                         self.old_fiat_changes - fiat_changes) > config.MINOR_DIFF:
             self.report_asset(asset_list)
             self.report_asset_changes(coin_changes, fiat_changes)
+        # possible emailing
         self.try_notify_asset_changes(asset_list, coin_changes, fiat_changes)
         # update old
         self.old_coin_changes = coin_changes
@@ -200,6 +263,9 @@ class Monitor(threading.Thread):
         return status
 
     def run(self, *args, **kwargs):
+        """
+        thread entry; while loop run; when exit loop, ensure that the coin amount is still fixed
+        """
         # initialize asset
         self.original_asset_list = self.get_asset_list()
         self.report_asset(self.original_asset_list)
@@ -223,11 +289,13 @@ class Monitor(threading.Thread):
 
 
 if __name__ == '__main__':
+    log_helper.init_logger()
     okcoin_cn = OKCoinCN()
     huobi = HuoBi()
     plt_list = [okcoin_cn, huobi]
     stats = Statistics()
     monitor = Monitor(plt_list, stats)
     asset_list = monitor.get_asset_list()
-    msg = monitor.asset_message_render(asset_list, 3.0, 4.0, stats)
-    excepts.send_msg(msg, 'html')
+    monitor.report_asset(asset_list)
+    # msg = monitor.asset_message_render(asset_list, 3.0, 4.0, stats)
+    # excepts.send_msg(msg, 'html')

@@ -18,8 +18,10 @@ INVALID_ORDER_ID = -1
 
 INVALID_INDEX = -1
 
-# FIXME seems still may fail for huobi
-ADJUST_PERCENTAGE = 0.0095
+# FIXME huobi requires that 0.1btc transaction cannot overrange 1%
+# both used for consumer/monitor
+ADJUST_PERCENTAGE = 0.04
+
 ASSET_WAIT_MAX = 3
 ASSET_FOR_TRAID_DIFF = 0.0005
 
