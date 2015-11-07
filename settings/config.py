@@ -60,7 +60,7 @@ AVOID_TIMEOUT = True
 ####################################################################
 
 emailing_interval_seconds = 3600
-ADJUST_NUM = int((emailing_interval_seconds / 3600.0) * 8)
+ADJUST_NUM = int((emailing_interval_seconds / 3600.0) * 10)
 
 monitor_fail_max = 2
 
@@ -69,7 +69,7 @@ exceed_max_dict = {
     'ltc': 0.01
 }
 upper_bound = {
-    'btc': 1.0,
+    'btc': 0.8,
     'ltc': 30
 }
 
@@ -79,14 +79,14 @@ grid_cancel_all = True
 grid_sleep_seconds = 1.0
 
 # sleep seconds, to avoid API too frequently
-sleep_seconds = 0.2
+sleep_seconds = 0.4
 
 # Semantics: when Pa.ask1 + diff_dict[Pa][Pb] <= Pb.bid1, (buy at Pa, sell at Pb)
 # NOTE: if price(Pa) > price(Pb) for most of the time, it's more likely to (sell at Pa, buy at Pb);
 # we should make btc_diff_dict[Pa][Pb] < diff_dict[Pb][Pa] so that (buy at Pa, sell at Pb) will be easier
 btc_diff_dict = {
     'BitBays': {
-        'CHBTC': 0.45, 'HuoBi': 0.48, 'OKCoinCN': 0.45
+        'CHBTC': 0.45, 'HuoBi': 0.75, 'OKCoinCN': 0.45
     },
     'CHBTC': {
         'BitBays': 0.45, 'HuoBi': 0.75, 'OKCoinCN': 0.75
@@ -95,7 +95,7 @@ btc_diff_dict = {
         'BitBays': 0.45, 'CHBTC': 0.75, 'HuoBi': 0.75
     },
     'HuoBi': {
-        'BitBays': 0.48, 'CHBTC': 0.00, 'OKCoinCN': 0.00
+        'BitBays': 0.75, 'CHBTC': 0.00, 'OKCoinCN': 0.00
     }
 }
 

@@ -39,7 +39,7 @@ Emailing:
 #    username: cc_hongxuchen@outlook.com
 #    server: localhost
     username: chenhx.666@163.com
-    password: V2BAZRB2chenhx
+    password: fdfsdf4fcn2
     server: smtp.163.com
     receivers:
         - leftcopy.chx@gmail.com
