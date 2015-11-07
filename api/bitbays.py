@@ -4,9 +4,7 @@ import hashlib
 import hmac
 import urllib
 import time
-
 import requests
-
 from utils import excepts, plt_helper
 from utils import log_helper
 from api.plt import Platform
@@ -88,7 +86,7 @@ class BitBays(Platform):
                     raise excepts.InvalidNonceError(
                         'InvalidNonceError: {}, current_nonce={}'.format(msg, params['nonce']))
                 if msg.startswith("Rate Limit Exceeded"):
-                    raise excepts.RateExceedError("Rate Exceeded for api_type={}".format(api_type))
+                    raise excepts.RateExceedError("BitBays: Rate Exceeded for api_type={}".format(api_type))
                 else:
                     BitBays._logger.critical(
                         'ERROR: api_type={}, error_message={}'.format(api_type, msg))

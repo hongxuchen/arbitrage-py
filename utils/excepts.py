@@ -71,7 +71,7 @@ def is_retry_exception(exception):
 
 def handle_exit(error):
     utils.log_helper.get_logger().critical('Error during request:"{}", will EXIT'.format(error))
-    send_msg('error during request: {}'.format(error), 'plain')
+    send_msg('{}'.format(error), 'plain')
     traceback.print_exc(file=sys.stdout)
     # noinspection PyProtectedMember
     os._exit(1)
