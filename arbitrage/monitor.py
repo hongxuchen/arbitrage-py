@@ -1,21 +1,19 @@
 #!/usr/bin/env python
-from jinja2.exceptions import TemplateSyntaxError
-from operator import itemgetter
 import threading
 import time
+from operator import itemgetter
 
-import jinja2
 import concurrent.futures
-from arbitrage.stats import Statistics
+import jinja2
+from jinja2.exceptions import TemplateSyntaxError
 
-from settings import config
-from utils.asset_info import AssetInfo
-from utils import (common, plt_helper)
-from utils import excepts
-from utils import log_helper
 from api.huobi import HuoBi
 from api.okcoin import OKCoinCN
+from arbitrage.stats import Statistics
+from settings import config
 from trader import Trader
+from utils import (common, plt_helper, excepts, log_helper)
+from utils.asset_info import AssetInfo
 
 
 class Monitor(threading.Thread):

@@ -4,10 +4,9 @@ import os
 
 import yaml
 
-from settings import config
-
 import utils.excepts
 import utils.log_helper
+from settings import config
 
 
 def _display(k):

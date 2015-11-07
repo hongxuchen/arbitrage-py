@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 
-import time
 import threading
+import time
 
 import concurrent.futures
 
-from utils.asset_info import AssetInfo
-from settings import config
 from arbitrage.adjuster import Adjuster
 from arbitrage.trader import Trader
+from settings import config
 from utils import common, plt_helper, log_helper, excepts
+from utils.asset_info import AssetInfo
 
 
 class Producer(threading.Thread):

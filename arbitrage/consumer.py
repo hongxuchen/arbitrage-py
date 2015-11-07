@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 
 from __future__ import print_function
-from Queue import Empty
+
 import threading
 import time
+from Queue import Empty
 
 from api.bitbays import BitBays
-from settings import config
-from utils import common
-from utils import log_helper
 from api.okcoin import OKCoinCN
+from settings import config
+from utils import (common, log_helper)
 
 
 class Consumer(threading.Thread):

@@ -1,17 +1,18 @@
 #!/usr/bin/env python
+
 from __future__ import print_function
+
+import sys
+import time
+import traceback
 from pprint import pprint
 
-import time
-import sys
-import traceback
 from api.okcoin import OKCoinCN
-
-from utils.asset_info import AssetInfo
-from utils import common
 from settings import config
 from slot import GridOrder, GridSlot
+from utils import common
 from utils import log_helper
+from utils.asset_info import AssetInfo
 
 
 class Grid(object):

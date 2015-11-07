@@ -1,20 +1,22 @@
 #!/usr/bin/env python
 
 from __future__ import print_function
+
+import time
+
+import concurrent.futures
 import jinja2
 from jinja2.exceptions import TemplateSyntaxError
-import time
-import concurrent.futures
-from api.bitbays import BitBays
+
+import utils.excepts
 from api.huobi import HuoBi
+from api.okcoin import OKCoinCN
 from arbitrage.stats import Statistics
 from settings import config
-from utils import log_helper
-from utils import common
-from api.okcoin import OKCoinCN
 from trader import Trader
+from utils import common
+from utils import log_helper
 from utils.asset_info import AssetInfo
-import utils.excepts
 
 
 class Adjuster(object):

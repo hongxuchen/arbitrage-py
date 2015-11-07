@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 
-from email.mime.text import MIMEText
 import os
 import smtplib
+import sys
 import time
 import traceback
-import sys
-import requests.exceptions as req_except
 import urllib3.exceptions as urllib3_except
+from email.mime.text import MIMEText
+
+import requests.exceptions as req_except
 
 import utils.log_helper
 import utils.plt_helper

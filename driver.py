@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
+from api.bitbays import BitBays
 from api.chbtc import CHBTC
 from api.huobi import HuoBi
 from api.itbit import ItBitAPI
+from api.okcoin import OKCoinCN
+from arbitrage import monitor, consumer, producer
 from arbitrage.stats import Statistics
 from utils import log_helper, plt_helper
-from api.okcoin import OKCoinCN
-from api.bitbays import BitBays
-from arbitrage import monitor, consumer, producer
 
 select_plt_dict = {
     'OKCoinCN': OKCoinCN,

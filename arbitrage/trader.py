@@ -1,7 +1,8 @@
 #!/usr/bin/env python
-from utils.asset_info import AssetInfo
+
 from settings import config
 from utils import log_helper, common
+from utils.asset_info import AssetInfo
 from utils.order_info import PlatformOrderInfo
 
 
