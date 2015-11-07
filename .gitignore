@@ -112,4 +112,5 @@ crashlytics-build.properties
 *.dat
 *.log
 /log/
+*/log/
 *~
