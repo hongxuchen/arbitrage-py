@@ -76,8 +76,7 @@ class BitBays(Platform):
             # try:
             res_data = r.json()
             if res_data is None or res_data is {}:
-                raise excepts.NULLResponseError(
-                    'NULLResponseError: Response is empty for api_type={}'.format(api_type))
+                raise excepts.NULLResponseError('Response is empty for api_type={}'.format(api_type))
             result = res_data['result']
             # TODO check other api_type fail
             if result is None:

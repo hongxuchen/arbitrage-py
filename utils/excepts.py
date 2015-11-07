@@ -15,41 +15,43 @@ import utils.plt_helper
 from settings import config
 
 
+# bitbays
 class InvalidNonceError(Exception):
     def __init__(self, message):
         super(InvalidNonceError, self).__init__(message)
 
 
+# bitbays
 class RateExceedError(Exception):
     def __init__(self, message):
         super(RateExceedError, self).__init__(message)
 
 
+# okcoin, bitbays
 class NULLResponseError(Exception):
     def __init__(self, message):
         super(NULLResponseError, self).__init__(message)
 
 
+# huobi
 class HuoBiError(Exception):
     def __init__(self, msg):
         super(HuoBiError, self).__init__(msg)
 
 
+# huobi
 class HuoBiExitError(Exception):
     def __init__(self, msg):
         super(HuoBiExitError, self).__init__(msg)
 
 
-class HuoBiIgnoreError(Exception):
-    def __init__(self, msg):
-        super(HuoBiIgnoreError, self).__init__(msg)
-
-
+# chbtc
 class CHBTCExitError(Exception):
     def __init__(self, msg):
         super(CHBTCExitError, self).__init__(msg)
 
 
+# chbtc
 class CHBTCRetryError(Exception):
     def __init__(self, msg):
         super(CHBTCRetryError, self).__init__(msg)

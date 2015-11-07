@@ -3,9 +3,7 @@
 from __future__ import print_function
 import hashlib
 from pprint import pprint
-
 import requests
-
 from utils.order_info import PlatformOrderInfo
 from utils import log_helper, plt_helper, common, excepts
 from api.plt import Platform
@@ -68,8 +66,7 @@ class OKCoinAPI(Platform):
                 res = r.json()
                 # OKCoinAPI._logger.warning('response={}'.format(res))
                 if res is None or res is {}:
-                    raise excepts.NULLResponseError(
-                        'NULLResponseError: Response is empty/{} for api_type={}'.format(api_type))
+                    raise excepts.NULLResponseError('Response is empty for api_type={}'.format(api_type))
                 return res
             except ValueError as ee:
                 err_msg = 'msg: OKCoin parse json error "{}" for api_type={}, response={}'.format(ee, api_type, r)
