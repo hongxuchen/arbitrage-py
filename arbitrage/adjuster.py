@@ -4,9 +4,7 @@ from __future__ import print_function
 import jinja2
 from jinja2.exceptions import TemplateSyntaxError
 import time
-
 import concurrent.futures
-
 from api.bitbays import BitBays
 from api.huobi import HuoBi
 from arbitrage.stats import Statistics
@@ -16,7 +14,6 @@ from utils import common
 from api.okcoin import OKCoinCN
 from trader import Trader
 from utils.asset_info import AssetInfo
-
 import utils.excepts
 
 
@@ -157,13 +154,12 @@ class Adjuster(object):
 
     @staticmethod
     def try_notify_abnormal(plt_list, stats):
-        if stats.adjust_num > config.ADJUST_NUM:
+        if stats.arbitrage_num * config.ADJUST_RATIO < stats.adjust_num:
             with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
                 assets = executor.map(lambda plt: AssetInfo.from_api(plt), plt_list)
             asset_list = list(assets)
             jinja2_env = jinja2.Environment(loader=jinja2.FileSystemLoader(config.res_dir), trim_blocks=True)
-            msg = jinja2_env.get_template(config.abnormal_file).render(asset_list=asset_list,
-                                                                       adjust_num=config.ADJUST_NUM)
+            msg = jinja2_env.get_template(config.abnormal_file).render(asset_list=asset_list, stats=stats)
             try:
                 utils.excepts.send_msg(msg, 'html')
             except TemplateSyntaxError as e:
@@ -176,6 +172,7 @@ if __name__ == '__main__':
     plt_list = [okcoin, hb]
     stats = Statistics()
     stats.adjust_num = 12
+    stats.arbitrage_num = 20
     Adjuster.try_notify_abnormal(plt_list, stats)
     # ok_trade = Trader(okcoin, 'buy', 10, 0.01)
     # bb_trade = Trader(bitbays, 'sell', 10000, 0.01)

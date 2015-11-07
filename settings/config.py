@@ -60,7 +60,7 @@ AVOID_TIMEOUT = True
 ####################################################################
 
 emailing_interval_seconds = 3600
-ADJUST_NUM = int((emailing_interval_seconds / 3600.0) * 10)
+ADJUST_RATIO = 0.4
 
 monitor_fail_max = 2
 
