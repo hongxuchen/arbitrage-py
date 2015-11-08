@@ -2,9 +2,7 @@
 
 import threading
 import time
-
 import concurrent.futures
-
 from arbitrage.adjuster import Adjuster
 from arbitrage.trader import Trader
 from settings import config
@@ -49,7 +47,7 @@ class Producer(threading.Thread):
         for trader in trade_pair:
             trade_str += str(trader) + '\n'
         err_msg = 'msg: Found non-existent Order ID Error\n' + asset_str + '\n' + trade_str
-        excepts.send_msg(err_msg, 'plain')
+        excepts.send_msg(err_msg, 'Error', 'plain')
 
     @staticmethod
     def process_trade(trade_pair):

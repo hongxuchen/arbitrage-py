@@ -18,7 +18,7 @@ INVALID_ORDER_ID = -1
 
 INVALID_INDEX = -1
 
-# FIXME huobi requires that 0.1btc transaction cannot overrange 1%
+# FIXME huobi requires that 0.1btc transaction cannot overrange 0.01
 # both used for consumer/monitor
 ADJUST_PERCENTAGE = 0.04
 
@@ -61,6 +61,8 @@ AVOID_TIMEOUT = True
 
 ####################################################################
 
+# TODO should specify queue size
+
 emailing_interval_seconds = 3600
 ADJUST_RATIO = 0.4
 
@@ -71,7 +73,7 @@ exceed_max_dict = {
     'ltc': 0.01
 }
 upper_bound = {
-    'btc': 0.8,
+    'btc': 0.6,
     'ltc': 30
 }
 
@@ -81,23 +83,23 @@ grid_cancel_all = True
 grid_sleep_seconds = 1.0
 
 # sleep seconds, to avoid API too frequently
-sleep_seconds = 0.4
+sleep_seconds = 1.0
 
 # Semantics: when Pa.ask1 + diff_dict[Pa][Pb] <= Pb.bid1, (buy at Pa, sell at Pb)
 # NOTE: if price(Pa) > price(Pb) for most of the time, it's more likely to (sell at Pa, buy at Pb);
 # we should make btc_diff_dict[Pa][Pb] < diff_dict[Pb][Pa] so that (buy at Pa, sell at Pb) will be easier
 btc_diff_dict = {
     'BitBays': {
-        'CHBTC': 0.45, 'HuoBi': 0.75, 'OKCoinCN': 0.45
+        'CHBTC': 0.45, 'HuoBi': 2.0, 'OKCoinCN': 2.0
     },
     'CHBTC': {
         'BitBays': 0.45, 'HuoBi': 0.75, 'OKCoinCN': 0.75
     },
     'OKCoinCN': {
-        'BitBays': 0.45, 'CHBTC': 0.75, 'HuoBi': 0.75
+        'BitBays': 2.0, 'CHBTC': 0.75, 'HuoBi': 0.75
     },
     'HuoBi': {
-        'BitBays': 0.75, 'CHBTC': 0.00, 'OKCoinCN': 0.00
+        'BitBays': 2.0, 'CHBTC': 0.00, 'OKCoinCN': 0.00
     }
 }
 

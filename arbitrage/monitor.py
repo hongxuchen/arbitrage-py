@@ -107,7 +107,7 @@ class Monitor(threading.Thread):
         stats.reset()
         return msg
 
-    def try_notify_asset_changes(self, asset_list, coin_changes, fiat_changes):
+    def try_notify_asset_changes(self, asset_list, coin_changes, fiat_changes, is_last):
         """
         notify asset changes if proper; this should have no effect but possible emailing
 
@@ -116,14 +116,17 @@ class Monitor(threading.Thread):
         :param asset_list: asset info, including sumed
         """
         now = time.time()
-        if now - self.last_notifier_time >= config.emailing_interval_seconds:
+        if is_last or now - self.last_notifier_time >= config.emailing_interval_seconds:
             if abs(coin_changes) <= self.exceed_max:
                 Monitor._logger.info('notifying asset changes via email')
                 report = self.asset_message_render(asset_list, coin_changes, fiat_changes, self.stats)
                 try:
-                    excepts.send_msg(report, 'html')
+                    if is_last:
+                        excepts.send_msg(report, 'summary', 'html')
+                    else:
+                        excepts.send_msg(report, 'terminate', 'html')
                 except TemplateSyntaxError as e:
-                    excepts.send_msg('wrong template, {}'.format(e), 'plain')
+                    excepts.send_msg('wrong template, {}'.format(e), 'Error', 'plain')
                 self.last_notifier_time = now
 
     def _get_plt_price_list(self, catalog):
@@ -193,6 +196,7 @@ class Monitor(threading.Thread):
             return True  # no trade
         # keeper
         self.stats.monitor_num += 1
+        self._logger.warning('statistics: {}'.format(self.stats))
         trade_amount = common.adjust_amount(coin_change_amount)
         adjust_status = self.adjust_trade(trade_catalog, trade_amount)
         # reset after trade
@@ -256,7 +260,7 @@ class Monitor(threading.Thread):
             self.report_asset(asset_list)
             self.report_asset_changes(coin_changes, fiat_changes)
         # possible emailing
-        self.try_notify_asset_changes(asset_list, coin_changes, fiat_changes)
+        self.try_notify_asset_changes(asset_list, coin_changes, fiat_changes, is_last)
         # update old
         self.old_coin_changes = coin_changes
         self.old_fiat_changes = fiat_changes
@@ -279,7 +283,7 @@ class Monitor(threading.Thread):
                 self.failed_counter += 1
                 if self.failed_counter > config.monitor_fail_max:
                     report = 'Monitor adjuster failed {} times'.format(self.failed_counter)
-                    excepts.send_msg(report, 'plain')
+                    excepts.send_msg(report, 'Error', 'plain')
         # last adjust
         # NOTE this strategy is fine only when exiting in the order: consumer->monitor
         last_adjust_status = self.asset_update_handler(True)
@@ -297,5 +301,3 @@ if __name__ == '__main__':
     monitor = Monitor(plt_list, stats)
     asset_list = monitor.get_asset_list()
     monitor.report_asset(asset_list)
-    # msg = monitor.asset_message_render(asset_list, 3.0, 4.0, stats)
-    # excepts.send_msg(msg, 'html')

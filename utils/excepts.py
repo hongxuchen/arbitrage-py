@@ -7,9 +7,7 @@ import time
 import traceback
 import urllib3.exceptions as urllib3_except
 from email.mime.text import MIMEText
-
 import requests.exceptions as req_except
-
 import utils.log_helper
 import utils.plt_helper
 from settings import config
@@ -73,7 +71,7 @@ def is_retry_exception(exception):
 
 def handle_exit(error):
     utils.log_helper.get_logger().critical('Error during request:"{}", will EXIT'.format(error))
-    send_msg('{}'.format(error), 'plain')
+    send_msg('{}'.format(error), 'ExitError', 'plain')
     traceback.print_exc(file=sys.stdout)
     # noinspection PyProtectedMember
     os._exit(1)
@@ -118,13 +116,13 @@ def handle_retry(exception, handler):
     # notifying
     msg = 'Request Exception "{}" after retrying {} times'.format(current_exception, config.RETRY_MAX)
     logger.critical(msg)
-    send_msg(msg, 'plain')
+    send_msg(msg, 'Error', 'plain')
     time.sleep(config.RETRY_SLEEP_SECONDS)
     # retry
     return handle_retry(current_exception, handler)
 
 
-def send_msg(report, msg_type):
+def send_msg(report, notification_type, msg_type):
     emailing_info = utils.plt_helper.get_key_from_data('Emailing')
     server = emailing_info['server']
     username = emailing_info['username']
@@ -135,7 +133,7 @@ def send_msg(report, msg_type):
     receivers = emailing_info['receivers']
     msg = MIMEText(report, msg_type, _charset='utf-8')
     client_id = utils.plt_helper.get_key_from_data('ClientID')
-    subject = 'Arbitrage for {}'.format(client_id)
+    subject = 'Arbitrage for {} ({})'.format(client_id, notification_type)
     msg['Subject'] = subject
     msg['From'] = sender
     msg['To'] = ', '.join(receivers)
@@ -156,4 +154,4 @@ def send_msg(report, msg_type):
 
 if __name__ == '__main__':
     utils.log_helper.init_logger()
-    send_msg("HELLOWORLD", 'plain')
+    send_msg("HELLOWORLD", 'summary', 'plain')
