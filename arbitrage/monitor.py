@@ -53,10 +53,12 @@ class Monitor(threading.Thread):
         asset_logger = log_helper.get_asset_logger()
         report_template = '{:10s} ' + Monitor.coin_type + '={:<10.4f}, cny={:<10.4f}'
         total_asset = AssetInfo.from_sum(asset_list)
-        asset_list.append(total_asset)
+        # TODO: currently haven't append "ALL"
         for asset in asset_list:
             plt_coin, plt_fiat = asset.total_coin(), asset.total_fiat()
             asset_logger.info(report_template.format(asset.plt_name, plt_coin, plt_fiat))
+        plt_coin, plt_fiat = total_asset.total_coin(), total_asset.total_fiat()
+        asset_logger.info(report_template.format(total_asset.plt_name, plt_coin, plt_fiat))
 
     # asset changes
 
@@ -96,6 +98,8 @@ class Monitor(threading.Thread):
         :param stats:
         :return:
         """
+        for asset in asset_list:
+            print(asset)
         assert (len(asset_list) == 2)
         asset_total = AssetInfo.from_sum(asset_list)
         asset_list.append(asset_total)
@@ -301,3 +305,5 @@ if __name__ == '__main__':
     monitor = Monitor(plt_list, stats)
     asset_list = monitor.get_asset_list()
     monitor.report_asset(asset_list)
+    msg = monitor.asset_message_render(asset_list, 3.0, 4.0, stats)
+    excepts.send_msg(msg, 'summary', 'html')
