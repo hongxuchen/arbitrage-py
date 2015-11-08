@@ -86,7 +86,7 @@ def handle_retry(exception, handler):
     """
     logger = utils.log_helper.get_logger()
     current_exception = exception
-    logger.error('RETRY for Exception: "{}"'.format(current_exception))
+    logger.exception('RETRY for Exception:\n{sep}\n{}\n{sep}'.format(current_exception, sep='*'*80))
     retry_counter = 0
     while retry_counter < config.RETRY_MAX:
         retry_counter += 1

@@ -126,9 +126,9 @@ class Monitor(threading.Thread):
                 report = self.asset_message_render(asset_list, coin_changes, fiat_changes, self.stats)
                 try:
                     if is_last:
-                        excepts.send_msg(report, 'summary', 'html')
+                        excepts.send_msg(report, 'final', 'html')
                     else:
-                        excepts.send_msg(report, 'terminate', 'html')
+                        excepts.send_msg(report, 'summary', 'html')
                 except TemplateSyntaxError as e:
                     excepts.send_msg('wrong template, {}'.format(e), 'Error', 'plain')
                 self.last_notifier_time = now

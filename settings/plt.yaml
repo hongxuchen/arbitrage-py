@@ -43,5 +43,5 @@ Emailing:
     server: smtp.163.com
     receivers:
         - leftcopy.chx@gmail.com
-#        - 409085788@qq.com
-        - hongxuchen@outlook.com
+        - 409085788@qq.com
+        # - hongxuchen@outlook.com
