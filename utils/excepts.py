@@ -77,6 +77,7 @@ def handle_exit(error):
     os._exit(1)
 
 
+# TODO indicate current platform
 def handle_retry(exception, handler):
     """
     # NOTE: this handling may be blocked OR not blocked
@@ -86,7 +87,8 @@ def handle_retry(exception, handler):
     """
     logger = utils.log_helper.get_logger()
     current_exception = exception
-    logger.exception('RETRY for Exception:\n{sep}\n{}\n{sep}'.format(current_exception, sep='*'*80))
+    # logger.exception('RETRY for Exception:\n{sep}\n{}\n{sep}'.format(current_exception, sep='*' * 80))
+    logger.error('RETRY for "{}": {}'.format(type(current_exception).__name__, current_exception))
     retry_counter = 0
     while retry_counter < config.RETRY_MAX:
         retry_counter += 1
