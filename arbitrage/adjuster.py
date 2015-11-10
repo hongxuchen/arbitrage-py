@@ -160,7 +160,7 @@ class Adjuster(object):
             jinja2_env = jinja2.Environment(loader=jinja2.FileSystemLoader(config.res_dir), trim_blocks=True)
             msg = jinja2_env.get_template(config.abnormal_file).render(asset_list=asset_list, stats=stats)
             try:
-                utils.excepts.send_msg(msg, 'summary', 'html')
+                utils.excepts.send_msg(msg, 'Abnormal', 'html')
             except TemplateSyntaxError as e:
                 utils.excepts.send_msg("wrong template, {}".format(e), 'Error', 'plain')
 

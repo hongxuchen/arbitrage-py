@@ -20,7 +20,7 @@ INVALID_INDEX = -1
 
 # FIXME huobi requires that 0.1btc transaction cannot overrange 0.01
 # both used for consumer/monitor
-ADJUST_PERCENTAGE = 0.04
+ADJUST_PERCENTAGE = 0.0085
 
 ASSET_WAIT_MAX = 3
 ASSET_FOR_TRAID_DIFF = 0.0005
@@ -32,7 +32,7 @@ RETRY_MAX = 80
 RETRY_SLEEP_SECONDS = 10
 RATE_EXCEED_SLEEP_SECONDS = 1
 
-COIN_EXCEED_TIMES = 2
+COIN_EXCEED_TIMES = 3
 
 # CONFIG
 # upper_bound must > lower_bound for all platforms
@@ -73,7 +73,7 @@ exceed_max_dict = {
     'ltc': 0.01
 }
 upper_bound = {
-    'btc': 0.6,
+    'btc': 0.4,
     'ltc': 30
 }
 
@@ -96,10 +96,10 @@ btc_diff_dict = {
         'BitBays': 0.45, 'HuoBi': 0.75, 'OKCoinCN': 0.75
     },
     'OKCoinCN': {
-        'BitBays': 2.0, 'CHBTC': 0.75, 'HuoBi': 0.75
+        'BitBays': 2.0, 'CHBTC': 0.75, 'HuoBi': 1.5
     },
     'HuoBi': {
-        'BitBays': 2.0, 'CHBTC': 0.00, 'OKCoinCN': 0.00
+        'BitBays': 2.0, 'CHBTC': 0.00, 'OKCoinCN': 1.5
     }
 }
 

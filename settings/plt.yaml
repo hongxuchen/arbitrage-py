@@ -27,7 +27,7 @@ CHBTC:
 
 Available: [OKCoinCN, BitBays, HuoBi, CHBTC]
 
-Enabled: [HuoBi, BitBays]
+Enabled: [HuoBi, OKCoinCN]
 
 Enable_Adjuster: True
 
