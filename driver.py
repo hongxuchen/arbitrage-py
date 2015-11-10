@@ -1,21 +1,15 @@
 #!/usr/bin/env python
 
-from api.bitbays import BitBays
-from api.chbtc import CHBTC
-from api.huobi import HuoBi
-from api.itbit import ItBitAPI
-from api.okcoin import OKCoinCN
 from arbitrage import monitor, consumer, producer
 from arbitrage.stats import Statistics
 from utils import log_helper, plt_helper
-
-select_plt_dict = {
-    'OKCoinCN': OKCoinCN,
-    'BitBays': BitBays,
-    'ItBit': ItBitAPI,
-    'HuoBi': HuoBi,
-    'CHBTC': CHBTC
-}
+# FIXME it's better to import dynamically
+# noinspection PyUnresolvedReferences
+from api.bitbays import BitBays
+# noinspection PyUnresolvedReferences
+from api.huobi import HuoBi
+# noinspection PyUnresolvedReferences
+from api.okcoin import OKCoinCN
 
 try:
     # noinspection PyPep8Naming
@@ -34,7 +28,7 @@ class Driver(object):
     def __init__(self):
         log_helper.init_logger()
         enabled_plt = plt_helper.get_key_from_data('Enabled')
-        self.plt_list = [select_plt_dict[plt]() for plt in enabled_plt]
+        self.plt_list = [eval(plt)() for plt in enabled_plt]
         self.adjuster_enabled = plt_helper.get_key_from_data('Enable_Adjuster')
         stats = Statistics()
         if self.adjuster_enabled:

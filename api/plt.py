@@ -9,6 +9,10 @@ class Platform(object):
         self.domain = info['domain']
         self.key = None
 
+    @property
+    def plt_name(self):
+        return self.__class__.__name__
+
     def ask1(self):
         """
         :return: ask1 price

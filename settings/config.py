@@ -1,11 +1,11 @@
-# coding=utf8
 import os
 
 root_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..')
 res_dir = os.path.join(root_dir, 'res')
 settings_dir = os.path.join(root_dir, 'settings')
 render_file = 'render.html'
-# TODO
+
+# TODO add abnormal.html
 abnormal_file = 'abnormal-zh.html'
 
 ####################################################################
@@ -20,7 +20,7 @@ INVALID_INDEX = -1
 
 # FIXME huobi requires that 0.1btc transaction cannot overrange 0.01
 # both used for consumer/monitor
-ADJUST_PERCENTAGE = 0.0085
+ADJUST_PERCENTAGE = 0.008
 
 ASSET_WAIT_MAX = 3
 ASSET_FOR_TRAID_DIFF = 0.0005
@@ -45,7 +45,9 @@ RETRY_SECONDS = 0.04
 
 AMOUNT_PERCENT = 1.0
 HUOBI_PRICE_PRECISION = 2
-TRADE_PRECISION = 4
+
+# TODO: OKCoin only supports 3; but bitbays and huobi supports 4
+TRADE_PRECISION = 3
 
 ####################################################################
 

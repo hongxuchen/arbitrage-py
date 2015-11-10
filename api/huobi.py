@@ -20,6 +20,7 @@ class HuoBi(Platform):
         'data_domain': 'http://api.huobi.com/staticmarket',
         'fiat': 'cny'
     }
+    data_domain = plt_info['data_domain']
     coin_type_map = {
         'btc': 1,
         'ltc': 2
@@ -35,7 +36,6 @@ class HuoBi(Platform):
         'ltc': 0.01
     }
     _logger = log_helper.get_logger()
-    data_domain = plt_info['data_domain']
     common_headers = {
         'user-agent': config.USER_AGENT,
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -78,21 +78,22 @@ class HuoBi(Platform):
                 r = requests.post(self.domain, params=param_dict, headers=HuoBi.common_headers,
                                   timeout=config.REQUEST_TIMEOUT)
                 res_data = r.json()
+                # deal with exceptions
                 if 'code' in res_data and res_data['code'] != 0:
                     code = res_data['code']
                     msg = res_data['msg']
                     HuoBi._logger.error(u'HuoBi Error: code={}, msg={}'.format(code, msg))
                     if code in [5, 7, 61, 63, 74]:
-                        raise excepts.HuoBiExitError('HuoBi Fatal Error: code={}, msg={}'.format(code, msg))
+                        raise excepts.HuoBiExitError(u'HuoBi Fatal Error: code={}, msg={}'.format(code, msg))
                     elif code == 71:
-                        raise excepts.RateExceedError("HuoBi Rate Exceed: code={}, msg={}".format(code, msg))
+                        raise excepts.RateExceedError(u'HuoBi Rate Exceed: code={}, msg={}'.format(code, msg))
                     elif code == 1:
-                        raise excepts.HuoBiError('HuoBi Unknown Error: code={}, msg={}'.format(code, msg))
+                        raise excepts.HuoBiError(u'HuoBi Unknown Error: code={}, msg={}'.format(code, msg))
             try:
                 res_data = r.json()
                 return res_data
             except ValueError as ee:
-                err_msg = 'msg: HuoBi parse json error "{}" for api_uri={}, response={}'.format(ee, api_uri, r)
+                err_msg = u'msg: HuoBi parse json error "{}" for api_uri={}, response={}'.format(ee, api_uri, r)
                 excepts.handle_exit(err_msg)
 
         try:
