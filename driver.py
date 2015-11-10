@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from arbitrage import monitor, consumer, producer
+from arbitrage.recollect import Recollector
 from arbitrage.stats import Statistics
 from utils import log_helper, plt_helper
 # FIXME it's better to import dynamically
@@ -17,6 +18,7 @@ try:
 except ImportError:
     # noinspection PyUnresolvedReferences
     import queue
+
 try:
     # noinspection PyShadowingBuiltins
     input = raw_input
@@ -31,13 +33,14 @@ class Driver(object):
         self.plt_list = [eval(plt)() for plt in enabled_plt]
         self.adjuster_enabled = plt_helper.get_key_from_data('Enable_Adjuster')
         stats = Statistics()
+        recollector = Recollector()
         if self.adjuster_enabled:
             self.adjuster_queue = queue.Queue()
-            self.producer = producer.Producer(self.plt_list, self.adjuster_queue, stats)
+            self.producer = producer.Producer(self.plt_list, self.adjuster_queue, stats, recollector)
             self.consumer = consumer.Consumer(self.adjuster_queue, stats)
         else:
-            self.producer = producer.Producer(self.plt_list, None, stats)
-        self.monitor = monitor.Monitor(self.plt_list, stats)
+            self.producer = producer.Producer(self.plt_list, None, stats, recollector)
+        self.monitor = monitor.Monitor(self.plt_list, stats, recollector)
         self.running = False
 
     def start_trade(self):

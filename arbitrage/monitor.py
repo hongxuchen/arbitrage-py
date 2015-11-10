@@ -2,9 +2,11 @@
 import threading
 import time
 from operator import itemgetter
+
 import concurrent.futures
 import jinja2
 from jinja2.exceptions import TemplateSyntaxError
+
 from api.huobi import HuoBi
 from api.okcoin import OKCoinCN
 from arbitrage.stats import Statistics
@@ -19,7 +21,7 @@ class Monitor(threading.Thread):
     coin_type = plt_helper.get_key_from_data('CoinType')
     exceed_max = config.exceed_max_dict[coin_type]
 
-    def __init__(self, plt_list, stats):
+    def __init__(self, plt_list, stats, recollector):
         super(Monitor, self).__init__()
         self.plt_list = plt_list
         self.original_asset_list = []
@@ -30,6 +32,7 @@ class Monitor(threading.Thread):
         self.failed_counter = 0
         self.last_notifier_time = time.time()
         self.stats = stats
+        self.recollector = recollector
 
     # asset
 
@@ -255,6 +258,8 @@ class Monitor(threading.Thread):
             asset_list = self.get_asset_list()
             Monitor._logger.debug('[M] asset_list obtained')
             coin_changes, fiat_changes = self.get_asset_changes(asset_list)
+            self.recollector.push_back(coin_changes)
+            Monitor._logger.debug("recollect: coin_changes={}".format(coin_changes))
             status = self.coin_keeper(coin_changes, is_last)
         Monitor._logger.debug('[M] LOCK released')
         # report

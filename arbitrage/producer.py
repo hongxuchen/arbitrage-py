@@ -2,7 +2,9 @@
 
 import threading
 import time
+
 import concurrent.futures
+
 from arbitrage.adjuster import Adjuster
 from arbitrage.trader import Trader
 from settings import config
@@ -16,7 +18,7 @@ class Producer(threading.Thread):
     diff_dict = config.diff_dict[coin_type]
 
     # stateless
-    def __init__(self, plt_list, adjuster_queue, stats):
+    def __init__(self, plt_list, adjuster_queue, stats, recollector):
         super(Producer, self).__init__()
         self.plt_list = plt_list
         if adjuster_queue is not None:
@@ -27,6 +29,7 @@ class Producer(threading.Thread):
         self.running = False
         self.min_amount = max(plt_list[0].lower_bound, plt_list[1].lower_bound)
         self.stats = stats
+        self.recollector = recollector
 
     def run(self):
         while self.running:
@@ -134,7 +137,7 @@ class Producer(threading.Thread):
         """
 
         def get_plt_name(plt):
-            return plt.__class__.__name__
+            return plt.plt_name
 
         ask_a, bid_b = ask_list[i], bid_list[1 - i]
         plt_name_a, plt_name_b = get_plt_name(self.plt_list[i]), get_plt_name(self.plt_list[1 - i])
@@ -143,6 +146,7 @@ class Producer(threading.Thread):
         if ask_a[0] + arbitrage_diff < bid_b[0]:
             self.stats.trade_chance += 1
             Producer._logger.debug('[P] Arbitrage chance: {} {}'.format(ask_a, bid_b))
+
             with common.MUTEX:
                 Producer._logger.debug('[P] LOCK acquired')
                 self.arbitrage_impl(i, ask_list[i], bid_list[1 - i])
@@ -159,7 +163,11 @@ class Producer(threading.Thread):
 
         ask_list = [info[length / 2 - 1] for info in info_list]
         bid_list = [info[length / 2] for info in info_list]
-
+        # FIXME redundant for CoinType
+        if not self.recollector.balanced(plt_helper.get_key_from_data("CoinType")):
+            Producer._logger.debug('[P] wait for ImBalanced')
+            self.stats.wait_imbalanced += 1
+            return False
         for i in range(2):
             if self.try_arbitrage(ask_list, bid_list, i):
                 return True

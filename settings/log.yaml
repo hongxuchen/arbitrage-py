@@ -18,7 +18,7 @@ handlers:
   tracker_file:
     class: logging.handlers.TimedRotatingFileHandler
     formatter: trackerFormatter
-    level: INFO
+    level: DEBUG
     filename: log/tracker.log
     when: midnight
     backupCount: 7
@@ -31,7 +31,7 @@ handlers:
 
 loggers:
   logger:
-    level: INFO
+    level: DEBUG
     handlers: [tracker_file]
     propagate: yes
   asset_logger:

@@ -62,3 +62,25 @@
     1. Consumer取消之前有新交易，导致剩余数量没有及时更新(即AAA)
     1. Consumer在尝试两个平台的调整交易之后均失败(即BBB)
 2. 适时更新UI资产显示
+
+
+Traceback (most recent call last):
+  File "/Users/hongxu/Dropbox/FinTech/trade/api/okcoin.py", line 76, in _setup_request
+    response_data = _request_impl()
+  File "/Users/hongxu/Dropbox/FinTech/trade/api/okcoin.py", line 57, in _request_impl
+    timeout=config.REQUEST_TIMEOUT, verify=True)
+  File "/Library/Python/2.7/site-packages/requests/api.py", line 49, in request
+    response = session.request(method=method, url=url, **kwargs)
+  File "/Library/Python/2.7/site-packages/requests/sessions.py", line 461, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/Library/Python/2.7/site-packages/requests/sessions.py", line 573, in send
+    r = adapter.send(request, **kwargs)
+  File "/Library/Python/2.7/site-packages/requests/adapters.py", line 370, in send
+    timeout=timeout
+  File "/Library/Python/2.7/site-packages/requests/packages/urllib3/connectionpool.py", line 544, in urlopen
+    body=body, headers=headers)
+  File "/Library/Python/2.7/site-packages/requests/packages/urllib3/connectionpool.py", line 344, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=conn.timeout)
+  File "/Library/Python/2.7/site-packages/requests/packages/urllib3/connectionpool.py", line 314, in _raise_timeout
+    if 'timed out' in str(err) or 'did not complete (read)' in str(err):  # Python 2.6
+TypeError: __str__ returned non-string (type SysCallError)

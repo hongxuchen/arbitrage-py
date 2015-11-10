@@ -8,6 +8,7 @@ class Statistics(object):
     # noinspection PyAttributeOutsideInit
     def reset(self):
         self.trade_chance = 0
+        self.wait_imbalanced = 0
         self.insufficient_num = 0
         self.arbitrage_num = 0
         self.adjust_num = 0
