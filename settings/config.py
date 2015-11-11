@@ -32,7 +32,7 @@ RETRY_MAX = 80
 RETRY_SLEEP_SECONDS = 10
 RATE_EXCEED_SLEEP_SECONDS = 1
 
-COIN_EXCEED_TIMES = 3
+COIN_EXCEED_TIMES = 2
 
 # CONFIG
 # upper_bound must > lower_bound for all platforms

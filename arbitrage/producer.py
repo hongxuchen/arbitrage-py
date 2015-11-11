@@ -55,6 +55,7 @@ class Producer(threading.Thread):
         """
         inital trading, this guarantees that the asset is enough
         TODO: ensure this trade MUST succeed
+        :param trade_pair:
         :return:
         """
         Producer._logger.warning('[P] Arbitrage Start')
@@ -131,6 +132,9 @@ class Producer(threading.Thread):
         """
         arbitrage necssary condition
         ask_a, bid_b are of [price, amount]
+        :param i:
+        :param bid_list:
+        :param ask_list:
         :return:
         """
 

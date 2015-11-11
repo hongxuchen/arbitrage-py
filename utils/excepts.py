@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 import os
 import smtplib
@@ -70,7 +71,7 @@ def is_retry_exception(exception):
 
 
 def handle_exit(error):
-    utils.log_helper.get_logger().critical('Error during request:"{}", will EXIT'.format(error))
+    utils.log_helper.get_logger().critical(u'Error during request:"{}", will EXIT'.format(error))
     send_msg('{}'.format(error), 'ExitError', 'plain')
     traceback.print_exc(file=sys.stdout)
     # noinspection PyProtectedMember
@@ -88,13 +89,13 @@ def handle_retry(exception, handler):
     logger = utils.log_helper.get_logger()
     current_exception = exception
     # logger.exception('RETRY for Exception:\n{sep}\n{}\n{sep}'.format(current_exception, sep='*' * 80))
-    logger.error('RETRY for "{}": {}'.format(type(current_exception).__name__, current_exception))
+    logger.error(u'RETRY for "{}": {}'.format(type(current_exception).__name__, current_exception))
     retry_counter = 0
     while retry_counter < config.RETRY_MAX:
         retry_counter += 1
         # sleep
         if isinstance(current_exception, RateExceedError):
-            logger.error("RateExceedError, will sleep for {}s".format(config.RATE_EXCEED_SLEEP_SECONDS))
+            logger.error(u'RateExceedError, will sleep for {}s'.format(config.RATE_EXCEED_SLEEP_SECONDS))
             time.sleep(config.RATE_EXCEED_SLEEP_SECONDS)
         else:
             if retry_counter % 10 == 0:
@@ -103,7 +104,7 @@ def handle_retry(exception, handler):
                 time.sleep(config.RETRY_SECONDS)
         # retry
         try:
-            logger.warning('retry_counter={:<2}'.format(retry_counter))
+            logger.warning(u'retry_counter={:<2}'.format(retry_counter))
             res = handler()  # real handle function
             # logger.warning('res={}'.format(res))
             return res  # succeed
@@ -111,12 +112,12 @@ def handle_retry(exception, handler):
             if is_retry_exception(e):
                 # only log, do nothing
                 current_exception = e
-                logger.error('Exception during retrying:"{}", will RETRY'.format(current_exception))
+                logger.error(u'Exception during retrying:"{}", will RETRY'.format(current_exception))
                 continue
             else:
                 handle_exit(e)  # fail, exit
     # notifying
-    msg = 'Request Exception "{}" after retrying {} times'.format(current_exception, config.RETRY_MAX)
+    msg = u'Request Exception "{}" after retrying {} times'.format(current_exception, config.RETRY_MAX)
     logger.critical(msg)
     send_msg(msg, 'Error', 'plain')
     time.sleep(config.RETRY_SLEEP_SECONDS)
