@@ -14,7 +14,7 @@ class AssetInfo(object):
     @classmethod
     def from_api(cls, plt):
         asset_raw_list = plt.assets()
-        plt_name = plt.__class__.__name__
+        plt_name = plt.plt_name
         coin_type = plt.coin_type
         fiat, coin = asset_raw_list
         return cls(plt_name, coin_type, fiat, coin)

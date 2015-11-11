@@ -2,9 +2,7 @@
 
 import threading
 import time
-
 import concurrent.futures
-
 from arbitrage.adjuster import Adjuster
 from arbitrage.trader import Trader
 from settings import config
@@ -136,11 +134,8 @@ class Producer(threading.Thread):
         :return:
         """
 
-        def get_plt_name(plt):
-            return plt.plt_name
-
         ask_a, bid_b = ask_list[i], bid_list[1 - i]
-        plt_name_a, plt_name_b = get_plt_name(self.plt_list[i]), get_plt_name(self.plt_list[1 - i])
+        plt_name_a, plt_name_b = self.plt_list[i].plt_name, self.plt_list[1 - i].plt_name
 
         arbitrage_diff = Producer.diff_dict[plt_name_a][plt_name_b]
         if ask_a[0] + arbitrage_diff < bid_b[0]:

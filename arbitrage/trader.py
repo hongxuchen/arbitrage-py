@@ -20,7 +20,7 @@ class Trader(object):
         self.plt = plt
         self.coin_type = self.plt.coin_type
         self.fiat = fiat
-        self.plt_name = self.plt.__class__.__name__
+        self.plt_name = self.plt.plt_name
         assert (catalog in ['sell', 'buy'])
         self.catalog = catalog
         self.amount = amount
