@@ -2,11 +2,9 @@
 import threading
 import time
 from operator import itemgetter
-
 import concurrent.futures
 import jinja2
 from jinja2.exceptions import TemplateSyntaxError
-
 from api.huobi import HuoBi
 from api.okcoin import OKCoinCN
 from arbitrage.stats import Statistics
@@ -259,7 +257,7 @@ class Monitor(threading.Thread):
             Monitor._logger.debug('[M] asset_list obtained')
             coin_changes, fiat_changes = self.get_asset_changes(asset_list)
             self.recollector.push_back(coin_changes)
-            Monitor._logger.debug("recollect: coin_changes={}".format(coin_changes))
+            Monitor._logger.debug("recollect: coin_changes={:<10.4f}".format(coin_changes))
             status = self.coin_keeper(coin_changes, is_last)
         Monitor._logger.debug('[M] LOCK released')
         # report

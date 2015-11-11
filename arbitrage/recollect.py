@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 from collections import deque
-
 from settings import config
 
 

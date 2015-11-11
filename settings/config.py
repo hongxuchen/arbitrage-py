@@ -66,6 +66,7 @@ AVOID_TIMEOUT = True
 # TODO should specify queue size
 
 emailing_interval_seconds = 3600
+ARBITRAGE_NUM = 10
 ADJUST_RATIO = 0.4
 
 monitor_fail_max = 2

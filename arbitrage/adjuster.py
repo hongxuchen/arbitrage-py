@@ -153,7 +153,7 @@ class Adjuster(object):
 
     @staticmethod
     def try_notify_abnormal(plt_list, stats):
-        if stats.arbitrage_num * config.ADJUST_RATIO < stats.adjust_num:
+        if stats.arbitrage_num * config.ADJUST_RATIO < stats.adjust_num and stats.arbitrage_num > config.ARBITRAGE_NUM:
             with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
                 assets = executor.map(lambda plt: AssetInfo.from_api(plt), plt_list)
             asset_list = list(assets)
