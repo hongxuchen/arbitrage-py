@@ -142,6 +142,13 @@ class Producer(threading.Thread):
         plt_name_a, plt_name_b = self.plt_list[i].plt_name, self.plt_list[1 - i].plt_name
 
         arbitrage_diff = Producer.diff_dict[plt_name_a][plt_name_b]
+        # try buying at plt_a, sell at plt_b
+# if for most of the time, price(plt_a) < price(plt_b),  we need to make
+# 1. diff_a_b=arbitrage_diff[plt_a][plt_b] bigger
+# 2. diff_b_a=arbitrage_diff[plt_b][plt_a] smaller       
+# ideally diff_a_b==diff_b_a, so in this trend, diff_a_b > diff_b_a
+# EXAMPLE: when  price(HuoBi) < price(OKCoinCN), plt_a == HuoBi, plt_b == OKCoinCN
+#          in config.py, we should make diff_dict[HuoBi][OKCoinCN] > diff_dict[OKCoinCN][HuoBi]
         if ask_a[0] + arbitrage_diff < bid_b[0]:
             self.stats.trade_chance += 1
             Producer._logger.debug('[P] Arbitrage chance: {} {}'.format(ask_a, bid_b))

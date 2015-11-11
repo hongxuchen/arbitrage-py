@@ -88,9 +88,9 @@ grid_sleep_seconds = 1.0
 # sleep seconds, to avoid API too frequently
 sleep_seconds = 1.0
 
-# Semantics: when Pa.ask1 + diff_dict[Pa][Pb] <= Pb.bid1, (buy at Pa, sell at Pb)
-# NOTE: if price(Pa) > price(Pb) for most of the time, it's more likely to (sell at Pa, buy at Pb);
-# we should make btc_diff_dict[Pa][Pb] < diff_dict[Pb][Pa] so that (buy at Pa, sell at Pb) will be easier
+# Semantics: when Pa.ask1+diff_dict[Pa][Pb]<=Pb.bid1, { buy at Pa, sell at Pb }
+# Tips: if price(a)<price(b) for most of the time, makes diff_dict[a][b]>diff_dict[b][a]
+# Example: price(HuoBi)<price(OKCoinCN), makes btc_diff_dict['HuoBi']['OKCoinCN']>btc_diff_dict['OKCoinCN']['HuoBi']
 btc_diff_dict = {
     'BitBays': {
         'CHBTC': 0.45, 'HuoBi': 2.0, 'OKCoinCN': 2.0
@@ -99,10 +99,10 @@ btc_diff_dict = {
         'BitBays': 0.45, 'HuoBi': 0.75, 'OKCoinCN': 0.75
     },
     'OKCoinCN': {
-        'BitBays': 2.0, 'CHBTC': 0.75, 'HuoBi': 1.5
+        'BitBays': 2.0, 'CHBTC': 0.75, 'HuoBi': -4.0
     },
     'HuoBi': {
-        'BitBays': 2.0, 'CHBTC': 0.00, 'OKCoinCN': 1.5
+        'BitBays': 2.0, 'CHBTC': 0.00, 'OKCoinCN': 10.0
     }
 }
 
