@@ -10,20 +10,15 @@ import requests
 
 from api.plt import Platform
 from settings import config
-from utils import excepts, plt_helper, common
+from utils import excepts, common
 from utils.log_helper import get_logger
 from utils.order_info import PlatformOrderInfo
 
 
 class BitBays(Platform):
     plt_info = {
-        'domain': 'https://bitbays.com/api/v1',
+        'prefix': 'https://bitbays.com/api/v1',
         'fiat': 'cny'
-    }
-
-    catalog_dict = {
-        0: 'buy',
-        1: 'sell'
     }
     common_headers = {
         'user-agent': config.USER_AGENT
@@ -33,11 +28,15 @@ class BitBays(Platform):
     }
     trade_cancel_list = ['cancel', 'trade']
 
+    # specific to bitbays
+    catalog_dict = {
+        0: 'buy',
+        1: 'sell'
+    }
+
     def __init__(self):
         super(BitBays, self).__init__(self.plt_info)
-        self.fiat = self.plt_info['fiat']
         self.lower_bound = BitBays.lower_bound_dict[self.coin_type]
-        self.key = plt_helper.get_key_from_data('BitBays')
         self.api_public = ['ticker', 'trades', 'depth']
         self.api_private = ['info', 'orders', 'transactions', 'trade', 'cancel', 'order']
         self._counter = int(time.time() * 1000)
@@ -58,7 +57,7 @@ class BitBays(Platform):
         return params
 
     def _real_uri(self, api_type):
-        return self.get_url('/' + api_type + '/')
+        return self.prefix + '/' + api_type + '/'
 
     def _setup_request(self, api_type, params=None):
 
@@ -112,7 +111,7 @@ class BitBays(Platform):
     # public api
     def api_ticker(self):
         payload = {
-            'market': self.coin_type + '_' + self.fiat
+            'market': self.coin_type + '_' + self.fiat_type
         }
         res = self._setup_request('ticker', params=payload)
         return res
@@ -134,7 +133,7 @@ class BitBays(Platform):
     def ask_bid_list(self, length=2):
         assert (1 <= length <= 50)
         payload = {
-            'market': self.coin_type + '_' + self.fiat
+            'market': self.coin_type + '_' + self.fiat_type
         }
         res = self._setup_request('depth', params=payload)['result']
         asks = sorted(res['asks'], key=lambda ask: ask[0], reverse=True)[-length:]
@@ -150,7 +149,7 @@ class BitBays(Platform):
         :return:
         """
         payload = {
-            'market': self.coin_type + '_' + self.fiat
+            'market': self.coin_type + '_' + self.fiat_type
         }
         res = self._setup_request('trades', params=payload)
         return res
@@ -159,7 +158,7 @@ class BitBays(Platform):
 
     def api_trade(self, order):
         payload = {
-            'market': self.coin_type + '_' + self.fiat,
+            'market': self.coin_type + '_' + self.fiat_type,
             'order_type': 0  # limit order
         }
         payload.update(order)
@@ -189,7 +188,7 @@ class BitBays(Platform):
 
     def api_orders(self, catalog, status=0):
         payload = {
-            'market': self.coin_type + '_' + self.fiat,
+            'market': self.coin_type + '_' + self.fiat_type,
             'catalog': catalog,
             'status': status,
             'count': 20,
@@ -205,7 +204,7 @@ class BitBays(Platform):
 
     def api_transactions(self, catalog):
         payload = {
-            'market': self.coin_type + '_' + self.fiat,
+            'market': self.coin_type + '_' + self.fiat_type,
             'catalog': catalog,
             'count': 20,
             'nonce': self._nonce()
@@ -277,7 +276,7 @@ class BitBays(Platform):
         user_info = self.api_user_info()['result']
         info = user_info['wallet']
         l = [
-            [common.to_decimal(info[self.fiat]['lock']), common.to_decimal(info[self.fiat]['avail'])],
+            [common.to_decimal(info[self.fiat_type]['lock']), common.to_decimal(info[self.fiat_type]['avail'])],
             [common.to_decimal(info[self.coin_type]['lock']), common.to_decimal(info[self.coin_type]['avail'])]
         ]
         return l

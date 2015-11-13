@@ -8,27 +8,16 @@ import requests
 
 from api.plt import Platform
 from settings import config
-from utils import common, plt_helper, excepts
+from utils import common, excepts
 from utils.log_helper import get_logger, init_logger
 from utils.order_info import PlatformOrderInfo
 
 
 class HuoBi(Platform):
     plt_info = {
-        'domain': 'https://api.huobi.com/apiv3',
-        'data_domain': 'http://api.huobi.com/staticmarket',
+        'prefix': 'https://api.huobi.com/apiv3',
+        'public_prefix': 'http://api.huobi.com/staticmarket',
         'fiat': 'cny'
-    }
-    data_domain = plt_info['data_domain']
-    coin_type_map = {
-        'btc': 1,
-        'ltc': 2
-    }
-    catalog_map = {
-        1: 'buy',
-        2: 'sell',
-        3: 'buy',
-        4: 'sell'
     }
     lower_bound_dict = {
         'btc': 0.001,
@@ -39,10 +28,24 @@ class HuoBi(Platform):
         'Content-Type': 'application/x-www-form-urlencoded'
     }
 
+    # ------------------------------------------------------
+    # specific to HuoBi
+    coin_type_map = {
+        'btc': 1,
+        'ltc': 2
+    }
+    catalog_map = {
+        1: 'buy',
+        2: 'sell',
+        3: 'buy',
+        4: 'sell'
+    }
+
+    # ------------------------------------------------------
+
     def __init__(self):
         super(HuoBi, self).__init__(self.plt_info)
         self.lower_bound = HuoBi.lower_bound_dict[self.coin_type]
-        self.key = plt_helper.get_key_from_data('HuoBi')
         self.api_private = ['cancel_order', 'get_account_info', 'buy', 'sell', 'order_info']
 
     @staticmethod
@@ -73,7 +76,7 @@ class HuoBi(Platform):
                 param_dict['sign'] = self._sign(param_dict)
                 del param_dict['secret_key']
                 # print(param_dict)
-                r = requests.post(self.domain, params=param_dict, headers=HuoBi.common_headers,
+                r = requests.post(self.prefix, params=param_dict, headers=HuoBi.common_headers,
                                   timeout=config.REQUEST_TIMEOUT)
                 res_data = r.json()
                 # deal with exceptions
@@ -106,11 +109,7 @@ class HuoBi(Platform):
                 excepts.handle_exit(e)
 
     def api_ticker(self):
-        api_uri = HuoBi.data_domain + '/' + 'ticker_' + self.coin_type + '_json.js'
-        return self._setup_request(api_uri)
-
-    def api_depth(self, length):
-        api_uri = HuoBi.data_domain + '/' + 'depth_' + self.coin_type + '_' + str(length) + '.js'
+        api_uri = self.public_prefix + '/' + 'ticker_' + self.coin_type + '_json.js'
         return self._setup_request(api_uri)
 
     def ask1(self):
@@ -120,6 +119,10 @@ class HuoBi(Platform):
     def bid1(self):
         ticker = self.api_ticker()
         return ticker['ticker']['buy']
+
+    def api_depth(self, length):
+        api_uri = self.public_prefix + '/' + 'depth_' + self.coin_type + '_' + str(length) + '.js'
+        return self._setup_request(api_uri)
 
     def ask_bid_list(self, length):
         res = self.api_depth(length)

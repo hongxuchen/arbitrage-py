@@ -3,13 +3,14 @@
 import base64
 import hashlib
 import hmac
-import urllib
 import json
 import time
+import urllib
+
 import requests
 
-from utils import excepts, plt_helper
 from api.plt import Platform
+from utils import excepts, plt_helper
 
 
 class ItBitAPI(Platform):
@@ -19,9 +20,13 @@ class ItBitAPI(Platform):
     }
     markets = ['XBTUSD', 'XBTSGD', 'XBTEUR']
 
+    def _real_url(self, path):
+        url = self.prefix + path
+        return url
+
     def __init__(self):
         super(ItBitAPI, self).__init__(self.plt_info)
-        self.domain = self.plt_info['domain']
+        self.prefix = self.plt_info['domain']
         self.symbol = self.plt_info['symbol']
         self.key = plt_helper.get_key_from_data('ItBit')
 
@@ -48,12 +53,12 @@ class ItBitAPI(Platform):
     # public APIs
 
     def ticker(self):
-        base_url = self.get_url('markets/' + self.symbol + '/ticker')
+        base_url = self._real_url('markets/' + self.symbol + '/ticker')
         r = self._setup_request('get', base_url)
         print(json.dumps(r, indent=2))
 
     def order_book(self):
-        base_url = self.get_url('markets/' + self.symbol + '/order_book')
+        base_url = self._real_url('markets/' + self.symbol + '/order_book')
         print(base_url)
         r = self._setup_request('get', base_url)
         print(json.dumps(r, indent=2))
@@ -95,7 +100,7 @@ class ItBitAPI(Platform):
 
     def get_all_wallets(self):
         method = 'get'
-        base_url = self.domain + 'wallets'
+        base_url = self.prefix + 'wallets'
         params = {
             'userId': self.key['uid']
         }
@@ -105,7 +110,7 @@ class ItBitAPI(Platform):
 
     def get_wallet(self, wallet_id):
         method = 'get'
-        base_url = self.get_url('wallets/' + wallet_id)
+        base_url = self._real_url('wallets/' + wallet_id)
         params = None
         data = ''
         res_data = self._private_request(method, base_url, params, data)
@@ -113,7 +118,7 @@ class ItBitAPI(Platform):
 
     def get_wallet_balance(self, wallet_id):
         method = 'get'
-        base_url = self.get_url('wallets/' + wallet_id + '/balances/' + self.symbol[3:])
+        base_url = self._real_url('wallets/' + wallet_id + '/balances/' + self.symbol[3:])
         params = None
         data = ''
         res_data = self._private_request(method, base_url, params, data)
@@ -122,7 +127,7 @@ class ItBitAPI(Platform):
     # TODO: need to ensure no existing wallet name
     def new_wallet(self, name):
         method = 'post'
-        base_url = self.get_url('wallets')
+        base_url = self._real_url('wallets')
         params = None
         data_dict = {
             'userId': self.key['uid'],
@@ -134,7 +139,7 @@ class ItBitAPI(Platform):
 
     def get_trades(self, wallet_id):
         method = 'get'
-        base_url = self.get_url('wallets/' + wallet_id + '/trades')
+        base_url = self._real_url('wallets/' + wallet_id + '/trades')
         params = {
             'lastExecutionId': 10,  # exclude No. of executions before
             'page': 1,
@@ -148,7 +153,7 @@ class ItBitAPI(Platform):
 
     def get_orders(self, wallet_id, status='open'):
         method = 'get'
-        base_url = self.get_url('wallets/' + wallet_id + '/orders')
+        base_url = self._real_url('wallets/' + wallet_id + '/orders')
         params = {
             'instrument': self.symbol,
             'page': 1,  # default
@@ -162,7 +167,7 @@ class ItBitAPI(Platform):
 
     def new_order(self, wallet_id, order_info):
         method = 'post'
-        base_url = self.get_url('wallets/' + wallet_id + '/orders')
+        base_url = self._real_url('wallets/' + wallet_id + '/orders')
         data_dict = {
             'side': None,
             'type': 'limit',
@@ -183,7 +188,7 @@ class ItBitAPI(Platform):
 
     def get_order(self, wallet_id, order_id):
         method = 'get'
-        base_url = self.get_url('wallets/' + wallet_id + '/orders/' + order_id)
+        base_url = self._real_url('wallets/' + wallet_id + '/orders/' + order_id)
         params = None
         data = ''
         res_data = self._private_request(method, base_url, params, data)
@@ -191,7 +196,7 @@ class ItBitAPI(Platform):
 
     def cancel_order(self, wallet_id, order_id):
         method = 'delete'
-        base_url = self.get_url('wallets/' + wallet_id + '/orders/' + order_id)
+        base_url = self._real_url('wallets/' + wallet_id + '/orders/' + order_id)
         params = None
         data = ''
         res_data = self._private_request(method, base_url, params, data)
@@ -199,7 +204,7 @@ class ItBitAPI(Platform):
 
     def new_cryptocurrency_withdraw(self, wallet_id, withdraw_info):
         method = 'post'
-        base_url = self.get_url('wallets/' + wallet_id + '/cryptocurrency_withdrawals')
+        base_url = self._real_url('wallets/' + wallet_id + '/cryptocurrency_withdrawals')
         params = None
         data_dict = {
             'currency': 'XBT',
@@ -213,7 +218,7 @@ class ItBitAPI(Platform):
 
     def new_cryptocurrency_deposit(self, wallet_id, deposit_info=None):
         method = 'post'
-        base_url = self.get_url('wallets/' + wallet_id + '/cryptocurrency_deposits')
+        base_url = self._real_url('wallets/' + wallet_id + '/cryptocurrency_deposits')
         params = None
         data_dict = {
             'currency': 'XBT',
@@ -227,7 +232,7 @@ class ItBitAPI(Platform):
 
     def new_wallet_transfer(self, wallet_transfer_info):
         method = 'post'
-        base_url = self.get_url('wallet_transfers')
+        base_url = self._real_url('wallet_transfers')
         params = None
         data_dict = {
             'sourceWalletId': None,

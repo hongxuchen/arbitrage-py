@@ -39,7 +39,7 @@ class CHBTC(Platform):
 
     def __init__(self):
         super(CHBTC, self).__init__(self.plt_info)
-        self.fiat = self.plt_info['fiat']
+        self.fiat_type = self.plt_info['fiat']
         self.lower_bound = CHBTC.lower_bound_dict[self.coin_type]
         self.key = plt_helper.get_key_from_data('CHBTC')
         self.api_public = ['ticker', 'depth', 'trades']
@@ -56,7 +56,7 @@ class CHBTC(Platform):
                     uri = CHBTC.data_domain + 'ltc/' + api_type
                 r = requests.get(uri, headers=CHBTC.common_headers, timeout=config.REQUEST_TIMEOUT)
             elif api_type in self.api_private:
-                base_uri = self.domain + api_type + '?'
+                base_uri = self.prefix + api_type + '?'
                 param_str = self._signed_param(params)
                 request_str = base_uri + param_str
                 r = requests.get(request_str, timeout=config.REQUEST_TIMEOUT)
@@ -189,8 +189,8 @@ class CHBTC(Platform):
         frozen, avail = user_info['frozen'], user_info['balance']
         l = [
             [
-                common.to_decimal(frozen[self.fiat.upper()]['amount']),
-                common.to_decimal(avail[self.fiat.upper()]['amount'])],
+                common.to_decimal(frozen[self.fiat_type.upper()]['amount']),
+                common.to_decimal(avail[self.fiat_type.upper()]['amount'])],
             [
                 common.to_decimal(frozen[self.coin_type.upper()]['amount']),
                 common.to_decimal((avail[self.coin_type.upper()])['amount'])

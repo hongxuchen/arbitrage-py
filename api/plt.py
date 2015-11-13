@@ -5,9 +5,17 @@ from utils import plt_helper
 
 class Platform(object):
     def __init__(self, info):
+        """
+        :param info: the platform information dict
+        a platform should specify 'fiat', 'prefix'; 'public_prefix' is optional
+        :return:
+        """
         self.coin_type = plt_helper.get_key_from_data('CoinType')
-        self.domain = info['domain']
-        self.key = None
+        self.fiat_type = info['fiat']
+        self.prefix = info['prefix']
+        if 'public_prefix' in info:
+            self.public_prefix = info['public_prefix']
+        self.key = plt_helper.get_key_from_data(self.plt_name)
 
     @property
     def plt_name(self):
@@ -76,7 +84,3 @@ class Platform(object):
         :return: a PlatformOrderInfo instance
         """
         pass
-
-    def get_url(self, path):
-        url = self.domain + path
-        return url
