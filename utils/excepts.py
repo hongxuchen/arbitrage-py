@@ -14,6 +14,11 @@ import utils.plt_helper
 from settings import config
 
 
+class MayDisconnectedException(Exception):
+    def __init__(self, msg):
+        super(MayDisconnectedException, self).__init__(msg)
+
+
 # bitbays
 class InvalidNonceError(Exception):
     def __init__(self, message):
@@ -59,7 +64,7 @@ class CHBTCRetryError(Exception):
 retry_except_tuple = (
     req_except.ConnectionError, req_except.Timeout, req_except.HTTPError, InvalidNonceError, RateExceedError,
     NULLResponseError, HuoBiError, CHBTCRetryError, urllib3_except.TimeoutError, urllib3_except.HTTPError,
-    urllib3_except.ConnectionError, ValueError)
+    urllib3_except.ConnectionError, ValueError, MayDisconnectedException)
 exit_except_tuple = (req_except.URLRequired, req_except.TooManyRedirects, HuoBiExitError, CHBTCExitError)
 
 
@@ -136,7 +141,7 @@ def send_msg(report, notification_type, msg_type):
     receivers = emailing_info['receivers']
     msg = MIMEText(report, msg_type, _charset='utf-8')
     client_id = utils.plt_helper.get_key_from_data('ClientID')
-    subject = 'Arbitrage for {} ({})'.format(client_id, notification_type)
+    subject = u'Arbitrage for {} ({})'.format(client_id, notification_type)
     msg['Subject'] = subject
     msg['From'] = sender
     msg['To'] = ', '.join(receivers)

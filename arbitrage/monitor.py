@@ -276,6 +276,8 @@ class Monitor(threading.Thread):
     def run(self, *args, **kwargs):
         """
         thread entry; while loop run; when exit loop, ensure that the coin amount is still fixed
+        :param args:
+        :param kwargs:
         """
         # initialize asset
         self.original_asset_list = self.get_asset_list()

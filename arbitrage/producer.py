@@ -143,12 +143,12 @@ class Producer(threading.Thread):
 
         arbitrage_diff = Producer.diff_dict[plt_name_a][plt_name_b]
         # try buying at plt_a, sell at plt_b
-# if for most of the time, price(plt_a) < price(plt_b),  we need to make
-# 1. diff_a_b=arbitrage_diff[plt_a][plt_b] bigger
-# 2. diff_b_a=arbitrage_diff[plt_b][plt_a] smaller       
-# ideally diff_a_b==diff_b_a, so in this trend, diff_a_b > diff_b_a
-# EXAMPLE: when  price(HuoBi) < price(OKCoinCN), plt_a == HuoBi, plt_b == OKCoinCN
-#          in config.py, we should make diff_dict[HuoBi][OKCoinCN] > diff_dict[OKCoinCN][HuoBi]
+        # if for most of the time, price(plt_a) < price(plt_b),  we need to make
+        # 1. diff_a_b=arbitrage_diff[plt_a][plt_b] bigger
+        # 2. diff_b_a=arbitrage_diff[plt_b][plt_a] smaller
+        # ideally diff_a_b==diff_b_a, so in this trend, diff_a_b > diff_b_a
+        # EXAMPLE: when  price(HuoBi) < price(OKCoinCN), plt_a == HuoBi, plt_b == OKCoinCN
+        #          in config.py, we should make diff_dict[HuoBi][OKCoinCN] > diff_dict[OKCoinCN][HuoBi]
         if ask_a[0] + arbitrage_diff < bid_b[0]:
             self.stats.trade_chance += 1
             Producer._logger.debug('[P] Arbitrage chance: {} {}'.format(ask_a, bid_b))
@@ -170,6 +170,7 @@ class Producer(threading.Thread):
         ask_list = [info[length / 2 - 1] for info in info_list]
         bid_list = [info[length / 2] for info in info_list]
         # FIXME redundant for CoinType
+        # FIXME may need to reset
         if not self.recollector.balanced(plt_helper.get_key_from_data("CoinType")):
             Producer._logger.debug('[P] wait for ImBalanced')
             self.stats.wait_imbalanced += 1

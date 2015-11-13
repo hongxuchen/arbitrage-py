@@ -73,29 +73,30 @@ class BitBays(Platform):
             else:
                 err_msg = 'msg: BitBays api_type={} not supported'.format(api_type)
                 excepts.handle_exit(err_msg)
-            # try:
-            res_data = r.json()
-            if res_data is None or res_data is {}:
-                raise excepts.NULLResponseError('Response is empty for api_type={}'.format(api_type))
-            result = res_data['result']
-            # TODO check other api_type fail
-            if result is None:
-                msg = res_data['message']
-                if msg.startswith('Invalid Nonce'):
-                    raise excepts.InvalidNonceError(
-                        'InvalidNonceError: {}, current_nonce={}'.format(msg, params['nonce']))
-                if msg.startswith("Rate Limit Exceeded"):
-                    raise excepts.RateExceedError("BitBays: Rate Exceeded for api_type={}".format(api_type))
-                else:
-                    BitBays._logger.critical(
-                        'ERROR: api_type={}, error_message={}'.format(api_type, msg))
-                    if api_type not in BitBays.trade_cancel_list:
-                        err_msg = 'msg: BitBays Error during request when api_type={}'.format(api_type)
-                        excepts.handle_exit(err_msg)
-            return res_data
-            # except ValueError as ee:
-            #     err_msg = 'msg: BitBays parse json error "{}" for api_type={}, response={}'.format(ee, api_type, r)
-            #     excepts.handle_exit(err_msg)
+            try:
+                res_data = r.json()
+                if res_data is None or res_data is {}:
+                    raise excepts.NULLResponseError('Response is empty for api_type={}'.format(api_type))
+                result = res_data['result']
+                # TODO check other api_type fail
+                if result is None:
+                    msg = res_data['message']
+                    if msg.startswith('Invalid Nonce'):
+                        raise excepts.InvalidNonceError(
+                            'InvalidNonceError: {}, current_nonce={}'.format(msg, params['nonce']))
+                    if msg.startswith("Rate Limit Exceeded"):
+                        raise excepts.RateExceedError("BitBays: Rate Exceeded for api_type={}".format(api_type))
+                    else:
+                        BitBays._logger.critical(
+                            'ERROR: api_type={}, error_message={}'.format(api_type, msg))
+                        if api_type not in BitBays.trade_cancel_list:
+                            err_msg = 'msg: BitBays Error during request when api_type={}'.format(api_type)
+                            excepts.handle_exit(err_msg)
+                return res_data
+            except ValueError as ee:
+                err_msg = 'msg: bitbays parse json error "{}" for api_type={}, response={}'.format(ee, api_type, r)
+                bitbays._logger.critical(err_msg)
+                raise excepts.MayDisconnectedException(err_msg)
 
         try:
             result = _request_impl()

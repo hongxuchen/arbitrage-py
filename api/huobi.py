@@ -3,9 +3,7 @@
 import hashlib
 import time
 import urllib
-
 import requests
-
 from api.plt import Platform
 from settings import config
 from utils import common, plt_helper
@@ -94,7 +92,8 @@ class HuoBi(Platform):
                 return res_data
             except ValueError as ee:
                 err_msg = u'msg: HuoBi parse json error "{}" for api_uri={}, response={}'.format(ee, api_uri, r)
-                excepts.handle_exit(err_msg)
+                HuoBi._logger.critical(err_msg)
+                raise excepts.MayDisconnectedException(err_msg)
 
         try:
             result = _request_impl()
@@ -103,7 +102,7 @@ class HuoBi(Platform):
             if excepts.is_retry_exception(e):
                 return excepts.handle_retry(e, _request_impl)
             else:
-                HuoBi._logger.critical("ERROR, EXCEPTION TYPE: {}".format(type(e)))
+                HuoBi._logger.critical(u'HuoBi Error, Exception type: {}'.format(type(e)))
                 excepts.handle_exit(e)
 
     def api_ticker(self):
@@ -136,7 +135,7 @@ class HuoBi(Platform):
             'amount': str(amount)
         }
         res = self._setup_request(trade_type, params)
-        if 'result' in res and res['result'] == u'success':
+        if 'result' in res and res['result'] == 'success':
             return res['id']
         else:
             return config.INVALID_ORDER_ID
@@ -147,7 +146,7 @@ class HuoBi(Platform):
             'id': order_id
         }
         res = self._setup_request('cancel_order', params)
-        if 'result' in res and res['result'] == u'success':
+        if 'result' in res and res['result'] == 'success':
             return True
         else:
             return False

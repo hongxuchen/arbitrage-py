@@ -61,7 +61,6 @@ class OKCoinAPI(Platform):
             else:
                 err_msg = 'msg: OKCoin api_type [{}] not supported'.format(api_type)
                 excepts.handle_exit(err_msg)
-            # OKCoinAPI._logger.debug(r.url)
             try:
                 res = r.json()
                 # OKCoinAPI._logger.warning('response={}'.format(res))
@@ -70,7 +69,8 @@ class OKCoinAPI(Platform):
                 return res
             except ValueError as ee:
                 err_msg = 'msg: OKCoin parse json error "{}" for api_type={}, response={}'.format(ee, api_type, r)
-                excepts.handle_exit(err_msg)
+                OKCoinAPI._logger.critical(err_msg)
+                raise excepts.MayDisconnectedException(err_msg)
 
         try:
             response_data = _request_impl()
