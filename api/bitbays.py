@@ -1,15 +1,17 @@
 #!/usr/bin/env python
 from __future__ import print_function
+
 import hashlib
 import hmac
-import urllib
 import time
+import urllib
+
 import requests
-from utils import excepts, plt_helper
-from utils import log_helper
+
 from api.plt import Platform
-from utils import common
 from settings import config
+from utils import excepts, plt_helper, common
+from utils.log_helper import get_logger
 from utils.order_info import PlatformOrderInfo
 
 
@@ -19,7 +21,6 @@ class BitBays(Platform):
         'fiat': 'cny'
     }
 
-    _logger = log_helper.get_logger()
     catalog_dict = {
         0: 'buy',
         1: 'sell'
@@ -86,7 +87,7 @@ class BitBays(Platform):
                     if msg.startswith("Rate Limit Exceeded"):
                         raise excepts.RateExceedError("BitBays: Rate Exceeded for api_type={}".format(api_type))
                     else:
-                        BitBays._logger.critical(
+                        get_logger().critical(
                             'Error: api_type={}, error_message={}'.format(api_type, msg))
                         if api_type not in BitBays.trade_cancel_list:
                             err_msg = 'msg: BitBays Unknown Error during request when api_type={}'.format(api_type)
@@ -94,7 +95,7 @@ class BitBays(Platform):
                 return res_data
             except ValueError as ee:
                 err_msg = 'msg: bitbays parse json error "{}" for api_type={}, response={}'.format(ee, api_type, r)
-                bitbays._logger.critical(err_msg)
+                get_logger().critical(err_msg)
                 raise excepts.MayDisconnectedException(err_msg)
 
         try:
@@ -221,6 +222,9 @@ class BitBays(Platform):
     def trade(self, op_type, price, amount):
         """
         return: order_id if succeed, otherwise invalid id
+        :param op_type:
+        :param price:
+        :param amount:
         """
         trade_dict = {
             'op': op_type,
@@ -243,11 +247,11 @@ class BitBays(Platform):
         return data
 
     def buy_market(self, mo_amount):
-        BitBays._logger.debug('BitBays.buy_market with amount {}'.format(mo_amount))
+        get_logger().debug('BitBays.buy_market with amount {}'.format(mo_amount))
         return self._market_trade('buy', mo_amount)
 
     def sell_market(self, mo_amount):
-        BitBays._logger.debug('BitBays.sell_market with amount {}'.format(mo_amount))
+        get_logger().debug('BitBays.sell_market with amount {}'.format(mo_amount))
         return self._market_trade('sell', mo_amount)
 
     def cancel(self, order_id):

@@ -3,12 +3,13 @@
 import hashlib
 import time
 import urllib
+
 import requests
+
 from api.plt import Platform
 from settings import config
-from utils import common, plt_helper
-from utils import excepts
-from utils import log_helper
+from utils import common, plt_helper, excepts
+from utils.log_helper import get_logger, init_logger
 from utils.order_info import PlatformOrderInfo
 
 
@@ -33,7 +34,6 @@ class HuoBi(Platform):
         'btc': 0.001,
         'ltc': 0.01
     }
-    _logger = log_helper.get_logger()
     common_headers = {
         'user-agent': config.USER_AGENT,
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -80,7 +80,7 @@ class HuoBi(Platform):
                 if 'code' in res_data and res_data['code'] != 0:
                     code = res_data['code']
                     msg = res_data['msg']
-                    HuoBi._logger.error(u'HuoBi Error: code={}, msg={}'.format(code, msg))
+                    get_logger().error(u'HuoBi Error: code={}, msg={}'.format(code, msg))
                     if code in [5, 7, 61, 63, 74]:
                         raise excepts.HuoBiExitError(u'HuoBi Fatal Error: code={}, msg={}'.format(code, msg))
                     elif code == 71:
@@ -92,7 +92,7 @@ class HuoBi(Platform):
                 return res_data
             except ValueError as ee:
                 err_msg = u'msg: HuoBi parse json error "{}" for api_uri={}, response={}'.format(ee, api_uri, r)
-                HuoBi._logger.critical(err_msg)
+                get_logger().critical(err_msg)
                 raise excepts.MayDisconnectedException(err_msg)
 
         try:
@@ -102,7 +102,7 @@ class HuoBi(Platform):
             if excepts.is_retry_exception(e):
                 return excepts.handle_retry(e, _request_impl)
             else:
-                HuoBi._logger.critical(u'HuoBi Error, Exception type: {}'.format(type(e)))
+                get_logger().critical(u'HuoBi Error, Exception type: {}'.format(type(e)))
                 excepts.handle_exit(e)
 
     def api_ticker(self):
@@ -175,6 +175,6 @@ class HuoBi(Platform):
 
 
 if __name__ == '__main__':
-    log_helper.init_logger()
+    init_logger()
     huobi = HuoBi()
     print(huobi.assets())

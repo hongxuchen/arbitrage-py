@@ -1,13 +1,17 @@
 #!/usr/bin/env python
 
 from __future__ import print_function
+
 import hashlib
 from pprint import pprint
+
 import requests
-from utils.order_info import PlatformOrderInfo
-from utils import log_helper, plt_helper, common, excepts
+
 from api.plt import Platform
 from settings import config
+from utils import plt_helper, common, excepts
+from utils.log_helper import get_logger, init_logger
+from utils.order_info import PlatformOrderInfo
 
 
 class OKCoinAPI(Platform):
@@ -15,7 +19,6 @@ class OKCoinAPI(Platform):
         'btc': 0.01,
         'ltc': 0.1
     }
-    _logger = log_helper.get_logger()
     trade_cancel_api_list = ['cancel_order', 'trade']
     common_headers = {
         'user-agent': config.USER_AGENT,
@@ -69,7 +72,7 @@ class OKCoinAPI(Platform):
                 return res
             except ValueError as ee:
                 err_msg = 'msg: OKCoin parse json error "{}" for api_type={}, response={}'.format(ee, api_type, r)
-                OKCoinAPI._logger.critical(err_msg)
+                get_logger().critical(err_msg)
                 raise excepts.MayDisconnectedException(err_msg)
 
         try:
@@ -141,7 +144,7 @@ class OKCoinAPI(Platform):
         response_data = self._setup_request(api_type, None, params)
         result_status = response_data['result']
         if result_status is False:
-            OKCoinAPI._logger.critical(
+            get_logger().critical(
                 'Error: api_type={}, response_data={}'.format(api_type, response_data))
             if api_type not in OKCoinAPI.trade_cancel_api_list:
                 err_msg = 'msg: OKCoin Unknown Error during request api_type={}'.format(api_type)
@@ -179,12 +182,12 @@ class OKCoinAPI(Platform):
             return data['order_id']
 
     def buy_market(self, mo_amount):
-        OKCoinAPI._logger.debug('OKCoinAPI.buy_market with {}'.format(mo_amount))
+        get_logger().debug('OKCoinAPI.buy_market with {}'.format(mo_amount))
         return self.trade('buy_market', mo_amount, None)
 
     def sell_market(self, mo_amount):
         assert (mo_amount >= self.lower_bound)
-        OKCoinAPI._logger.debug('OKCoinAPI.sell_market with amount {}'.format(mo_amount))
+        get_logger().debug('OKCoinAPI.sell_market with amount {}'.format(mo_amount))
         return self.trade('sell_market', None, mo_amount)
 
     def api_cancel_order(self, order_id):
@@ -198,6 +201,7 @@ class OKCoinAPI(Platform):
     def cancel(self, order_id):
         """
         return whether cancel succeeds or not
+        :param order_id:
         """
         data = self.api_cancel_order(order_id)
         return data['result']
@@ -306,7 +310,7 @@ class OKCoinCOM(OKCoinAPI):
 
 
 if __name__ == '__main__':
-    log_helper.init_logger()
+    init_logger()
     okcoin_cn = OKCoinCN()
     pending = okcoin_cn.pending_orders()
     pprint(pending)
