@@ -78,7 +78,6 @@ class BitBays(Platform):
                 if res_data is None or res_data is {}:
                     raise excepts.NULLResponseError('Response is empty for api_type={}'.format(api_type))
                 result = res_data['result']
-                # TODO check other api_type fail
                 if result is None:
                     msg = res_data['message']
                     if msg.startswith('Invalid Nonce'):
@@ -88,9 +87,9 @@ class BitBays(Platform):
                         raise excepts.RateExceedError("BitBays: Rate Exceeded for api_type={}".format(api_type))
                     else:
                         BitBays._logger.critical(
-                            'ERROR: api_type={}, error_message={}'.format(api_type, msg))
+                            'Error: api_type={}, error_message={}'.format(api_type, msg))
                         if api_type not in BitBays.trade_cancel_list:
-                            err_msg = 'msg: BitBays Error during request when api_type={}'.format(api_type)
+                            err_msg = 'msg: BitBays Unknown Error during request when api_type={}'.format(api_type)
                             excepts.handle_exit(err_msg)
                 return res_data
             except ValueError as ee:

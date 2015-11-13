@@ -1,0 +1,10 @@
+Error Handlings:
+* all handling should sink into "handle_retry" and "handle_exit"
+* make "handle_exit" as few as possible; cases include:
+  - api type name mismatch
+  - private api issues excluding "trade"/"cancel" (e.g., okcoin, bitbays)
+  - special code (e.g., huobi)
+  - unknown api
+
+API:
+-

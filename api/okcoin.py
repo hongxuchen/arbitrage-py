@@ -142,9 +142,9 @@ class OKCoinAPI(Platform):
         result_status = response_data['result']
         if result_status is False:
             OKCoinAPI._logger.critical(
-                'ERROR: api_type={}, response_data={}'.format(api_type, response_data))
+                'Error: api_type={}, response_data={}'.format(api_type, response_data))
             if api_type not in OKCoinAPI.trade_cancel_api_list:
-                err_msg = 'msg: OKCoin Error during request api_type={}'.format(api_type)
+                err_msg = 'msg: OKCoin Unknown Error during request api_type={}'.format(api_type)
                 excepts.handle_exit(err_msg)
         return response_data
 
