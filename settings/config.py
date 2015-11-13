@@ -122,3 +122,6 @@ diff_dict = {
     'btc': btc_diff_dict,
     'ltc': ltc_diff_dict
 }
+
+######################
+OKCOIN_LEVERAL_RATE = 10

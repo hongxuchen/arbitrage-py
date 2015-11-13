@@ -13,7 +13,7 @@ from utils.log_helper import get_logger, init_logger
 from utils.order_info import PlatformOrderInfo
 
 
-class OKCoinAPI(Platform):
+class OKCoinBase(Platform):
     # plt_info is not specified here
     lower_bound_dict = {
         'btc': 0.01,
@@ -26,11 +26,16 @@ class OKCoinAPI(Platform):
     trade_cancel_api_list = ['cancel_order', 'trade']
 
     def __init__(self, info):
-        super(OKCoinAPI, self).__init__(info)
-        self.lower_bound = OKCoinAPI.lower_bound_dict[self.coin_type]
-        self.api_public = ['ticker', 'depth', 'trades']
+        super(OKCoinBase, self).__init__(info)
+        self.lower_bound = OKCoinBase.lower_bound_dict[self.coin_type]
+        _api_future_public = ['future_ticker', 'future_depth', 'future_trades', 'future_index', 'exchange_rate',
+                              'future_hold_amount']
+        _api_future_private = ['future_userinfo', 'future_position', 'future_trade', 'future_batch_trade',
+                               'future_cancel', 'future_order_info', 'future_orders_info', 'future_userinfo_4fix',
+                               'future_position_4fix', 'future_explosive']
+        self.api_public = ['ticker', 'depth', 'trades'] + _api_future_public
         self.api_private = ['userinfo', 'trade', 'batch_trade', 'cancel_order', 'orders', 'order_info', 'orders_info',
-                            'order_history']
+                            'order_history'] + _api_future_private
 
     def _real_uri(self, api_type):
         return self.prefix + '/' + api_type + '.do'
@@ -54,11 +59,11 @@ class OKCoinAPI(Platform):
         def _request_impl():
             r = None
             if api_type in self.api_public:
-                r = requests.request('get', self._real_uri(api_type), params=params, headers=OKCoinAPI.common_headers,
+                r = requests.request('get', self._real_uri(api_type), params=params, headers=OKCoinBase.common_headers,
                                      timeout=config.REQUEST_TIMEOUT, verify=True)
             elif api_type in self.api_private:
                 r = requests.request('post', self._real_uri(api_type), data=data, params=params,
-                                     headers=OKCoinAPI.common_headers, timeout=config.REQUEST_TIMEOUT, verify=True)
+                                     headers=OKCoinBase.common_headers, timeout=config.REQUEST_TIMEOUT, verify=True)
             else:
                 err_msg = 'msg: OKCoin api_type [{}] not supported'.format(api_type)
                 excepts.handle_exit(err_msg)
@@ -81,6 +86,26 @@ class OKCoinAPI(Platform):
                 return excepts.handle_retry(e, _request_impl)
             else:
                 excepts.handle_exit(e)
+
+    def _private_request(self, api_type, param_dict):
+        params = {'api_key': self.key['api']}
+        if param_dict is not None:
+            params.update(param_dict)
+        params['sign'] = self._sign(params)
+        response_data = self._setup_request(api_type, None, params)
+        result_status = response_data['result']
+        if result_status is False:
+            get_logger().critical(
+                'Error: api_type={}, response_data={}'.format(api_type, response_data))
+            if api_type not in OKCoinBase.trade_cancel_api_list:
+                err_msg = 'msg: OKCoin Unknown Error during request api_type={}'.format(api_type)
+                excepts.handle_exit(err_msg)
+        return response_data
+
+
+class OKCoinTrade(OKCoinBase):
+    def __init__(self, info):
+        super(OKCoinTrade, self).__init__(info)
 
     # public api
 
@@ -133,21 +158,6 @@ class OKCoinAPI(Platform):
         return res
 
     # private api
-
-    def _private_request(self, api_type, param_dict):
-        params = {'api_key': self.key['api']}
-        if param_dict is not None:
-            params.update(param_dict)
-        params['sign'] = self._sign(params)
-        response_data = self._setup_request(api_type, None, params)
-        result_status = response_data['result']
-        if result_status is False:
-            get_logger().critical(
-                'Error: api_type={}, response_data={}'.format(api_type, response_data))
-            if api_type not in OKCoinAPI.trade_cancel_api_list:
-                err_msg = 'msg: OKCoin Unknown Error during request api_type={}'.format(api_type)
-                excepts.handle_exit(err_msg)
-        return response_data
 
     def api_userinfo(self):
         res = self._private_request('userinfo', None)
@@ -285,7 +295,7 @@ class OKCoinAPI(Platform):
         return self.order_history(1, 1)
 
 
-class OKCoinCN(OKCoinAPI):
+class OKCoinCN(OKCoinTrade):
     plt_info = {
         'prefix': 'https://www.okcoin.cn/api/v1',
         'fiat': 'cny'
@@ -295,7 +305,7 @@ class OKCoinCN(OKCoinAPI):
         super(OKCoinCN, self).__init__(self.plt_info)
 
 
-class OKCoinCOM(OKCoinAPI):
+class OKCoinCOM(OKCoinTrade):
     plt_info = {
         'prefix': 'https://www.okcoin.com/api/v1',
         'fiat': 'usd'
@@ -310,3 +320,4 @@ if __name__ == '__main__':
     okcoin_cn = OKCoinCN()
     okcoin_com = OKCoinCOM()
     print(okcoin_cn.assets())
+    print(okcoin_com.assets())
