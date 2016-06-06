@@ -12,6 +12,7 @@
 * Deal with config.py and plt.yaml
 * Monitor gets starvation
 * use market buy/sell to avoid connection issues <-- seems infeasible since platform data inconsistency
+* use gevent
 
 ## hosts
 121.199.251.136 www.okcoin.cn

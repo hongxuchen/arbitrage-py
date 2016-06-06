@@ -284,4 +284,7 @@ class BitBays(Platform):
 
 if __name__ == '__main__':
     bitbays = BitBays()
-    print(bitbays.lower_bound)
+    # print(bitbays.lower_bound)
+    print(bitbays.api_ticker())
+    # print(bitbays.api_user_info())
+    print(bitbays.assets())

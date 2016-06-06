@@ -124,4 +124,4 @@ diff_dict = {
 }
 
 ######################
-OKCOIN_LEVERAL_RATE = 10
+OKCOIN_LEVERAL_RATE = 20
